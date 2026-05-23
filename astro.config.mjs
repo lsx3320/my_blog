@@ -8,7 +8,9 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   site: 'https://lushixiao.ccwu.cc',
   output: 'server',
-  adapter: cloudflare(),
+  adapter: cloudflare({
+    sessionKVBinding: false,
+  }),
   integrations: [mdx(), sitemap()],
   markdown: {
     syntaxHighlight: {
