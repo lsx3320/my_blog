@@ -1,0 +1,375 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Comment from '../../components/Comment.astro';
+import { getCollection, render } from 'astro:content';
+
+const { slug } = Astro.params;
+const posts = await getCollection('posts');
+const post = posts.find(p => p.id === slug);
+
+if (!post) {
+  return Astro.redirect('/404');
+}
+
+const { Content, headings } = await render(post);
+
+const formattedDate = post.data.pubDate.toLocaleDateString('zh-CN', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
+---
+
+<BaseLayout title={post.data.title} description={post.data.description}>
+  <article class="max-w-3xl mx-auto px-6 py-16">
+    <!-- Back link -->
+    <a href="/posts" class="inline-flex items-center gap-1.5 text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-colors mb-12 group">
+      <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      返回文章列表
+    </a>
+
+    <!-- Article header -->
+    <header class="mb-12 text-center">
+      <div class="flex items-center justify-center gap-3 text-sm text-[var(--color-muted-foreground)] mb-6">
+        <time datetime={post.data.pubDate.toISOString()}>{formattedDate}</time>
+        <span class="w-1 h-1 rounded-full bg-[var(--color-muted-foreground)]"></span>
+        <span class="text-[var(--color-primary)]">{post.data.category}</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl lg:text-5xl font-serif font-bold leading-tight mb-6 tracking-tight">
+        {post.data.title}
+      </h1>
+      <p class="text-lg text-[var(--color-muted-foreground)] max-w-2xl mx-auto leading-relaxed">
+        {post.data.description}
+      </p>
+      {post.data.tags.length > 0 && (
+        <div class="flex flex-wrap justify-center gap-2 mt-8">
+          {post.data.tags.map(tag => (
+            <span class="px-3 py-1.5 text-xs font-medium bg-[var(--color-muted)] rounded-full hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)] transition-colors cursor-default">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+      <div class="mt-10 flex items-center justify-center gap-4">
+        <div class="h-px flex-1 max-w-[100px] bg-gradient-to-r from-transparent to-[var(--color-border)]"></div>
+        <svg class="w-5 h-5 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+        </svg>
+        <div class="h-px flex-1 max-w-[100px] bg-gradient-to-l from-transparent to-[var(--color-border)]"></div>
+      </div>
+    </header>
+
+    <!-- TOC for mobile -->
+    {tocHeadings.length > 0 && (
+      <details class="lg:hidden mb-10 p-5 bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl">
+        <summary class="text-sm font-semibold text-[var(--color-foreground)] cursor-pointer flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+          </svg>
+          目录
+        </summary>
+        <nav class="mt-4 space-y-2.5 border-t border-[var(--color-border)] pt-4">
+          {tocHeadings.map(heading => (
+            <a
+              href={`#${heading.slug}`}
+              class:list={[
+                'block text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-colors',
+                heading.depth === 3 && 'pl-4',
+              ]}
+            >
+              {heading.text}
+            </a>
+          ))}
+        </nav>
+      </details>
+    )}
+
+    <!-- Article content with TOC -->
+    <div class="flex gap-12">
+      <!-- TOC sidebar for desktop -->
+      {tocHeadings.length > 0 && (
+        <aside class="hidden lg:block w-56 shrink-0">
+          <div class="sticky top-28">
+            <div class="pl-4 border-l-2 border-[var(--color-border)]">
+              <h2 class="text-xs font-semibold text-[var(--color-muted-foreground)] uppercase tracking-widest mb-4">
+                目录
+              </h2>
+              <nav class="space-y-3">
+                {tocHeadings.map(heading => (
+                  <a
+                    href={`#${heading.slug}`}
+                    class:list={[
+                      'block text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-colors leading-snug',
+                      heading.depth === 3 && 'pl-3 text-xs',
+                    ]}
+                  >
+                    {heading.text}
+                  </a>
+                ))}
+              </nav>
+            </div>
+          </div>
+        </aside>
+      )}
+
+      <!-- Main content -->
+      <div class="flex-1 min-w-0 article-content">
+        <Content />
+      </div>
+    </div>
+
+    <!-- Share & actions -->
+    <div class="mt-16 pt-8 border-t border-[var(--color-border)]">
+      <div class="flex items-center justify-between">
+        <a href="/posts" class="inline-flex items-center gap-2 text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-colors group">
+          <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          所有文章
+        </a>
+        <div class="flex items-center gap-3">
+          <button
+            onclick="navigator.clipboard.writeText(window.location.href).then(() => this.textContent = '已复制')"
+            class="px-4 py-2 text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] bg-[var(--color-muted)] rounded-lg transition-colors"
+          >
+            复制链接
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment section -->
+    <Comment path={`/posts/${slug}`} />
+  </article>
+</BaseLayout>
+
+<style>
+  .article-content {
+    font-size: 1.125rem;
+    line-height: 1.85;
+    color: var(--color-foreground);
+  }
+
+  .article-content :global(h2) {
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-top: 3rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+    letter-spacing: -0.02em;
+  }
+
+  .article-content :global(h3) {
+    font-family: var(--font-serif);
+    font-size: 1.375rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    color: var(--color-foreground);
+  }
+
+  .article-content :global(p) {
+    margin-bottom: 1.5rem;
+    text-align: justify;
+  }
+
+  .article-content :global(strong) {
+    font-weight: 600;
+    color: var(--color-foreground);
+  }
+
+  .article-content :global(blockquote) {
+    margin: 2rem 0;
+    padding: 1.25rem 1.5rem;
+    border-left: 4px solid var(--color-primary);
+    background: var(--color-muted);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    font-style: italic;
+    color: var(--color-muted-foreground);
+  }
+
+  .article-content :global(blockquote p) {
+    margin-bottom: 0;
+  }
+
+  .article-content :global(ul),
+  .article-content :global(ol) {
+    margin: 1.25rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .article-content :global(li) {
+    margin-bottom: 0.5rem;
+    position: relative;
+  }
+
+  .article-content :global(ul li) {
+    list-style-type: none;
+    padding-left: 1.25rem;
+  }
+
+  .article-content :global(ul li::before) {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.65em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    opacity: 0.7;
+  }
+
+  .article-content :global(ol li) {
+    list-style-type: decimal;
+    padding-left: 0.5rem;
+  }
+
+  .article-content :global(ol li::marker) {
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+
+  .article-content :global(hr) {
+    margin: 2.5rem 0;
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--color-border), transparent);
+  }
+
+  .article-content :global(a) {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    transition: color 0.2s;
+  }
+
+  .article-content :global(a:hover) {
+    color: var(--color-primary-dark);
+  }
+
+  .article-content :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    background: var(--color-muted);
+    padding: 0.2em 0.4em;
+    border-radius: var(--radius-sm);
+    color: var(--color-primary);
+  }
+
+  .article-content :global(pre) {
+    margin: 1.5rem 0;
+    padding: 1.25rem;
+    background: var(--color-muted);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow-x: auto;
+  }
+
+  .article-content :global(pre code) {
+    background: none;
+    padding: 0;
+    color: var(--color-foreground);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+
+  .article-content :global(img) {
+    border-radius: var(--radius-lg);
+    margin: 2rem auto;
+    display: block;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .article-content :global(table) {
+    width: 100%;
+    margin: 1.5rem 0;
+    border-collapse: collapse;
+  }
+
+  .article-content :global(th),
+  .article-content :global(td) {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-border);
+    text-align: left;
+  }
+
+  .article-content :global(th) {
+    background: var(--color-muted);
+    font-weight: 600;
+  }
+
+  .article-content :global(.img-placeholder) {
+    margin: 2rem 0;
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-muted);
+    transition: border-color 0.2s;
+  }
+
+  .article-content :global(.img-placeholder:hover) {
+    border-color: var(--color-primary);
+  }
+
+  .article-content :global(.img-placeholder-inner) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  .article-content :global(.img-placeholder-inner span) {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-muted-foreground);
+  }
+
+  .article-content :global(.img-placeholder-inner small) {
+    font-size: 0.8rem;
+    color: var(--color-muted-foreground);
+    opacity: 0.7;
+  }
+</style>
+
+<script>
+  // Smooth scroll for TOC links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // Highlight current TOC item on scroll
+  const headings = document.querySelectorAll('.article-content h2, .article-content h3');
+  const tocLinks = document.querySelectorAll('aside nav a, details nav a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        tocLinks.forEach(link => {
+          link.classList.toggle('text-[var(--color-primary)]', link.getAttribute('href') === `#${id}`);
+          link.classList.toggle('font-medium', link.getAttribute('href') === `#${id}`);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -80% 0px' });
+
+  headings.forEach(heading => {
+    if (heading.id) observer.observe(heading);
+  });
+</script>

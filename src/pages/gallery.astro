@@ -1,0 +1,160 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const photos = [
+  // 人物
+  { id: 1, title: '坤坤', category: '人物', src: '/gallery/ikun.jpg', aspect: 'landscape' },
+  { id: 2, title: 'KennyS', category: '人物', src: '/gallery/KennyS.jpg', aspect: 'portrait' },
+  { id: 3, title: '4F', category: '人物', src: '/gallery/4F.jpg', aspect: 'landscape' },
+  { id: 4, title: 'yc', category: '人物', src: '/gallery/yc.jpg', aspect: 'landscape' },
+  { id: 5, title: '拐子', category: '人物', src: '/gallery/拐子.jpg', aspect: 'portrait' },
+  { id: 6, title: '老爹精神', category: '人物', src: '/gallery/老爹精神.jpg', aspect: 'landscape' },
+  // 合影
+  { id: 7, title: '合照', category: '合影', src: '/gallery/合照.jpg', aspect: 'landscape' },
+  { id: 8, title: '情歌', category: '合影', src: '/gallery/情歌.jpg', aspect: 'landscape' },
+  { id: 9, title: '三姊妹', category: '合影', src: '/gallery/三姊妹.jpg', aspect: 'portrait' },
+  { id: 10, title: '来财和妹妹', category: '合影', src: '/gallery/来财和妹妹.jpg', aspect: 'landscape' },
+  // 回忆
+  { id: 11, title: '爷爷年轻照', category: '回忆', src: '/gallery/爷爷年轻照.jpg', aspect: 'portrait' },
+  { id: 12, title: '故宫', category: '回忆', src: '/gallery/故宫.jpg', aspect: 'landscape' },
+];
+
+const categories = ['全部', ...new Set(photos.map(p => p.category))];
+---
+
+<BaseLayout title="相册">
+  <section class="max-w-6xl mx-auto px-6 py-16">
+    <div class="mb-12">
+      <h1 class="text-3xl md:text-4xl font-serif font-bold mb-4">相册</h1>
+      <p class="text-[var(--color-muted-foreground)]">
+        用镜头记录生活中美好的瞬间
+      </p>
+    </div>
+
+    <!-- Category filter -->
+    <div class="flex flex-wrap gap-2 mb-8">
+      {categories.map((cat, i) => (
+        <button
+          class:list={[
+            'gallery-filter px-4 py-2 text-sm rounded-lg transition-colors',
+            i === 0
+              ? 'bg-[var(--color-primary)] text-white'
+              : 'bg-[var(--color-muted)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-primary)]/10',
+          ]}
+          data-category={cat === '全部' ? 'all' : cat}
+        >
+          {cat}
+        </button>
+      ))}
+    </div>
+
+    <!-- Photo grid (masonry-like) -->
+    <div class="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4" id="photo-grid">
+      {photos.map(photo => (
+        <div
+          class="photo-item break-inside-avoid group cursor-pointer"
+          data-category={photo.category}
+          data-src={photo.src}
+          data-title={photo.title}
+        >
+          <div class="relative overflow-hidden rounded-xl bg-[var(--color-muted)]">
+            <img
+              src={photo.src}
+              alt={photo.title}
+              class="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
+              loading="lazy"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div class="absolute bottom-0 left-0 right-0 p-4">
+                <h3 class="text-white font-serif font-bold">{photo.title}</h3>
+                <p class="text-white/80 text-sm">{photo.category}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div
+    id="lightbox"
+    class="fixed inset-0 z-50 items-center justify-center bg-black/90 backdrop-blur-sm"
+    style="display: none;"
+  >
+    <button
+      id="lightbox-close"
+      class="absolute top-6 right-6 text-white/80 hover:text-white transition-colors"
+      aria-label="关闭"
+    >
+      <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+    <img id="lightbox-img" src="" alt="" class="max-h-[90vh] max-w-[90vw] object-contain rounded-lg" />
+    <div id="lightbox-title" class="absolute bottom-8 left-1/2 -translate-x-1/2 text-white font-serif text-xl"></div>
+  </div>
+</BaseLayout>
+
+<script>
+  // Category filtering
+  const filterButtons = document.querySelectorAll('.gallery-filter');
+  const photoItems = document.querySelectorAll('.photo-item');
+
+  filterButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const category = button.getAttribute('data-category');
+
+      // Update button styles
+      filterButtons.forEach(btn => {
+        btn.classList.remove('bg-[var(--color-primary)]', 'text-white');
+        btn.classList.add('bg-[var(--color-muted)]', 'text-[var(--color-muted-foreground)]');
+      });
+      button.classList.remove('bg-[var(--color-muted)]', 'text-[var(--color-muted-foreground)]');
+      button.classList.add('bg-[var(--color-primary)]', 'text-white');
+
+      // Filter photos
+      photoItems.forEach(item => {
+        if (category === 'all' || item.getAttribute('data-category') === category) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  });
+
+  // Lightbox
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img') as HTMLImageElement;
+  const lightboxTitle = document.getElementById('lightbox-title');
+  const lightboxClose = document.getElementById('lightbox-close');
+
+  photoItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const src = item.getAttribute('data-src');
+      const title = item.getAttribute('data-title');
+      if (lightboxImg && src) lightboxImg.src = src;
+      if (lightboxTitle && title) lightboxTitle.textContent = title;
+      if (lightbox) {
+        lightbox.style.display = 'flex';
+      }
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  function closeLightbox() {
+    if (lightbox) {
+      lightbox.style.display = 'none';
+    }
+    document.body.style.overflow = '';
+  }
+
+  lightboxClose?.addEventListener('click', closeLightbox);
+  lightbox?.addEventListener('click', (e) => {
+    if (e.target === lightbox) closeLightbox();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox();
+  });
+</script>

@@ -1,0 +1,92 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('posts'))
+  .filter(post => !post.data.draft)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const categories = [...new Set(posts.map(post => post.data.category))];
+---
+
+<BaseLayout title="文章列表">
+  <section class="max-w-5xl mx-auto px-6 py-16">
+    <div class="mb-12">
+      <h1 class="text-3xl md:text-4xl font-serif font-bold mb-4">文章</h1>
+      <p class="text-[var(--color-muted-foreground)]">
+        记录技术探索与生活感悟的文字空间
+      </p>
+    </div>
+
+    <!-- Category filter -->
+    <div class="flex flex-wrap gap-2 mb-8">
+      <button
+        class="category-filter px-4 py-2 text-sm rounded-lg bg-[var(--color-primary)] text-white transition-colors"
+        data-category="all"
+      >
+        全部
+      </button>
+      {categories.map(cat => (
+        <button
+          class="category-filter px-4 py-2 text-sm rounded-lg bg-[var(--color-muted)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-primary)]/10 transition-colors"
+          data-category={cat}
+        >
+          {cat}
+        </button>
+      ))}
+    </div>
+
+    <!-- Posts grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="posts-grid">
+      {posts.map(post => (
+        <div class="post-item" data-category={post.data.category}>
+          <PostCard
+            title={post.data.title}
+            description={post.data.description}
+            pubDate={post.data.pubDate}
+            category={post.data.category}
+            tags={post.data.tags}
+            slug={post.id}
+            image={post.data.image}
+          />
+        </div>
+      ))}
+    </div>
+
+    {posts.length === 0 && (
+      <div class="text-center py-20">
+        <p class="text-[var(--color-muted-foreground)]">暂无文章</p>
+      </div>
+    )}
+  </section>
+</BaseLayout>
+
+<script>
+  // Category filtering
+  const filterButtons = document.querySelectorAll('.category-filter');
+  const postItems = document.querySelectorAll('.post-item');
+
+  filterButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const category = button.getAttribute('data-category');
+
+      // Update button styles
+      filterButtons.forEach(btn => {
+        btn.classList.remove('bg-[var(--color-primary)]', 'text-white');
+        btn.classList.add('bg-[var(--color-muted)]', 'text-[var(--color-muted-foreground)]');
+      });
+      button.classList.remove('bg-[var(--color-muted)]', 'text-[var(--color-muted-foreground)]');
+      button.classList.add('bg-[var(--color-primary)]', 'text-white');
+
+      // Filter posts
+      postItems.forEach(item => {
+        if (category === 'all' || item.getAttribute('data-category') === category) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  });
+</script>

@@ -1,0 +1,182 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Timeline from '../components/Timeline.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('posts');
+const recentPosts = allPosts
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
+
+const timelineEvents = [
+  {
+    date: '2021年9月',
+    title: '第一次想看看更大的世界',
+    description: `刚上大学那会，总觉得小地方的生活太平了。第一次来武汉，脑子里只有一个念头："大城市到底是什么样？"
+那几年，喜欢一个人在街上乱逛。光谷、东湖、地铁口、凌晨还亮着灯的便利店。
+以前总觉得世界离自己很远，后来才发现，很多故事真的会发生在自己身上。`,
+    icon: 'star',
+    category: '成长',
+  },
+  {
+    date: '2023年',
+    title: '第一次意识到自己的认知边界',
+    description: `本科阶段开始真正接触 AI。一开始只是觉得新鲜，后来越学越发现——自己懂的东西太少了。
+从机器学习到 Transformer，从 YOLO 到 LangChain，从中文教程到生硬的英文论文。那段时间几乎每天都在疯狂吸收信息。
+第一次感受到：世界上真的有人在推动未来，而我只是刚刚站在门口。`,
+    icon: 'study',
+    category: '学习',
+  },
+  {
+    date: '2024年夏',
+    title: '那天我熬到了第二天中午',
+    description: `为了提交挑战杯项目，从早上十点一直熬到第二天中午十二点。提交前最后一刻，模型 loss 还是高得离谱。
+那是一个手搓 GPT-2 的智能医疗机器人，里面还接了 BM25 检索算法。那天的终端、日志、报错、训练曲线，现在都还记得。
+后来才明白：大学里真正难忘的，从来不是获奖。而是某个凌晨，你真的拼命想做成一件事。`,
+    icon: 'work',
+    category: '拼搏',
+  },
+  {
+    date: '2025年春',
+    title: '高铁上的那一晚',
+    description: `从九华山回来。高铁开得很快，窗外一直在倒退。
+那天晚上突然意识到：自己已经不是刚进大学时那个状态了。以前总觉得时间很多，后来发现，人会在经历里慢慢变化。
+有些东西说不出来，但你知道自己已经回不去了。`,
+    icon: 'life',
+    category: '感悟',
+  },
+  {
+    date: '2025年夏天',
+    title: '伊犁的风吹得人很松弛',
+    description: `23 岁那年去了新疆伊犁。六星街的晚上，一群哈萨克族老人、小孩、年轻人围在一起跳舞。很多人彼此根本不认识，但音乐响起来的时候，所有人都能一起笑着共舞。
+那一刻特别震撼。原来生活真的可以不那么紧绷。
+新疆最吸引我的，不是风景。而是那里的人——善良、朴实、热情，身上带着一种内地很少见的松弛感。`,
+    icon: 'travel',
+    category: '旅行',
+  },
+  {
+    date: '2025年夏天',
+    title: '赛里木湖',
+    description: `和莽哥去了赛里木湖。湖水蓝得不像现实。风吹过来的时候，感觉整个世界都安静了。
+很多记忆已经记不清细节，但我会一直记得那段路。
+"费神之处，泥首以谢。"送给莽哥。(莽哥开坦克700真他娘的帅)(鱼罐头.mp3)`,
+    icon: 'travel',
+    category: '旅行',
+  },
+  {
+    date: '大学五年',
+    title: '东湖、威士忌和吹不完的牛B',
+    description: `很感谢 yc (仙桃黄金大道沔阳公馆)。大学五年，一起聊 AI、聊股票、聊未来。 
+    五年大学生涯 每次东湖畅谈 每一杯威士忌(尊美醇夯爆了) 每一次去网吧的路上
+人这一辈子，能遇到真正仗义的朋友不容易。yc 真 TM 仗义，以后他儿子，必须认我当干老汉儿。`,
+    icon: 'life',
+    category: '友情',
+  },
+  {
+    date: '',
+    title: '致谢',
+    description: `大学几年，时间过得比想象中快。从专科到本科，从对世界充满好奇，到慢慢理解生活、人和自己。一路上遇见了很多人，有些人陪我走了很久，有些人只是短暂出现，但都真实地参与了我的大学时代。
+感谢刘演、浩轩、样样、梦龙、阿哲、柯聪、涛子、东升、博愿、张申、猫咪、唐佳苒，还有楼下黄叔叔四人组。感谢曹导、曾茵婷导员，感谢软工 1 班、4 班班长，感谢档案室三位老师，感谢毕设指导老师刘雨琪老师，感谢 C 语言老师张晓芳老师，感谢专升本阶段周凤丽老师。
+也感谢那些在精神世界影响过我的人：大冰老师、索达吉堪布仁波切、宗萨仁波切。
+最后，感谢一路跌跌撞撞走到现在的自己。
+—— 卢仕潇 写于丙午孟夏之初七 在城院`,
+    icon: 'star',
+    category: '致谢',
+  },
+];
+---
+
+<BaseLayout title="首页">
+  <!-- Hero section -->
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-[var(--color-primary)]/5 via-transparent to-[var(--color-accent)]/5"></div>
+    <div class="absolute top-10 right-10 w-72 h-72 bg-[var(--color-primary)]/5 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-10 left-10 w-56 h-56 bg-[var(--color-accent)]/5 rounded-full blur-3xl"></div>
+    <div class="relative max-w-5xl mx-auto px-6 py-24 md:py-40 text-center">
+      <p class="text-sm font-medium text-[var(--color-primary)] mb-6 tracking-widest uppercase">
+        Welcome to my space
+      </p>
+      <h1 class="text-4xl md:text-6xl lg:text-7xl font-serif font-bold leading-tight mb-8 tracking-tight">
+        于此间记录点滴思考
+        <br />
+        <span class="text-[var(--color-primary)]">既为自省，亦为留痕</span>
+      </h1>
+      <p class="text-lg md:text-xl text-[var(--color-muted-foreground)] leading-relaxed mb-12 max-w-2xl mx-auto">
+        编程心得、项目经验，以及生活中那些值得记录的瞬间。
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a
+          href="/posts"
+          class="inline-flex items-center px-8 py-3.5 bg-[var(--color-primary)] text-white rounded-xl font-medium text-sm hover:bg-[var(--color-primary-dark)] transition-colors shadow-lg shadow-[var(--color-primary)]/20"
+        >
+          阅读文章
+          <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+        <a
+          href="/gallery"
+          class="inline-flex items-center px-8 py-3.5 border border-[var(--color-border)] rounded-xl font-medium text-sm text-[var(--color-foreground)] hover:bg-[var(--color-muted)] transition-colors"
+        >
+          浏览相册
+        </a>
+      </div>
+      <div class="mt-16 flex items-center justify-center gap-4">
+        <div class="h-px flex-1 max-w-[80px] bg-gradient-to-r from-transparent to-[var(--color-border)]"></div>
+        <svg class="w-4 h-4 text-[var(--color-muted-foreground)] opacity-40" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+        </svg>
+        <div class="h-px flex-1 max-w-[80px] bg-gradient-to-l from-transparent to-[var(--color-border)]"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline section -->
+  <section class="max-w-5xl mx-auto px-6 pb-20">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl md:text-4xl font-serif font-bold mb-4">时间轴</h2>
+      <p class="text-[var(--color-muted-foreground)] max-w-xl mx-auto">
+        记录生活中的重要时刻，留住那些值得回忆的瞬间
+      </p>
+    </div>
+    <Timeline events={timelineEvents} />
+  </section>
+
+  <!-- Recent posts preview -->
+  <section class="max-w-5xl mx-auto px-6 pb-20">
+    <div class="flex items-center justify-between mb-10">
+      <h2 class="text-2xl font-serif font-bold">最新文章</h2>
+      <a href="/posts" class="text-sm text-[var(--color-primary)] hover:underline">
+        查看全部 &rarr;
+      </a>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {recentPosts.map(post => {
+        const formattedDate = post.data.pubDate.toLocaleDateString('zh-CN', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+        return (
+          <a href={`/posts/${post.id}`} class="group block p-6 bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl hover:shadow-lg transition-all duration-300">
+            <div class="text-xs text-[var(--color-muted-foreground)] mb-3">
+              {formattedDate}
+            </div>
+            <h3 class="font-serif font-bold text-lg mb-2 group-hover:text-[var(--color-primary)] transition-colors">
+              {post.data.title}
+            </h3>
+            <p class="text-sm text-[var(--color-muted-foreground)] leading-relaxed mb-4">
+              {post.data.description}
+            </p>
+            <div class="flex flex-wrap gap-2">
+              <span class="px-2 py-1 text-xs bg-[var(--color-muted)] rounded-md">{post.data.category}</span>
+              {post.data.tags.slice(0, 2).map(tag => (
+                <span class="px-2 py-1 text-xs bg-[var(--color-muted)] rounded-md">{tag}</span>
+              ))}
+            </div>
+          </a>
+        );
+      })}
+    </div>
+  </section>
+</BaseLayout>
