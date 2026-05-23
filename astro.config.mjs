@@ -10,6 +10,7 @@ export default defineConfig({
   output: 'server',
   adapter: cloudflare({
     sessionKVBinding: false,
+    imageService: 'passthrough',
   }),
   integrations: [mdx(), sitemap()],
   markdown: {
