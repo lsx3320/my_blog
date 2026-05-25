@@ -36,6 +36,12 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       rel="stylesheet"
     />
     <title>{title} | 卢仕潇的博客</title>
+    <script>
+      // Theme initialization - must run before body renders
+      const theme = localStorage.getItem('theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.classList.toggle('dark', theme === 'dark');
+    </script>
   </head>
   <body class="min-h-screen flex flex-col">
     <Header />
@@ -45,11 +51,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <Footer />
     <MusicPlayer />
     <script>
-      // Theme initialization
-      const theme = localStorage.getItem('theme') ||
-        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      document.documentElement.classList.toggle('dark', theme === 'dark');
-
       // Listen for system theme changes
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
         if (!localStorage.getItem('theme')) {

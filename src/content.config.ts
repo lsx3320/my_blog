@@ -15,4 +15,14 @@ const posts = defineCollection({
   }),
 });
 
-export const collections = { posts };
+const moments = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/moments' }),
+  schema: z.object({
+    date: z.coerce.date().optional(),
+    images: z.array(z.string()).optional(),
+    likes: z.number().default(0),
+    location: z.string().optional(),
+  }),
+});
+
+export const collections = { posts, moments };

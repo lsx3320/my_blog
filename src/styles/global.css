@@ -30,7 +30,7 @@
   --shadow-xl: 0 16px 48px oklch(0 0 0 / 0.1);
 }
 
-/* Dark mode overrides */
+/* Dark mode overrides - class based */
 .dark {
   --color-background: oklch(0.13 0.015 265);
   --color-foreground: oklch(0.92 0.008 265);
@@ -39,6 +39,19 @@
   --color-border: oklch(0.25 0.015 265);
   --color-card: oklch(0.17 0.015 265);
   --color-card-foreground: oklch(0.92 0.008 265);
+}
+
+/* Dark mode - system preference (prevents flash on page load) */
+@media (prefers-color-scheme: dark) {
+  html:not(.light) {
+    --color-background: oklch(0.13 0.015 265);
+    --color-foreground: oklch(0.92 0.008 265);
+    --color-muted: oklch(0.2 0.015 265);
+    --color-muted-foreground: oklch(0.55 0.015 265);
+    --color-border: oklch(0.25 0.015 265);
+    --color-card: oklch(0.17 0.015 265);
+    --color-card-foreground: oklch(0.92 0.008 265);
+  }
 }
 
 /* Shiki code highlighting - CSS variables theme */
