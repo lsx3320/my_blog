@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 280" fill="none">
+  <rect x="1" y="1" width="698" height="278" rx="12" fill="#f8f9fa"/>
+  <!-- Planar MOSFET -->
+  <text x="90" y="30" font-size="14" fill="#333" font-weight="bold" font-family="Arial">Planar MOSFET</text>
+  <text x="75" y="48" font-size="11" fill="#888" font-family="Arial">2面控制 (28nm+)</text>
+  <!-- Substrate -->
+  <rect x="50" y="180" width="140" height="30" rx="2" fill="#e8eaf6" stroke="#5c6bc0"/>
+  <text x="85" y="200" font-size="11" fill="#5c6bc0" font-family="Arial">Si 衬底</text>
+  <!-- Channel -->
+  <rect x="85" y="155" width="70" height="25" rx="2" fill="#c5cae9" stroke="#5c6bc0"/>
+  <!-- Gate -->
+  <rect x="95" y="120" width="50" height="35" rx="2" fill="#bbdefb" stroke="#1976d2"/>
+  <text x="105" y="143" font-size="12" fill="#1976d2" font-family="Arial">Gate</text>
+  <!-- Source/Drain -->
+  <rect x="55" y="155" width="25" height="25" rx="2" fill="#ffccbc" stroke="#e64a19"/>
+  <text x="58" y="172" font-size="9" fill="#e64a19" font-family="Arial">S</text>
+  <rect x="160" y="155" width="25" height="25" rx="2" fill="#ffccbc" stroke="#e64a19"/>
+  <text x="163" y="172" font-size="9" fill="#e64a19" font-family="Arial">D</text>
+  <!-- Arrow showing gate control -->
+  <line x1="120" y1="155" x2="120" y2="157" stroke="#d32f2f" stroke-width="2" marker-end="url(#arr2)"/>
+  <text x="130" y="170" font-size="9" fill="#d32f2f" font-family="Arial">↑控制</text>
+  <!-- Arrow marker -->
+  <defs>
+    <marker id="arr2" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto">
+      <polygon points="0 0, 6 2.5, 0 5" fill="#d32f2f"/>
+    </marker>
+  </defs>
+  <!-- FinFET -->
+  <text x="310" y="30" font-size="14" fill="#333" font-weight="bold" font-family="Arial">FinFET</text>
+  <text x="300" y="48" font-size="11" fill="#888" font-family="Arial">3面控制 (22nm~3nm)</text>
+  <!-- Substrate -->
+  <rect x="270" y="180" width="140" height="30" rx="2" fill="#e8eaf6" stroke="#5c6bc0"/>
+  <text x="305" y="200" font-size="11" fill="#5c6bc0" font-family="Arial">Si 衬底</text>
+  <!-- Fin -->
+  <rect x="320" y="100" width="20" height="80" rx="2" fill="#c5cae9" stroke="#5c6bc0"/>
+  <text x="345" y="145" font-size="10" fill="#5c6bc0" font-family="Arial">Fin</text>
+  <!-- Gate wrapping around fin -->
+  <path d="M310,95 L310,180 L350,180 L350,95 L345,95 L345,175 L315,175 L315,95 Z" fill="#bbdefb" stroke="#1976d2" fill-opacity="0.4"/>
+  <text x="305" y="88" font-size="12" fill="#1976d2" font-family="Arial">Gate (3面包裹)</text>
+  <!-- Arrow showing 3-side control -->
+  <text x="360" y="140" font-size="9" fill="#d32f2f" font-family="Arial">←↑→ 控制</text>
+  <!-- GAAFET -->
+  <text x="520" y="30" font-size="14" fill="#333" font-weight="bold" font-family="Arial">GAAFET</text>
+  <text x="500" y="48" font-size="11" fill="#888" font-family="Arial">4面控制 (2nm+)</text>
+  <!-- Substrate -->
+  <rect x="480" y="180" width="140" height="30" rx="2" fill="#e8eaf6" stroke="#5c6bc0"/>
+  <text x="515" y="200" font-size="11" fill="#5c6bc0" font-family="Arial">Si 衬底</text>
+  <!-- Nanosheet stack -->
+  <rect x="525" y="110" width="50" height="12" rx="2" fill="#c5cae9" stroke="#5c6bc0"/>
+  <rect x="525" y="130" width="50" height="12" rx="2" fill="#c5cae9" stroke="#5c6bc0"/>
+  <rect x="525" y="150" width="50" height="12" rx="2" fill="#c5cae9" stroke="#5c6bc0"/>
+  <text x="580" y="140" font-size="10" fill="#5c6bc0" font-family="Arial">Nanosheet</text>
+  <!-- Gate wrapping all around -->
+  <rect x="515" y="105" width="70" height="62" rx="4" fill="#bbdefb" stroke="#1976d2" fill-opacity="0.3"/>
+  <text x="510" y="88" font-size="12" fill="#1976d2" font-family="Arial">Gate (4面全包裹)</text>
+  <!-- Arrow showing 4-side control -->
+  <text x="590" y="140" font-size="9" fill="#d32f2f" font-family="Arial">四面控制</text>
+  <!-- Evolution arrows -->
+  <text x="220" y="145" font-size="24" fill="#1976d2" font-family="Arial">→</text>
+  <text x="440" y="145" font-size="24" fill="#1976d2" font-family="Arial">→</text>
+</svg>

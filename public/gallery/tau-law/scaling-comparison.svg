@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 350" fill="none">
+  <rect x="1" y="1" width="598" height="348" rx="12" fill="#f8f9fa"/>
+  <!-- Title -->
+  <text x="150" y="28" font-size="16" fill="#333" font-weight="bold" font-family="Arial">从摩尔定律到 Tau 定律：衡量指标的演进</text>
+  <!-- Old way: nm -->
+  <rect x="30" y="50" width="250" height="130" rx="8" fill="#fff3e0" stroke="#ff9800" stroke-dasharray="4"/>
+  <text x="80" y="75" font-size="14" fill="#e65100" font-weight="bold" font-family="Arial">旧指标：晶体管尺寸 (nm)</text>
+  <text x="50" y="100" font-size="12" fill="#666" font-family="Arial">• 7nm → 5nm → 3nm</text>
+  <text x="50" y="120" font-size="12" fill="#666" font-family="Arial">• 各厂标准不统一</text>
+  <text x="50" y="140" font-size="12" fill="#666" font-family="Arial">• "等效尺寸" ≠ 实际尺寸</text>
+  <text x="50" y="160" font-size="12" fill="#d32f2f" font-family="Arial">✗ 已失去对比意义</text>
+  <!-- Arrow -->
+  <text x="290" y="125" font-size="28" fill="#1976d2" font-family="Arial">→</text>
+  <!-- New way: Tau -->
+  <rect x="320" y="50" width="250" height="130" rx="8" fill="#e8f5e9" stroke="#4caf50" stroke-dasharray="4"/>
+  <text x="370" y="75" font-size="14" fill="#2e7d32" font-weight="bold" font-family="Arial">新指标：时间常数 τ (秒)</text>
+  <text x="340" y="100" font-size="12" fill="#666" font-family="Arial">• τ = R × C，单位统一</text>
+  <text x="340" y="120" font-size="12" fill="#666" font-family="Arial">• 全栈端到端可衡量</text>
+  <text x="340" y="140" font-size="12" fill="#666" font-family="Arial">• 工艺/电路/系统通用语言</text>
+  <text x="340" y="160" font-size="12" fill="#2e7d32" font-family="Arial">✓ 真正反映芯片性能</text>
+  <!-- Comparison table -->
+  <text x="30" y="210" font-size="14" fill="#333" font-weight="bold" font-family="Arial">Scaling Law 对比</text>
+  <!-- Table header -->
+  <rect x="30" y="220" width="540" height="28" rx="4" fill="#e3f2fd"/>
+  <text x="50" y="240" font-size="12" fill="#1565c0" font-weight="bold" font-family="Arial">领域</text>
+  <text x="180" y="240" font-size="12" fill="#1565c0" font-weight="bold" font-family="Arial">Scaling Law</text>
+  <text x="380" y="240" font-size="12" fill="#1565c0" font-weight="bold" font-family="Arial">核心思路</text>
+  <!-- Row 1 -->
+  <rect x="30" y="248" width="540" height="28" rx="0" fill="#fff"/>
+  <text x="50" y="267" font-size="12" fill="#555" font-family="Arial">半导体</text>
+  <text x="180" y="267" font-size="12" fill="#555" font-family="Arial">摩尔定律（旧）</text>
+  <text x="380" y="267" font-size="12" fill="#555" font-family="Arial">缩小晶体管尺寸 → 提升性能</text>
+  <!-- Row 2 -->
+  <rect x="30" y="276" width="540" height="28" rx="0" fill="#f5f5f5"/>
+  <text x="50" y="295" font-size="12" fill="#555" font-family="Arial">大模型</text>
+  <text x="180" y="295" font-size="12" fill="#555" font-family="Arial">Chinchilla 定律</text>
+  <text x="380" y="295" font-size="12" fill="#555" font-family="Arial">增加参数/数据 → 提升能力</text>
+  <!-- Row 3 -->
+  <rect x="30" y="304" width="540" height="28" rx="4" fill="#e8f5e9"/>
+  <text x="50" y="323" font-size="12" fill="#2e7d32" font-weight="bold" font-family="Arial">半导体</text>
+  <text x="180" y="323" font-size="12" fill="#2e7d32" font-weight="bold" font-family="Arial">Tau 定律（新）</text>
+  <text x="380" y="323" font-size="12" fill="#2e7d32" font-weight="bold" font-family="Arial">降低时延 τ → 提升性能</text>
+</svg>

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 320" fill="none">
+  <rect x="1" y="1" width="498" height="318" rx="12" fill="#f8f9fa"/>
+  <!-- Axes -->
+  <line x1="80" y1="40" x2="80" y2="250" stroke="#333" stroke-width="2"/>
+  <line x1="80" y1="250" x2="460" y2="250" stroke="#333" stroke-width="2"/>
+  <!-- Y axis label -->
+  <text x="25" y="150" font-size="14" fill="#555" font-family="Arial" transform="rotate(-90,25,150)">电压 V</text>
+  <!-- X axis label -->
+  <text x="250" y="290" font-size="14" fill="#555" font-family="Arial">时间 t</text>
+  <!-- Y axis ticks -->
+  <text x="55" y="255" font-size="12" fill="#888" font-family="Arial">0</text>
+  <text x="38" y="155" font-size="12" fill="#888" font-family="Arial">63.2%</text>
+  <line x1="75" y1="148" x2="85" y2="148" stroke="#888" stroke-width="1"/>
+  <text x="48" y="55" font-size="12" fill="#888" font-family="Arial">100%</text>
+  <!-- X axis ticks -->
+  <text x="155" y="270" font-size="13" fill="#d32f2f" font-weight="bold" font-family="serif">τ</text>
+  <text x="230" y="270" font-size="13" fill="#888" font-family="serif">2τ</text>
+  <text x="305" y="270" font-size="13" fill="#888" font-family="serif">3τ</text>
+  <text x="380" y="270" font-size="13" fill="#888" font-family="serif">4τ</text>
+  <text x="440" y="270" font-size="13" fill="#888" font-family="serif">5τ</text>
+  <!-- Grid lines -->
+  <line x1="160" y1="40" x2="160" y2="250" stroke="#eee" stroke-width="1" stroke-dasharray="4"/>
+  <line x1="240" y1="40" x2="240" y2="250" stroke="#eee" stroke-width="1" stroke-dasharray="4"/>
+  <line x1="320" y1="40" x2="320" y2="250" stroke="#eee" stroke-width="1" stroke-dasharray="4"/>
+  <line x1="400" y1="40" x2="400" y2="250" stroke="#eee" stroke-width="1" stroke-dasharray="4"/>
+  <line x1="80" y1="148" x2="460" y2="148" stroke="#ddd" stroke-width="1" stroke-dasharray="4"/>
+  <!-- Charging curve -->
+  <path d="M80,250 C120,248 140,170 160,150 C180,130 200,95 240,75 C280,58 340,48 400,45 C430,43 450,42 460,42" stroke="#1976d2" stroke-width="3" fill="none"/>
+  <!-- Dot at tau -->
+  <circle cx="160" cy="150" r="5" fill="#d32f2f"/>
+  <!-- Annotation arrow -->
+  <line x1="160" y1="130" x2="160" y2="95" stroke="#d32f2f" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="105" y="90" font-size="12" fill="#d32f2f" font-family="Arial">τ 时达到 63.2%</text>
+  <!-- Arrow marker -->
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#d32f2f"/>
+    </marker>
+  </defs>
+  <!-- Title -->
+  <text x="150" y="25" font-size="16" fill="#333" font-weight="bold" font-family="Arial">RC 电路充电曲线</text>
+</svg>
