@@ -4,7 +4,6 @@ description: "Tau 缩放定律火了！用 RC 电路的时间常数 τ 重新定
 pubDate: 2025-05-25
 category: "科技"
 tags: ["芯片", "半导体", "华为", "AI", "科普"]
-image: "/gallery/tau-law/scaling-comparison.svg"
 ---
 
 Tau 定律火了！不但有希腊字母，还被叫做定律，还是华为出的，还和 AI 半导体芯片有关。这简直是科普的重灾区。
