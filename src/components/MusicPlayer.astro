@@ -47,94 +47,185 @@
 </style>
 
 <script>
+  // Use global state to persist across View Transitions (SPA navigation)
   const KEY_POS = '__bgm_pos';
   const KEY_STATE = '__bgm_playing';
 
-  // Web Audio API — much lower latency
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  let source = null;
-  let buffer = null;
-  let startedAt = 0;
-  let pausedAt = 0;
-  let isPlaying = false;
+  // Singleton: reuse existing AudioContext if already created
+  if (!window.__bgm_ctx) {
+    window.__bgm_ctx = new (window.AudioContext || window.webkitAudioContext)();
+    window.__bgm_gain = window.__bgm_ctx.createGain();
+    window.__bgm_gain.gain.value = 0;
+    window.__bgm_gain.connect(window.__bgm_ctx.destination);
+    window.__bgm_source = null;
+    window.__bgm_buffer = null;
+    window.__bgm_startedAt = 0;
+    window.__bgm_pausedAt = 0;
+    window.__bgm_isPlaying = false;
+    window.__bgm_userPaused = false;
+    window.__bgm_initialized = false;
+  }
+
+  const ctx = window.__bgm_ctx;
+  const gainNode = window.__bgm_gain;
+
+  // Getters/setters for shared state
+  function getSource() { return window.__bgm_source; }
+  function setSource(v) { window.__bgm_source = v; }
+  function getBuffer() { return window.__bgm_buffer; }
+  function setBuffer(v) { window.__bgm_buffer = v; }
+  function getStartedAt() { return window.__bgm_startedAt; }
+  function setStartedAt(v) { window.__bgm_startedAt = v; }
+  function getPausedAt() { return window.__bgm_pausedAt; }
+  function setPausedAt(v) { window.__bgm_pausedAt = v; }
+  function getIsPlaying() { return window.__bgm_isPlaying; }
+  function setIsPlaying(v) { window.__bgm_isPlaying = v; }
 
   const toggle = document.getElementById('music-toggle');
   const iconPlay = document.getElementById('icon-play');
   const iconPause = document.getElementById('icon-pause');
 
   function setUI(playing) {
-    isPlaying = playing;
+    setIsPlaying(playing);
     toggle.classList.toggle('music-playing', playing);
     toggle.classList.toggle('music-paused', !playing);
     iconPlay.classList.toggle('hidden', playing);
     iconPause.classList.toggle('hidden', !playing);
   }
 
-  function play() {
+  function play(options = {}) {
+    const buffer = getBuffer();
     if (!buffer) return;
-    // Resume context if suspended (browser autoplay policy)
     if (ctx.state === 'suspended') ctx.resume();
 
-    source = ctx.createBufferSource();
-    source.buffer = buffer;
-    source.loop = true;
-    source.connect(ctx.destination);
-    source.start(0, pausedAt % buffer.duration);
-    startedAt = ctx.currentTime - pausedAt;
+    // Stop existing source
+    const oldSource = getSource();
+    if (oldSource) {
+      try { oldSource.stop(); oldSource.disconnect(); } catch(e) {}
+      setSource(null);
+    }
+
+    const pausedAt = getPausedAt();
+    const newSource = ctx.createBufferSource();
+    newSource.buffer = buffer;
+    newSource.loop = true;
+    newSource.connect(gainNode);
+    newSource.start(0, pausedAt % buffer.duration);
+    setSource(newSource);
+    setStartedAt(ctx.currentTime - pausedAt);
     setUI(true);
+
+    if (options.muted) {
+      gainNode.gain.cancelScheduledValues(ctx.currentTime);
+      gainNode.gain.setValueAtTime(0, ctx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(1, ctx.currentTime + 2);
+    } else {
+      gainNode.gain.cancelScheduledValues(ctx.currentTime);
+      gainNode.gain.setValueAtTime(1, ctx.currentTime);
+    }
   }
 
   function pause() {
+    const source = getSource();
     if (source) {
-      source.stop();
-      source.disconnect();
-      source = null;
+      try { source.stop(); source.disconnect(); } catch(e) {}
+      setSource(null);
     }
-    pausedAt = ctx.currentTime - startedAt;
+    setPausedAt(ctx.currentTime - getStartedAt());
     setUI(false);
   }
 
-  // Fetch and decode audio once
-  fetch('/bgm.mp3')
-    .then(r => r.arrayBuffer())
-    .then(data => ctx.decodeAudioData(data))
-    .then(buf => {
-      buffer = buf;
-
-      // Restore from previous page
-      const wasPlaying = sessionStorage.getItem(KEY_STATE) === '1';
-      const savedPos = parseFloat(sessionStorage.getItem(KEY_POS) || '0');
-      pausedAt = savedPos;
-
-      if (wasPlaying) {
-        play();
-      } else {
-        setUI(false);
-      }
-    });
-
-  // Toggle — near instant
-  toggle.addEventListener('click', () => {
-    if (isPlaying) pause(); else play();
-  });
-
-  // Save state periodically + before unload
   function getPos() {
-    return isPlaying ? (ctx.currentTime - startedAt) : pausedAt;
+    return getIsPlaying() ? (ctx.currentTime - getStartedAt()) : getPausedAt();
   }
 
-  setInterval(() => {
-    sessionStorage.setItem(KEY_POS, String(getPos()));
-    sessionStorage.setItem(KEY_STATE, isPlaying ? '1' : '0');
-  }, 1000);
+  // Fetch and decode audio (only once globally)
+  if (!window.__bgm_buffer_loading) {
+    window.__bgm_buffer_loading = true;
+    fetch('/bgm.mp3')
+      .then(r => r.arrayBuffer())
+      .then(data => ctx.decodeAudioData(data))
+      .then(buf => {
+        setBuffer(buf);
 
-  window.addEventListener('beforeunload', () => {
-    sessionStorage.setItem(KEY_POS, String(getPos()));
-    sessionStorage.setItem(KEY_STATE, isPlaying ? '1' : '0');
-  });
+        const wasPlaying = sessionStorage.getItem(KEY_STATE) === '1';
+        const savedPos = parseFloat(sessionStorage.getItem(KEY_POS) || '0');
+        setPausedAt(savedPos);
 
-  // First interaction fallback — resume suspended context
-  document.addEventListener('click', () => {
-    if (ctx.state === 'suspended') ctx.resume();
-  }, { once: true });
+        if (wasPlaying) {
+          play();
+        } else {
+          // Auto-play 3 seconds after first load
+          if (!window.__bgm_autoplay_done) {
+            window.__bgm_autoplay_done = true;
+            setTimeout(() => {
+              if (!getIsPlaying() && !window.__bgm_userPaused) {
+                play({ muted: true });
+              }
+            }, 3000);
+          }
+          setUI(false);
+        }
+
+        window.__bgm_initialized = true;
+      });
+  }
+
+  // Auto-play strategies
+  if (!window.__bgm_autoplay_setup) {
+    window.__bgm_autoplay_setup = true;
+    const resumeAudio = () => {
+      if (ctx.state === 'suspended') {
+        ctx.resume().then(() => {
+          if (getBuffer() && !getIsPlaying() && !window.__bgm_userPaused) {
+            play({ muted: true });
+          }
+        });
+      }
+    };
+    ['click', 'touchstart', 'keydown', 'scroll', 'mousemove'].forEach(event => {
+      document.addEventListener(event, resumeAudio, { once: true, passive: true });
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && !getIsPlaying() && !window.__bgm_userPaused && getBuffer()) {
+        setTimeout(() => play({ muted: true }), 100);
+      }
+    });
+  }
+
+  // Re-bind toggle on each View Transition (DOM is persisted but listeners may need refresh)
+  if (!toggle.__bgm_bound) {
+    toggle.__bgm_bound = true;
+    toggle.addEventListener('click', () => {
+      if (getIsPlaying()) {
+        window.__bgm_userPaused = true;
+        pause();
+      } else {
+        window.__bgm_userPaused = false;
+        play();
+      }
+    });
+  }
+
+  // Sync UI state after View Transition
+  setUI(getIsPlaying());
+
+  // Save state periodically (only start once)
+  if (!window.__bgm_saveInterval) {
+    window.__bgm_saveInterval = setInterval(() => {
+      if (getIsPlaying() || getPausedAt() > 0) {
+        sessionStorage.setItem(KEY_POS, String(getPos()));
+        sessionStorage.setItem(KEY_STATE, getIsPlaying() ? '1' : '0');
+      }
+    }, 1000);
+
+    window.addEventListener('beforeunload', () => {
+      sessionStorage.setItem(KEY_POS, String(getPos()));
+      sessionStorage.setItem(KEY_STATE, getIsPlaying() ? '1' : '0');
+    });
+
+    document.addEventListener('click', () => {
+      if (ctx.state === 'suspended') ctx.resume();
+    }, { once: true });
+  }
 </script>

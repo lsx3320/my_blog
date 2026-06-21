@@ -2,6 +2,7 @@
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import MusicPlayer from '../components/MusicPlayer.astro';
+import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 
 interface Props {
@@ -36,20 +37,37 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       rel="stylesheet"
     />
     <title>{title} | 卢仕潇的博客</title>
+    <ClientRouter />
     <script>
       // Theme initialization - must run before body renders
       const theme = localStorage.getItem('theme') ||
         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       document.documentElement.classList.toggle('dark', theme === 'dark');
     </script>
+    <style>
+      /* Reading progress bar */
+      .reading-progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0%;
+        height: 3px;
+        background: linear-gradient(to right, var(--color-primary), var(--color-accent));
+        z-index: 100;
+        transition: width 0.1s;
+      }
+    </style>
   </head>
   <body class="min-h-screen flex flex-col">
+    <div class="reading-progress" id="reading-progress"></div>
     <Header />
     <main class="flex-1">
       <slot />
     </main>
     <Footer />
-    <MusicPlayer />
+    <div transition:persist="music-player">
+      <MusicPlayer />
+    </div>
     <script>
       // Listen for system theme changes
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
@@ -57,6 +75,17 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
           document.documentElement.classList.toggle('dark', e.matches);
         }
       });
+      
+      // Reading progress bar
+      const progressBar = document.getElementById('reading-progress');
+      if (progressBar) {
+        window.addEventListener('scroll', () => {
+          const scrollTop = window.scrollY;
+          const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+          const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+          progressBar.style.width = progress + '%';
+        }, { passive: true });
+      }
     </script>
   </body>
 </html>

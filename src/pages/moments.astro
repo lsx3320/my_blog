@@ -32,7 +32,7 @@ const userName = '后生仔';
           <article class="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-5 hover:shadow-md transition-all duration-300">
             <!-- User Info -->
             <div class="flex items-start gap-3 mb-4">
-              <img src={avatarUrl} alt={userName} class="w-10 aspect-square rounded-full object-cover shrink-0 ring-2 ring-[var(--color-primary)]/20 shadow-md" />
+              <img src={avatarUrl} alt={userName} class="w-10 aspect-square rounded-full object-cover shrink-0 ring-2 ring-[var(--color-primary)]/20 shadow-md" loading="lazy" decoding="async" />
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
                   <span class="font-medium text-[var(--color-foreground)]">{userName}</span>
@@ -60,7 +60,7 @@ const userName = '后生仔';
               <div class="mb-4 pl-[52px]">
                 {moment.data.images.length === 1 ? (
                   <div class="max-w-[280px] overflow-hidden rounded-lg cursor-pointer">
-                    <img src={moment.data.images[0]} alt="" class="moment-img w-full h-auto rounded-lg hover:scale-[1.02] transition-transform duration-300" loading="lazy" />
+                    <img src={moment.data.images[0]} alt={moment.data.location || '动态图片'} class="moment-img w-full h-auto rounded-lg hover:scale-[1.02] transition-transform duration-300" loading="lazy" decoding="async" />
                   </div>
                 ) : (
                   <div class={`grid gap-2 ${
@@ -70,7 +70,7 @@ const userName = '后生仔';
                   } max-w-[400px]`}>
                     {moment.data.images.map((img: string) => (
                       <div class="aspect-square overflow-hidden rounded-lg cursor-pointer">
-                        <img src={img} alt="" class="moment-img w-full h-full object-cover hover:scale-105 transition-transform duration-300" loading="lazy" />
+                        <img src={img} alt={moment.data.location || '动态图片'} class="moment-img w-full h-full object-cover hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" />
                       </div>
                     ))}
                   </div>

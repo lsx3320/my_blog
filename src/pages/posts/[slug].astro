@@ -11,7 +11,7 @@ export async function getStaticPaths() {
 }
 
 const { slug } = Astro.params;
-const posts = await getCollection('posts');
+const posts = (await getCollection('posts')).filter(post => !post.data.draft);
 const post = posts.find(p => p.id === slug);
 
 if (!post) {
@@ -27,6 +27,16 @@ const formattedDate = post.data.pubDate.toLocaleDateString('zh-CN', {
 });
 
 const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
+
+// Reading time
+const wordCount = post.body?.length || 0;
+const readingTime = Math.max(1, Math.ceil(wordCount / 500));
+
+// Prev/Next posts
+const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const currentIndex = sortedPosts.findIndex(p => p.id === slug);
+const prevPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : null;
+const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
 ---
 
 <BaseLayout title={post.data.title} description={post.data.description}>
@@ -43,6 +53,8 @@ const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
     <header class="mb-12 text-center">
       <div class="flex items-center justify-center gap-3 text-sm text-[var(--color-muted-foreground)] mb-6">
         <time datetime={post.data.pubDate.toISOString()}>{formattedDate}</time>
+        <span class="w-1 h-1 rounded-full bg-[var(--color-muted-foreground)]"></span>
+        <span>约{readingTime}分钟</span>
         <span class="w-1 h-1 rounded-full bg-[var(--color-muted-foreground)]"></span>
         <span class="text-[var(--color-primary)]">{post.data.category}</span>
       </div>
@@ -148,6 +160,28 @@ const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
         </div>
       </div>
     </div>
+
+    <!-- Prev/Next navigation -->
+    {(prevPost || nextPost) && (
+      <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+        {prevPost && (
+          <a href={`/posts/${prevPost.id}`} class="group p-5 bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl hover:shadow-md transition-all">
+            <div class="text-xs text-[var(--color-muted-foreground)] mb-2">上一篇</div>
+            <div class="font-serif font-bold text-sm group-hover:text-[var(--color-primary)] transition-colors line-clamp-2">
+              {prevPost.data.title}
+            </div>
+          </a>
+        )}
+        {nextPost && (
+          <a href={`/posts/${nextPost.id}`} class={`group p-5 bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl hover:shadow-md transition-all ${!prevPost ? 'md:col-start-2' : ''}`}>
+            <div class="text-xs text-[var(--color-muted-foreground)] mb-2 text-right">下一篇</div>
+            <div class="font-serif font-bold text-sm group-hover:text-[var(--color-primary)] transition-colors line-clamp-2 text-right">
+              {nextPost.data.title}
+            </div>
+          </a>
+        )}
+      </div>
+    )}
 
     <!-- Comment section -->
     <Comment path={`/posts/${slug}`} />

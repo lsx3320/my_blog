@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f8f9fa"/>
+  <rect x="50" y="50" width="1100" height="530" rx="20" fill="white" stroke="#e5e7eb" stroke-width="2"/>
+  <text x="600" y="280" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="48" font-weight="700" fill="#1f2937">后生仔的博客</text>
+  <text x="600" y="340" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="#6b7280">记录技术探索与生活感悟</text>
+  <line x1="500" y1="380" x2="700" y2="380" stroke="#8b5cf6" stroke-width="3" stroke-linecap="round"/>
+  <text x="600" y="430" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#9ca3af">lushixiao.ccwu.cc</text>
+</svg>
