@@ -1,32 +1,32 @@
 ---
 const navItems = [
   { label: '首页', href: '/' },
-  { label: '文章', href: '/posts' },
-  { label: '朋友圈', href: '/moments' },
-  { label: '相册', href: '/gallery' },
-  { label: '关于', href: '/about' },
+  { label: '目录', href: '/posts' },
+  { label: '图录', href: '/moments' },
+  { label: '画册', href: '/gallery' },
+  { label: '编者按', href: '/about' },
 ];
 
 const currentPath = Astro.url.pathname;
 ---
 
 <header class="sticky top-0 z-50 bg-[var(--color-background)] border-b border-[var(--color-border)]">
-  <nav class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-    <a href="/" class="flex items-center gap-2 text-[17px] font-semibold tracking-tight hover:opacity-70 transition-opacity">
-      <span class="w-2 h-2 rounded-[1px] bg-[var(--color-primary)]" aria-hidden="true"></span>
-      后生仔
+  <nav class="max-w-6xl mx-auto px-6 py-3.5 flex items-center justify-between">
+    <a href="/" class="flex items-baseline gap-2.5">
+      <span class="font-display font-bold text-xl tracking-tight">后生仔</span>
+      <span class="tag text-[var(--color-muted-foreground)] hidden sm:inline">Vol.01</span>
     </a>
 
     <!-- Desktop nav -->
-    <ul class="hidden md:flex items-center gap-8">
+    <ul class="hidden md:flex items-center gap-7 font-sans text-[13px] tracking-wide">
       {navItems.map(item => (
         <li>
           <a
             href={item.href}
             class:list={[
-              'text-sm tracking-wide transition-colors',
+              'transition-colors',
               currentPath === item.href || currentPath.startsWith(item.href + '/')
-                ? 'text-[var(--color-foreground)] underline decoration-[var(--color-primary)] decoration-[1.5px] underline-offset-[6px]'
+                ? 'text-[var(--color-primary)]'
                 : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
             ]}
           >
@@ -36,7 +36,7 @@ const currentPath = Astro.url.pathname;
       ))}
     </ul>
 
-    <div class="flex items-center gap-1">
+    <div class="flex items-center gap-1 font-sans">
       <!-- Theme toggle -->
       <button
         id="theme-toggle"
@@ -65,7 +65,7 @@ const currentPath = Astro.url.pathname;
   </nav>
 
   <!-- Mobile menu -->
-  <div id="mobile-menu" class="hidden md:hidden border-t border-[var(--color-border)]">
+  <div id="mobile-menu" class="hidden md:hidden border-t border-[var(--color-border)] font-sans">
     <ul class="px-6 py-4 space-y-1">
       {navItems.map(item => (
         <li>

@@ -2,50 +2,57 @@
 const currentYear = new Date().getFullYear();
 ---
 
-<footer class="mt-20 bg-[#141413] text-[#e8e6dc]">
-  <div class="max-w-5xl mx-auto px-6 py-14">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-      <!-- About -->
+<footer class="mt-24 bg-[#1c1b17] text-[#e9e4d6]">
+  <div class="max-w-6xl mx-auto px-6 py-14">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
       <div>
-        <h3 class="text-xs font-medium tracking-[0.18em] uppercase text-[#8a887d] mb-4">关于博客</h3>
-        <p class="text-sm text-[#a3a196] leading-relaxed">
-          记录技术探索与生活感悟的个人空间。
-        </p>
+        <p class="font-display font-bold text-2xl tracking-tight mb-2">后生仔</p>
+        <p class="text-sm text-[#a39c8c] font-serif">纸上得来终觉浅，绝知此事要躬行</p>
       </div>
+      <p class="tag text-[#8a8578]">第壹卷 · 贰零贰陆 · 技术与生活的纸上笔记</p>
+    </div>
 
-      <!-- Links -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 border-t border-[#322e25] pt-10">
+      <!-- 栏目 -->
       <div>
-        <h3 class="text-xs font-medium tracking-[0.18em] uppercase text-[#8a887d] mb-4">快速链接</h3>
-        <ul class="space-y-2.5">
-          <li><a href="/" class="text-sm text-[#a3a196] hover:text-[#e08663] transition-colors">首页</a></li>
-          <li><a href="/posts" class="text-sm text-[#a3a196] hover:text-[#e08663] transition-colors">文章</a></li>
-          <li><a href="/moments" class="text-sm text-[#a3a196] hover:text-[#e08663] transition-colors">朋友圈</a></li>
-          <li><a href="/gallery" class="text-sm text-[#a3a196] hover:text-[#e08663] transition-colors">相册</a></li>
-          <li><a href="/about" class="text-sm text-[#a3a196] hover:text-[#e08663] transition-colors">关于</a></li>
+        <h3 class="tag text-[#8a8578] mb-5">栏目</h3>
+        <ul class="space-y-2.5 font-sans text-sm">
+          <li><a href="/posts" class="text-[#a39c8c] hover:text-[#d04a2e] transition-colors">目录 · 文章</a></li>
+          <li><a href="/moments" class="text-[#a39c8c] hover:text-[#d04a2e] transition-colors">图录 · 片刻</a></li>
+          <li><a href="/gallery" class="text-[#a39c8c] hover:text-[#d04a2e] transition-colors">画册 · 相片</a></li>
+          <li><a href="/about" class="text-[#a39c8c] hover:text-[#d04a2e] transition-colors">编者按 · 关于</a></li>
         </ul>
       </div>
 
-      <!-- Social -->
+      <!-- 往来 -->
       <div>
-        <h3 class="text-xs font-medium tracking-[0.18em] uppercase text-[#8a887d] mb-4">社交媒体</h3>
-        <div class="flex gap-5">
-          <a href="https://github.com/lsx3320" target="_blank" rel="noopener" class="text-[#a3a196] hover:text-[#e08663] transition-colors" aria-label="GitHub">
+        <h3 class="tag text-[#8a8578] mb-5">往来</h3>
+        <div class="flex items-center gap-6">
+          <a href="https://github.com/lsx3320" target="_blank" rel="noopener" class="text-[#a39c8c] hover:text-[#d04a2e] transition-colors" aria-label="GitHub">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
             </svg>
           </a>
-          <a href="mailto:15527759825@163.com" class="text-[#a3a196] hover:text-[#e08663] transition-colors" aria-label="Email">
+          <a href="mailto:15527759825@163.com" class="text-[#a39c8c] hover:text-[#d04a2e] transition-colors" aria-label="Email">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </a>
         </div>
       </div>
+
+      <!-- 卷尾 -->
+      <div>
+        <h3 class="tag text-[#8a8578] mb-5">卷尾</h3>
+        <p class="text-sm text-[#a39c8c] font-serif leading-relaxed">
+          以代码观世界，以迭代修人生；<br />一行一 commit，皆为进化之痕。
+        </p>
+      </div>
     </div>
 
-    <div class="mt-12 pt-6 border-t border-[#2a2926] flex flex-col md:flex-row items-center justify-between gap-3">
-      <p class="text-xs text-[#8a887d]">&copy; {currentYear} 后生仔的博客</p>
-      <p class="text-xs text-[#8a887d]">Built with Astro · Cloudflare Pages</p>
+    <div class="mt-12 pt-6 border-t border-[#322e25] flex flex-col md:flex-row items-center justify-between gap-3 font-sans">
+      <p class="text-xs text-[#8a8578]">&copy; {currentYear} 后生仔的博客 · 卢仕潇</p>
+      <p class="text-xs text-[#8a8578]">Built with Astro · Cloudflare Pages</p>
     </div>
   </div>
 </footer>

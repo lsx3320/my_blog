@@ -1,8 +1,11 @@
 @import "tailwindcss";
+@import "@fontsource/fraunces/latin-400.css";
+@import "@fontsource/fraunces/latin-400-italic.css";
+@import "@fontsource/fraunces/latin-600.css";
+@import "@fontsource/fraunces/latin-700.css";
 @import "@fontsource/poppins/latin-400.css";
 @import "@fontsource/poppins/latin-500.css";
 @import "@fontsource/poppins/latin-600.css";
-@import "@fontsource/poppins/latin-700.css";
 @import "@fontsource/lora/latin-400.css";
 @import "@fontsource/lora/latin-400-italic.css";
 @import "@fontsource/lora/latin-500.css";
@@ -12,90 +15,89 @@
 @import "@fontsource/jetbrains-mono/latin-500.css";
 
 /*
- * Claude / Anthropic 品牌美学
- * 暖白底、墨黑文字、发丝线、克制的橙强调。
- * 中文正文走系统衬线（宋体系），拉丁字符走 Lora；标题走 Poppins + 系统黑体。
+ * 中文刊物 / 杂志概念
+ * 纸色底、墨黑字、朱砂印章红；正文衬线、标题衬线 display、UI 无衬线小字。
+ * 版面语言：运行页眉、页码、编号索引、发丝线、首字下沉、竖排点缀。
  */
 @theme {
-  --color-primary: #d97757;
-  --color-primary-light: #e8a98f;
-  --color-primary-dark: #bf5f42;
-  --color-accent: #6a9bcc;
-  --color-background: #faf9f5;
-  --color-foreground: #141413;
-  --color-muted: #f1efe8;
-  --color-muted-foreground: #b0aea5;
-  --color-border: #e8e6dc;
-  --color-card: #fdfcf8;
-  --color-card-foreground: #141413;
+  --color-primary: #c23b22;
+  --color-primary-light: #e8b4a6;
+  --color-primary-dark: #a3301b;
+  --color-accent: #4a6a8a;
+  --color-background: #f7f4ec;
+  --color-foreground: #1c1b17;
+  --color-muted: #efeadd;
+  --color-muted-foreground: #8a8578;
+  --color-border: #ddd6c4;
+  --color-card: #fcfaf3;
+  --color-card-foreground: #1c1b17;
   --color-destructive: #a83232;
-  --color-success: #788c5d;
+  --color-success: #5f7a4a;
 
-  --font-sans: 'Poppins', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+  --font-display: 'Fraunces', 'Songti SC', 'STSong', 'SimSun', Georgia, serif;
   --font-serif: 'Lora', 'Songti SC', 'STSong', 'SimSun', Georgia, serif;
+  --font-sans: 'Poppins', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', Consolas, monospace;
 
-  --radius-sm: 0.125rem;
-  --radius-md: 0.25rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.625rem;
+  --radius-sm: 0;
+  --radius-md: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.375rem;
 
-  --shadow-sm: 0 1px 2px rgb(20 20 19 / 0.05);
-  --shadow-md: 0 4px 12px rgb(20 20 19 / 0.06);
-  --shadow-lg: 0 12px 32px rgb(20 20 19 / 0.1);
-  --shadow-xl: 0 24px 64px rgb(20 20 19 / 0.14);
+  --shadow-sm: 0 1px 2px rgb(28 27 23 / 0.04);
+  --shadow-md: 0 4px 12px rgb(28 27 23 / 0.07);
+  --shadow-lg: 0 12px 32px rgb(28 27 23 / 0.12);
+  --shadow-xl: 0 24px 64px rgb(28 27 23 / 0.16);
 }
 
-/* Dark mode overrides - class based */
+/* Dark mode - class based (墨黑纸) */
 .dark {
-  --color-background: #141413;
-  --color-foreground: #e8e6dc;
-  --color-muted: #1e1e1c;
-  --color-muted-foreground: #a3a196;
-  --color-border: #2a2926;
-  --color-card: #1a1a18;
-  --color-card-foreground: #e8e6dc;
-  --color-primary: #e08663;
-  --color-primary-light: #efb49c;
-  --color-primary-dark: #c96b4c;
-  --color-accent: #7aa5d3;
-  --color-success: #8fa373;
+  --color-background: #161512;
+  --color-foreground: #e9e4d6;
+  --color-muted: #24211c;
+  --color-muted-foreground: #a39c8c;
+  --color-border: #322e25;
+  --color-card: #1d1b17;
+  --color-card-foreground: #e9e4d6;
+  --color-primary: #d04a2e;
+  --color-primary-light: #e8a08a;
+  --color-primary-dark: #b83c22;
+  --color-accent: #8fb3d6;
+  --color-success: #9aaf75;
   --color-destructive: #c75b5b;
 }
 
-/* Dark mode - system preference (only applies when the user has not
-   explicitly chosen light/dark via the toggle; the toggle sets a .dark
-   or .light class on <html> which takes precedence). */
+/* Dark mode - system preference (only when no explicit choice) */
 @media (prefers-color-scheme: dark) {
   html:not(.dark):not(.light) {
-    --color-background: #141413;
-    --color-foreground: #e8e6dc;
-    --color-muted: #1e1e1c;
-    --color-muted-foreground: #a3a196;
-    --color-border: #2a2926;
-    --color-card: #1a1a18;
-    --color-card-foreground: #e8e6dc;
-    --color-primary: #e08663;
-    --color-primary-light: #efb49c;
-    --color-primary-dark: #c96b4c;
-    --color-accent: #7aa5d3;
-    --color-success: #8fa373;
+    --color-background: #161512;
+    --color-foreground: #e9e4d6;
+    --color-muted: #24211c;
+    --color-muted-foreground: #a39c8c;
+    --color-border: #322e25;
+    --color-card: #1d1b17;
+    --color-card-foreground: #e9e4d6;
+    --color-primary: #d04a2e;
+    --color-primary-light: #e8a08a;
+    --color-primary-dark: #b83c22;
+    --color-accent: #8fb3d6;
+    --color-success: #9aaf75;
     --color-destructive: #c75b5b;
   }
 }
 
-/* Shiki code highlighting - CSS variables theme (warm palette) */
+/* Shiki code highlighting - 纸墨暖调 */
 :root {
   --astro-code-foreground: var(--color-foreground);
   --astro-code-background: var(--color-muted);
   --shiki-foreground: var(--color-foreground);
   --shiki-background: var(--color-muted);
-  --shiki-token-comment: #8a887d;
-  --shiki-token-string: #6f824f;
-  --shiki-token-keyword: #b95f43;
-  --shiki-token-function: #5f8db8;
-  --shiki-token-constant: #c05f3f;
-  --shiki-token-parameter: #7a756b;
+  --shiki-token-comment: #8f8878;
+  --shiki-token-string: #5f7a4a;
+  --shiki-token-keyword: #b03a24;
+  --shiki-token-function: #4a6a8a;
+  --shiki-token-constant: #c23b22;
+  --shiki-token-parameter: #7a7363;
   --shiki-token-punctuation: var(--color-muted-foreground);
   --shiki-token-link: var(--color-primary);
 }
@@ -105,12 +107,12 @@
   --astro-code-background: var(--color-muted);
   --shiki-foreground: var(--color-foreground);
   --shiki-background: var(--color-muted);
-  --shiki-token-comment: #7d7b70;
+  --shiki-token-comment: #8f8878;
   --shiki-token-string: #9aaf75;
   --shiki-token-keyword: #d98a6c;
   --shiki-token-function: #8fb3d6;
-  --shiki-token-constant: #e09a7d;
-  --shiki-token-parameter: #a3a196;
+  --shiki-token-constant: #e08a6c;
+  --shiki-token-parameter: #a39c8c;
   --shiki-token-punctuation: var(--color-muted-foreground);
   --shiki-token-link: var(--color-primary);
 }
@@ -118,22 +120,23 @@
 /* Base styles */
 html {
   scroll-behavior: smooth;
-  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* 正文默认衬线（杂志正文感）；UI 小字显式使用 font-sans */
 body {
+  font-family: var(--font-serif);
   background-color: var(--color-background);
   color: var(--color-foreground);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Typography */
+/* Typography：标题一律衬线 display */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-sans);
+  font-family: var(--font-display);
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.25;
   letter-spacing: -0.01em;
 }
 
@@ -181,20 +184,33 @@ pre code {
   background: var(--color-muted-foreground);
 }
 
-/* Selection */
+/* Selection：朱砂淡染 */
 ::selection {
-  background: rgb(217 119 87 / 0.18);
+  background: rgb(194 59 34 / 0.16);
 }
 
-/* Focus styles */
+/* Focus */
 :focus-visible {
   outline: 1.5px solid var(--color-primary);
   outline-offset: 2px;
-  border-radius: var(--radius-sm);
 }
 
-/* Image styles */
 img {
   max-width: 100%;
   height: auto;
+}
+
+/* 刊物小标签（运行页眉 / 图注 / 索引小字） */
+.tag {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* View Transition：轻微淡入淡出（刊物翻页感） */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.22s;
+  animation-timing-function: ease;
 }
