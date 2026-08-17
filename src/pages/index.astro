@@ -1,86 +1,101 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Timeline from '../components/Timeline.astro';
-import PostCard from '../components/PostCard.astro';
 import { getCollection } from 'astro:content';
 import { timelineEvents } from '../data/timeline';
 
 const allPosts = (await getCollection('posts')).filter(post => !post.data.draft);
 const recentPosts = allPosts
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-  .slice(0, 3);
+  .slice(0, 4);
 ---
 
 <BaseLayout title="首页">
-  <!-- Hero section -->
-  <section class="relative">
-    <div class="max-w-5xl mx-auto px-6 py-28 md:py-40 text-center">
-      <p class="text-xs font-medium tracking-[0.28em] uppercase text-[var(--color-muted-foreground)] mb-8">
-        Welcome to my space
-      </p>
-      <h1 class="text-4xl md:text-5xl lg:text-6xl font-sans font-semibold leading-[1.15] tracking-tight mb-8">
-        于此间记录点滴思考
-        <br />
-        <span class="text-[var(--color-primary)]">既为自省，亦为留痕</span>
-      </h1>
-      <p class="text-lg md:text-xl text-[var(--color-muted-foreground)] leading-relaxed mb-14 max-w-2xl mx-auto">
-        编程心得、项目经验，以及生活中那些值得记录的瞬间。
-      </p>
-      <div class="flex flex-wrap justify-center gap-4">
-        <a
-          href="/posts"
-          class="inline-flex items-center px-7 py-3 bg-[var(--color-foreground)] text-[var(--color-background)] rounded-md font-medium text-sm hover:bg-[var(--color-primary)] transition-colors"
+  <!-- 封面 -->
+  <section class="border-b border-[var(--color-border)]">
+    <div class="max-w-6xl mx-auto px-6 py-16 md:py-24">
+      <!-- Masthead -->
+      <div class="relative">
+        <h1 class="font-display font-bold text-6xl md:text-8xl tracking-tight leading-none">
+          后生仔
+        </h1>
+        <p class="mt-5 text-lg md:text-xl text-[var(--color-muted-foreground)] font-serif">
+          于此间记录点滴思考 · 既为自省，亦为留痕
+        </p>
+        <div class="mt-10 flex items-center gap-4">
+          <div class="h-px flex-1 bg-[var(--color-border)]"></div>
+          <span class="tag text-[var(--color-muted-foreground)]">第壹卷 · 贰零贰陆 · 技术与生活的纸上笔记</span>
+          <div class="h-px flex-1 bg-[var(--color-border)]"></div>
+        </div>
+        <!-- 竖排点缀 -->
+        <span
+          class="hidden lg:block absolute right-0 top-0 font-serif text-sm tracking-[0.3em] text-[var(--color-muted-foreground)]"
+          style="writing-mode: vertical-rl"
+          aria-hidden="true"
         >
-          阅读文章
-          <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-          </svg>
-        </a>
-        <a
-          href="/gallery"
-          class="inline-flex items-center px-7 py-3 border border-[var(--color-border)] rounded-md font-medium text-sm text-[var(--color-foreground)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors"
-        >
-          浏览相册
-        </a>
+          于此间 · 记录点滴思考
+        </span>
       </div>
-      <div class="mt-16 flex justify-center">
-        <div class="w-12 h-[2px] bg-[var(--color-primary)]" aria-hidden="true"></div>
+
+      <!-- 封面主体：左图右要目 -->
+      <div class="mt-14 grid grid-cols-1 md:grid-cols-5 gap-10 md:gap-12">
+        <!-- 封面图 -->
+        <figure class="md:col-span-3">
+          <a href="/gallery" class="block group">
+            <img
+              src="/gallery/故宫.webp"
+              alt="故宫"
+              class="w-full h-[320px] md:h-[440px] object-cover border border-[var(--color-border)]"
+              loading="eager"
+              decoding="async"
+            />
+            <figcaption class="mt-3 flex items-center justify-between font-sans text-xs text-[var(--color-muted-foreground)]">
+              <span>封面图 · 故宫</span>
+              <span class="group-hover:text-[var(--color-primary)] transition-colors">画册 &rarr;</span>
+            </figcaption>
+          </a>
+        </figure>
+
+        <!-- 本期要目 -->
+        <aside class="md:col-span-2">
+          <h2 class="tag text-[var(--color-primary)] mb-4">本期要目</h2>
+          <ol class="border-t border-[var(--color-border)]">
+            {recentPosts.map((post, i) => (
+              <li class="border-b border-[var(--color-border)] py-4 group">
+                <a href={`/posts/${post.id}`} class="block">
+                  <div class="flex items-baseline gap-3">
+                    <span class="font-display font-semibold text-[var(--color-primary)] tabular-nums">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <div class="min-w-0">
+                      <h3 class="font-display font-semibold text-lg leading-snug group-hover:text-[var(--color-primary)] transition-colors line-clamp-2">
+                        {post.data.title}
+                      </h3>
+                      <p class="mt-1 font-sans text-xs text-[var(--color-muted-foreground)]">
+                        {post.data.category} · {post.data.pubDate.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' })}
+                      </p>
+                    </div>
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ol>
+          <a href="/posts" class="mt-5 inline-block font-sans text-xs text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-colors">
+            全部篇目 &rarr;
+          </a>
+        </aside>
       </div>
     </div>
   </section>
 
-  <!-- Timeline section -->
-  <section class="max-w-5xl mx-auto px-6 pb-24">
-    <div class="text-center mb-16">
-      <h2 class="text-3xl md:text-4xl font-sans font-semibold tracking-tight mb-4">时间轴</h2>
-      <p class="text-[var(--color-muted-foreground)] max-w-xl mx-auto">
-        记录生活中的重要时刻，留住那些值得回忆的瞬间
-      </p>
+  <!-- 编年史 -->
+  <section class="max-w-6xl mx-auto px-6 py-20">
+    <div class="flex items-baseline justify-between mb-12">
+      <h2 class="font-display font-bold text-3xl md:text-4xl tracking-tight">编年史</h2>
+      <p class="font-sans text-xs text-[var(--color-muted-foreground)]">二〇二一 — 二〇二六 · 摘录</p>
     </div>
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-3xl">
       <Timeline events={timelineEvents} />
-    </div>
-  </section>
-
-  <!-- Recent posts preview -->
-  <section class="max-w-5xl mx-auto px-6 pb-24">
-    <div class="flex items-center justify-between mb-10">
-      <h2 class="text-2xl font-sans font-semibold tracking-tight">最新文章</h2>
-      <a href="/posts" class="text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-colors">
-        查看全部 &rarr;
-      </a>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {recentPosts.map(post => (
-        <PostCard
-          title={post.data.title}
-          description={post.data.description}
-          pubDate={post.data.pubDate}
-          category={post.data.category}
-          tags={post.data.tags}
-          slug={post.id}
-        />
-      ))}
     </div>
   </section>
 </BaseLayout>
