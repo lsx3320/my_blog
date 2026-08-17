@@ -13,23 +13,23 @@ const categories = [...new Set(posts.map(post => post.data.category))];
 <BaseLayout title="文章列表">
   <section class="max-w-5xl mx-auto px-6 py-16">
     <div class="mb-12">
-      <h1 class="text-3xl md:text-4xl font-serif font-bold mb-4">文章</h1>
+      <h1 class="text-3xl md:text-4xl font-sans font-semibold tracking-tight mb-4">文章</h1>
       <p class="text-[var(--color-muted-foreground)]">
         记录技术探索与生活感悟的文字空间
       </p>
     </div>
 
     <!-- Category filter -->
-    <div class="flex flex-wrap gap-2 mb-8">
+    <div class="flex flex-wrap gap-2 mb-10">
       <button
-        class="category-filter px-4 py-2 text-sm rounded-lg bg-[var(--color-primary)] text-white transition-colors"
+        class="category-filter px-4 py-1.5 text-sm rounded-sm border transition-colors border-[var(--color-primary)] text-[var(--color-primary)]"
         data-category="all"
       >
         全部
       </button>
       {categories.map(cat => (
         <button
-          class="category-filter px-4 py-2 text-sm rounded-lg bg-[var(--color-muted)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-primary)]/10 transition-colors"
+          class="category-filter px-4 py-1.5 text-sm rounded-sm border border-[var(--color-border)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:border-[var(--color-muted-foreground)] transition-colors"
           data-category={cat}
         >
           {cat}
@@ -71,11 +71,11 @@ const categories = [...new Set(posts.map(post => post.data.category))];
 
       // Update button styles
       filterButtons.forEach(btn => {
-        btn.classList.remove('bg-[var(--color-primary)]', 'text-white');
-        btn.classList.add('bg-[var(--color-muted)]', 'text-[var(--color-muted-foreground)]');
+        btn.classList.remove('border-[var(--color-primary)]', 'text-[var(--color-primary)]');
+        btn.classList.add('border-[var(--color-border)]', 'text-[var(--color-muted-foreground)]');
       });
-      button.classList.remove('bg-[var(--color-muted)]', 'text-[var(--color-muted-foreground)]');
-      button.classList.add('bg-[var(--color-primary)]', 'text-white');
+      button.classList.remove('border-[var(--color-border)]', 'text-[var(--color-muted-foreground)]');
+      button.classList.add('border-[var(--color-primary)]', 'text-[var(--color-primary)]');
 
       // Filter posts
       postItems.forEach(item => {
