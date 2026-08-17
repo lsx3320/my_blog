@@ -3,20 +3,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 const photos = [
   // 人物
-  { id: 1, title: '坤坤', category: '人物', src: '/gallery/ikun.jpg', aspect: 'landscape' },
-  { id: 2, title: 'KennyS', category: '人物', src: '/gallery/KennyS.jpg', aspect: 'portrait' },
-  { id: 3, title: '4F', category: '人物', src: '/gallery/4F.jpg', aspect: 'landscape' },
-  { id: 4, title: 'yc', category: '人物', src: '/gallery/yc.jpg', aspect: 'landscape' },
-  { id: 5, title: '拐子', category: '人物', src: '/gallery/拐子.jpg', aspect: 'portrait' },
-  { id: 6, title: '老爹精神', category: '人物', src: '/gallery/老爹精神.jpg', aspect: 'landscape' },
+  { id: 1, title: '坤坤', category: '人物', src: '/gallery/ikun.jpg' },
+  { id: 2, title: 'KennyS', category: '人物', src: '/gallery/KennyS.jpg' },
+  { id: 3, title: '4F', category: '人物', src: '/gallery/4F.jpg' },
+  { id: 4, title: 'yc', category: '人物', src: '/gallery/yc.jpg' },
+  { id: 5, title: '拐子', category: '人物', src: '/gallery/拐子.jpg' },
+  { id: 6, title: '老爹精神', category: '人物', src: '/gallery/老爹精神.jpg' },
   // 合影
-  { id: 7, title: '合照', category: '合影', src: '/gallery/合照.jpg', aspect: 'landscape' },
-  { id: 8, title: '情歌', category: '合影', src: '/gallery/情歌.jpg', aspect: 'landscape' },
-  { id: 9, title: '三姊妹', category: '合影', src: '/gallery/三姊妹.jpg', aspect: 'portrait' },
-  { id: 10, title: '来财和妹妹', category: '合影', src: '/gallery/来财和妹妹.jpg', aspect: 'landscape' },
+  { id: 7, title: '合照', category: '合影', src: '/gallery/合照.jpg' },
+  { id: 8, title: '情歌', category: '合影', src: '/gallery/情歌.jpg' },
+  { id: 9, title: '三姊妹', category: '合影', src: '/gallery/三姊妹.jpg' },
+  { id: 10, title: '来财和妹妹', category: '合影', src: '/gallery/来财和妹妹.jpg' },
   // 回忆
-  { id: 11, title: '爷爷年轻照', category: '回忆', src: '/gallery/爷爷年轻照.jpg', aspect: 'portrait' },
-  { id: 12, title: '故宫', category: '回忆', src: '/gallery/故宫.jpg', aspect: 'landscape' },
+  { id: 11, title: '爷爷年轻照', category: '回忆', src: '/gallery/爷爷年轻照.jpg' },
+  { id: 12, title: '故宫', category: '回忆', src: '/gallery/故宫.jpg' },
 ];
 
 const categories = ['全部', ...new Set(photos.map(p => p.category))];
