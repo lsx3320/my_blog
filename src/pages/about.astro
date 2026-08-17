@@ -19,9 +19,9 @@ const socialLinks = [
   <section class="max-w-4xl mx-auto px-6 py-16">
     <!-- Hero -->
     <div class="mb-16">
-      <h1 class="text-3xl md:text-4xl font-serif font-bold mb-6">关于我</h1>
+      <h1 class="text-3xl md:text-4xl font-sans font-semibold tracking-tight mb-6">关于我</h1>
       <div class="flex flex-col md:flex-row gap-10 items-start">
-        <img src="/gallery/mp3/image.png" alt="头像" class="w-32 h-32 rounded-full object-cover shrink-0 border-2 border-[var(--color-border)]" loading="lazy" decoding="async" />
+        <img src="/gallery/mp3/image.png" alt="头像" class="w-32 h-32 rounded-full object-cover shrink-0 border border-[var(--color-border)]" loading="lazy" decoding="async" />
         <div>
           <p class="text-lg text-[var(--color-muted-foreground)] leading-relaxed mb-4">
             吾乃屌丝之楷模，以鄂西南做题家之出身，无惧寒微家境，只身勇赴汉城，偏皇家大湾一隅，事vibe coding之业，以八块腹肌之勇，推倒都市海归土肥圆。吾之爱情乃人间佳话，吾之事业乃励志传奇，如遇喷子，吾必将以黄金之劳砸其鼻梁，宾利之钥击其门齿！
@@ -39,11 +39,11 @@ const socialLinks = [
 
     <!-- Fun Stats -->
     <div class="mb-16">
-      <h2 class="text-2xl font-serif font-bold mb-8">日常数据</h2>
+      <h2 class="text-2xl font-sans font-semibold tracking-tight mb-8">日常数据</h2>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map(stat => (
-          <div class="group p-6 bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl text-center hover:border-[var(--color-primary)] hover:shadow-lg transition-all duration-300">
-            <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div class="group p-6 bg-[var(--color-card)] border border-[var(--color-border)] rounded-md text-center hover:border-[var(--color-primary)] transition-colors">
+            <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center">
               {stat.icon === 'code' && (
                 <svg class="w-6 h-6 text-[var(--color-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
@@ -78,14 +78,14 @@ const socialLinks = [
 
     <!-- Social links -->
     <div>
-      <h2 class="text-2xl font-serif font-bold mb-8">联系方式</h2>
+      <h2 class="text-2xl font-sans font-semibold tracking-tight mb-8">联系方式</h2>
       <div class="flex flex-wrap gap-4">
         {socialLinks.map(link => (
           <a
             href={link.url}
             target="_blank"
             rel="noopener"
-            class="inline-flex items-center gap-2 px-5 py-3 bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg hover:border-[var(--color-primary)] hover:shadow-md transition-all"
+            class="inline-flex items-center gap-2 px-5 py-3 bg-[var(--color-card)] border border-[var(--color-border)] rounded-md hover:border-[var(--color-primary)] transition-colors"
           >
             {link.icon === 'github' && (
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -111,7 +111,7 @@ const socialLinks = [
 
   <!-- WeChat QR Code Modal -->
   <div id="wechat-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
-    <div class="relative bg-[var(--color-card)] rounded-2xl shadow-2xl p-6 max-w-sm mx-4">
+    <div class="relative bg-[var(--color-card)] rounded-lg shadow-lg p-6 max-w-sm mx-4">
       <button id="close-modal" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-[var(--color-muted)] flex items-center justify-center hover:bg-[var(--color-border)] transition-colors">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -173,7 +173,7 @@ const socialLinks = [
     // Toast notification
     function showToast(message) {
       const toast = document.createElement('div');
-      toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-6 py-3 bg-[var(--color-primary)] text-white rounded-lg shadow-lg text-sm font-medium transition-all duration-300 opacity-0 translate-y-2';
+      toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-6 py-3 bg-[var(--color-primary)] text-white rounded-md shadow-md text-sm font-medium transition-all duration-300 opacity-0 translate-y-2';
       toast.textContent = message;
       document.body.appendChild(toast);
 
