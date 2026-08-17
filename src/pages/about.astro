@@ -1,91 +1,78 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 
+// 本刊档案
 const stats = [
-  { label: '代码提交', value: '2,847', icon: 'code', suffix: '+' },
-  { label: '咖啡续命', value: '1,024', icon: 'coffee', suffix: '杯' },
-  { label: '深夜Debug', value: '365', icon: 'moon', suffix: '夜' },
-  { label: '旅行城市', value: '12', icon: 'map', suffix: '座' },
+  { label: '编年', value: '005', note: '年' },
+  { label: '篇目', value: '010', note: '篇' },
+  { label: '相片', value: '045', note: '帧' },
+  { label: '旅行', value: '012', note: '座' },
 ];
 
 const socialLinks = [
   { name: 'GitHub', url: 'https://github.com/lsx3320', icon: 'github' },
   { name: '微信', url: '#wechat', icon: 'wechat' },
-  { name: 'Email', url: '#copy-email', icon: 'email' },
+  { name: '来信', url: '#copy-email', icon: 'email' },
 ];
 ---
 
-<BaseLayout title="关于我">
-  <section class="max-w-4xl mx-auto px-6 py-16">
-    <!-- Hero -->
+<BaseLayout title="编者按">
+  <section class="max-w-4xl mx-auto px-6 py-16 md:py-20">
+    <!-- 编者按 -->
     <div class="mb-16">
-      <h1 class="text-3xl md:text-4xl font-sans font-semibold tracking-tight mb-6">关于我</h1>
+      <div class="flex items-baseline justify-between mb-3">
+        <h1 class="font-display font-bold text-4xl md:text-5xl tracking-tight">编者按</h1>
+        <p class="tag text-[var(--color-muted-foreground)]">关于本刊</p>
+      </div>
+      <div class="h-px bg-[var(--color-border)] mb-10"></div>
+
       <div class="flex flex-col md:flex-row gap-10 items-start">
-        <img src="/gallery/mp3/image.webp" alt="头像" class="w-32 h-32 rounded-full object-cover shrink-0 border border-[var(--color-border)]" loading="lazy" decoding="async" />
-        <div>
-          <p class="text-lg text-[var(--color-muted-foreground)] leading-relaxed mb-4">
+        <img src="/gallery/mp3/image.webp" alt="头像" class="w-28 h-28 object-cover shrink-0 border border-[var(--color-border)]" loading="lazy" decoding="async" />
+        <div class="space-y-4">
+          <p class="text-lg text-[var(--color-muted-foreground)] font-serif leading-relaxed">
             吾乃屌丝之楷模，以鄂西南做题家之出身，无惧寒微家境，只身勇赴汉城，偏皇家大湾一隅，事vibe coding之业，以八块腹肌之勇，推倒都市海归土肥圆。吾之爱情乃人间佳话，吾之事业乃励志传奇，如遇喷子，吾必将以黄金之劳砸其鼻梁，宾利之钥击其门齿！
           </p>
-          <p class="text-lg text-[var(--color-muted-foreground)] leading-relaxed">
+          <p class="text-lg text-[var(--color-muted-foreground)] font-serif leading-relaxed">
             吾信技术之道，可化凡俗为灵光，令柴米油盐皆生算法之美；亦信分享之力，可使孤知不孤，使一念之火，燃成万家星河。
-
-吾以代码观世界，以迭代修人生；一行一commit，皆为进化之痕。
-
-若问吾之所执，不过是：以技术渡己，以分享渡人。
+          </p>
+          <p class="text-lg text-[var(--color-muted-foreground)] font-serif leading-relaxed">
+            吾以代码观世界，以迭代修人生；一行一commit，皆为进化之痕。若问吾之所执，不过是：以技术渡己，以分享渡人。
           </p>
         </div>
       </div>
     </div>
 
-    <!-- Fun Stats -->
+    <!-- 本刊档案 -->
     <div class="mb-16">
-      <h2 class="text-2xl font-sans font-semibold tracking-tight mb-8">日常数据</h2>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="flex items-center gap-4 mb-8">
+        <h2 class="font-display font-bold text-2xl tracking-tight">本刊档案</h2>
+        <div class="h-px flex-1 bg-[var(--color-border)]"></div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 border-t border-l border-[var(--color-border)]">
         {stats.map(stat => (
-          <div class="group p-6 bg-[var(--color-card)] border border-[var(--color-border)] rounded-md text-center hover:border-[var(--color-primary)] transition-colors">
-            <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center">
-              {stat.icon === 'code' && (
-                <svg class="w-6 h-6 text-[var(--color-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                </svg>
-              )}
-              {stat.icon === 'coffee' && (
-                <svg class="w-6 h-6 text-[var(--color-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 1v3M10 1v3M14 1v3" />
-                </svg>
-              )}
-              {stat.icon === 'moon' && (
-                <svg class="w-6 h-6 text-[var(--color-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              )}
-              {stat.icon === 'map' && (
-                <svg class="w-6 h-6 text-[var(--color-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              )}
+          <div class="border-b border-r border-[var(--color-border)] p-6 text-center group hover:bg-[var(--color-muted)]/60 transition-colors">
+            <div class="font-display font-bold text-3xl text-[var(--color-primary)] tabular-nums mb-1">
+              {stat.value}
             </div>
-            <div class="text-3xl font-bold text-[var(--color-foreground)] mb-1">
-              {stat.value}<span class="text-lg text-[var(--color-primary)]">{stat.suffix}</span>
-            </div>
-            <div class="text-sm text-[var(--color-muted-foreground)]">{stat.label}</div>
+            <div class="tag text-[var(--color-muted-foreground)]">{stat.label} · {stat.note}</div>
           </div>
         ))}
       </div>
     </div>
 
-    <!-- Social links -->
+    <!-- 往来 -->
     <div>
-      <h2 class="text-2xl font-sans font-semibold tracking-tight mb-8">联系方式</h2>
-      <div class="flex flex-wrap gap-4">
+      <div class="flex items-center gap-4 mb-8">
+        <h2 class="font-display font-bold text-2xl tracking-tight">往来</h2>
+        <div class="h-px flex-1 bg-[var(--color-border)]"></div>
+      </div>
+      <div class="flex flex-wrap gap-x-8 gap-y-4">
         {socialLinks.map(link => (
           <a
             href={link.url}
-            target="_blank"
-            rel="noopener"
-            class="inline-flex items-center gap-2 px-5 py-3 bg-[var(--color-card)] border border-[var(--color-border)] rounded-md hover:border-[var(--color-primary)] transition-colors"
+            target={link.url.startsWith('#') ? undefined : '_blank'}
+            rel={link.url.startsWith('#') ? undefined : 'noopener'}
+            class="inline-flex items-center gap-2 font-sans text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-colors group"
           >
             {link.icon === 'github' && (
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -102,14 +89,14 @@ const socialLinks = [
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             )}
-            <span class="text-sm font-medium">{link.name}</span>
+            <span class="group-hover:underline decoration-[var(--color-primary)] underline-offset-4">{link.name}</span>
           </a>
         ))}
       </div>
     </div>
   </section>
 
-  <!-- WeChat QR Code Modal -->
+  <!-- 微信二维码弹窗 -->
   <div id="wechat-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
     <div class="relative bg-[var(--color-card)] rounded-lg shadow-lg p-6 max-w-sm mx-4">
       <button id="close-modal" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-[var(--color-muted)] flex items-center justify-center hover:bg-[var(--color-border)] transition-colors">
@@ -117,14 +104,14 @@ const socialLinks = [
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
-      <h3 class="text-lg font-serif font-bold text-center mb-4">微信扫码添加</h3>
+      <h3 class="text-lg font-display font-bold text-center mb-4">微信扫码添加</h3>
       <img src="/gallery/mp3/wx.webp" alt="微信二维码" class="w-full rounded-lg" />
       <p class="text-sm text-[var(--color-muted-foreground)] text-center mt-4">扫描二维码添加微信好友</p>
     </div>
   </div>
 
   <script is:inline data-astro-rerun>
-    // WeChat modal
+    // 微信弹窗
     const wechatLink = document.querySelector('a[href="#wechat"]');
     const modal = document.getElementById('wechat-modal');
     const closeBtn = document.getElementById('close-modal');
@@ -149,7 +136,7 @@ const socialLinks = [
       });
     }
 
-    // Email copy functionality
+    // 复制邮箱
     const emailLink = document.querySelector('a[href="#copy-email"]');
     if (emailLink) {
       emailLink.addEventListener('click', async (e) => {
@@ -158,7 +145,6 @@ const socialLinks = [
           await navigator.clipboard.writeText('15527759825@163.com');
           showToast('邮箱已复制到剪贴板');
         } catch (err) {
-          // Fallback for older browsers
           const textarea = document.createElement('textarea');
           textarea.value = '15527759825@163.com';
           document.body.appendChild(textarea);
@@ -170,10 +156,9 @@ const socialLinks = [
       });
     }
 
-    // Toast notification
     function showToast(message) {
       const toast = document.createElement('div');
-      toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-6 py-3 bg-[var(--color-primary)] text-white rounded-md shadow-md text-sm font-medium transition-all duration-300 opacity-0 translate-y-2';
+      toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-6 py-3 bg-[var(--color-primary)] text-white text-sm font-medium transition-all duration-300 opacity-0 translate-y-2';
       toast.textContent = message;
       document.body.appendChild(toast);
 
