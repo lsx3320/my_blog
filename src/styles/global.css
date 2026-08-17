@@ -1,44 +1,66 @@
 @import "tailwindcss";
+@import "@fontsource/poppins/latin-400.css";
+@import "@fontsource/poppins/latin-500.css";
+@import "@fontsource/poppins/latin-600.css";
+@import "@fontsource/poppins/latin-700.css";
+@import "@fontsource/lora/latin-400.css";
+@import "@fontsource/lora/latin-400-italic.css";
+@import "@fontsource/lora/latin-500.css";
+@import "@fontsource/lora/latin-600.css";
+@import "@fontsource/lora/latin-700.css";
+@import "@fontsource/jetbrains-mono/latin-400.css";
+@import "@fontsource/jetbrains-mono/latin-500.css";
 
+/*
+ * Claude / Anthropic 品牌美学
+ * 暖白底、墨黑文字、发丝线、克制的橙强调。
+ * 中文正文走系统衬线（宋体系），拉丁字符走 Lora；标题走 Poppins + 系统黑体。
+ */
 @theme {
-  --color-primary: oklch(0.55 0.22 265);
-  --color-primary-light: oklch(0.65 0.18 265);
-  --color-primary-dark: oklch(0.45 0.22 265);
-  --color-accent: oklch(0.65 0.2 200);
-  --color-background: oklch(0.995 0.002 265);
-  --color-foreground: oklch(0.18 0.02 265);
-  --color-muted: oklch(0.95 0.008 265);
-  --color-muted-foreground: oklch(0.45 0.02 265);
-  --color-border: oklch(0.9 0.012 265);
-  --color-card: oklch(0.99 0.003 265);
-  --color-card-foreground: oklch(0.18 0.02 265);
-  --color-destructive: oklch(0.55 0.22 25);
-  --color-success: oklch(0.65 0.22 150);
+  --color-primary: #d97757;
+  --color-primary-light: #e8a98f;
+  --color-primary-dark: #bf5f42;
+  --color-accent: #6a9bcc;
+  --color-background: #faf9f5;
+  --color-foreground: #141413;
+  --color-muted: #f1efe8;
+  --color-muted-foreground: #b0aea5;
+  --color-border: #e8e6dc;
+  --color-card: #fdfcf8;
+  --color-card-foreground: #141413;
+  --color-destructive: #a83232;
+  --color-success: #788c5d;
 
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-  --font-serif: 'Noto Serif SC', 'Source Han Serif SC', 'STSong', Georgia, serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
+  --font-sans: 'Poppins', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+  --font-serif: 'Lora', 'Songti SC', 'STSong', 'SimSun', Georgia, serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', Consolas, monospace;
 
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.625rem;
 
-  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.04);
-  --shadow-md: 0 4px 12px oklch(0 0 0 / 0.06);
-  --shadow-lg: 0 8px 24px oklch(0 0 0 / 0.08);
-  --shadow-xl: 0 16px 48px oklch(0 0 0 / 0.1);
+  --shadow-sm: 0 1px 2px rgb(20 20 19 / 0.05);
+  --shadow-md: 0 4px 12px rgb(20 20 19 / 0.06);
+  --shadow-lg: 0 12px 32px rgb(20 20 19 / 0.1);
+  --shadow-xl: 0 24px 64px rgb(20 20 19 / 0.14);
 }
 
 /* Dark mode overrides - class based */
 .dark {
-  --color-background: oklch(0.13 0.015 265);
-  --color-foreground: oklch(0.92 0.008 265);
-  --color-muted: oklch(0.2 0.015 265);
-  --color-muted-foreground: oklch(0.55 0.015 265);
-  --color-border: oklch(0.25 0.015 265);
-  --color-card: oklch(0.17 0.015 265);
-  --color-card-foreground: oklch(0.92 0.008 265);
+  --color-background: #141413;
+  --color-foreground: #e8e6dc;
+  --color-muted: #1e1e1c;
+  --color-muted-foreground: #a3a196;
+  --color-border: #2a2926;
+  --color-card: #1a1a18;
+  --color-card-foreground: #e8e6dc;
+  --color-primary: #e08663;
+  --color-primary-light: #efb49c;
+  --color-primary-dark: #c96b4c;
+  --color-accent: #7aa5d3;
+  --color-success: #8fa373;
+  --color-destructive: #c75b5b;
 }
 
 /* Dark mode - system preference (only applies when the user has not
@@ -46,28 +68,34 @@
    or .light class on <html> which takes precedence). */
 @media (prefers-color-scheme: dark) {
   html:not(.dark):not(.light) {
-    --color-background: oklch(0.13 0.015 265);
-    --color-foreground: oklch(0.92 0.008 265);
-    --color-muted: oklch(0.2 0.015 265);
-    --color-muted-foreground: oklch(0.55 0.015 265);
-    --color-border: oklch(0.25 0.015 265);
-    --color-card: oklch(0.17 0.015 265);
-    --color-card-foreground: oklch(0.92 0.008 265);
+    --color-background: #141413;
+    --color-foreground: #e8e6dc;
+    --color-muted: #1e1e1c;
+    --color-muted-foreground: #a3a196;
+    --color-border: #2a2926;
+    --color-card: #1a1a18;
+    --color-card-foreground: #e8e6dc;
+    --color-primary: #e08663;
+    --color-primary-light: #efb49c;
+    --color-primary-dark: #c96b4c;
+    --color-accent: #7aa5d3;
+    --color-success: #8fa373;
+    --color-destructive: #c75b5b;
   }
 }
 
-/* Shiki code highlighting - CSS variables theme */
+/* Shiki code highlighting - CSS variables theme (warm palette) */
 :root {
   --astro-code-foreground: var(--color-foreground);
   --astro-code-background: var(--color-muted);
   --shiki-foreground: var(--color-foreground);
   --shiki-background: var(--color-muted);
-  --shiki-token-comment: oklch(0.55 0.02 265);
-  --shiki-token-string: oklch(0.55 0.18 150);
-  --shiki-token-keyword: oklch(0.55 0.22 265);
-  --shiki-token-function: oklch(0.6 0.18 200);
-  --shiki-token-constant: oklch(0.6 0.2 30);
-  --shiki-token-parameter: oklch(0.55 0.15 200);
+  --shiki-token-comment: #8a887d;
+  --shiki-token-string: #6f824f;
+  --shiki-token-keyword: #b95f43;
+  --shiki-token-function: #5f8db8;
+  --shiki-token-constant: #c05f3f;
+  --shiki-token-parameter: #7a756b;
   --shiki-token-punctuation: var(--color-muted-foreground);
   --shiki-token-link: var(--color-primary);
 }
@@ -77,12 +105,12 @@
   --astro-code-background: var(--color-muted);
   --shiki-foreground: var(--color-foreground);
   --shiki-background: var(--color-muted);
-  --shiki-token-comment: oklch(0.55 0.02 265);
-  --shiki-token-string: oklch(0.65 0.18 150);
-  --shiki-token-keyword: oklch(0.65 0.22 265);
-  --shiki-token-function: oklch(0.7 0.18 200);
-  --shiki-token-constant: oklch(0.7 0.2 30);
-  --shiki-token-parameter: oklch(0.65 0.15 200);
+  --shiki-token-comment: #7d7b70;
+  --shiki-token-string: #9aaf75;
+  --shiki-token-keyword: #d98a6c;
+  --shiki-token-function: #8fb3d6;
+  --shiki-token-constant: #e09a7d;
+  --shiki-token-parameter: #a3a196;
   --shiki-token-punctuation: var(--color-muted-foreground);
   --shiki-token-link: var(--color-primary);
 }
@@ -103,19 +131,19 @@ body {
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  line-height: 1.35;
-  letter-spacing: -0.02em;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
 code {
   font-family: var(--font-mono);
   background: var(--color-muted);
-  padding: 0.2em 0.4em;
+  padding: 0.15em 0.35em;
   border-radius: var(--radius-sm);
   font-size: 0.875em;
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
 }
 
 pre {
@@ -155,12 +183,12 @@ pre code {
 
 /* Selection */
 ::selection {
-  background: oklch(0.55 0.22 265 / 0.2);
+  background: rgb(217 119 87 / 0.18);
 }
 
 /* Focus styles */
 :focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 1.5px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
