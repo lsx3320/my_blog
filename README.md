@@ -1,28 +1,38 @@
 # 后生仔的博客
 
-个人博客，记录技术探索与生活感悟。基于 **Astro 6** 构建，静态输出，部署在 **Cloudflare Pages**（域名 `lushixiao.ccwu.cc`）。
+个人博客（刊物概念：封面 / 目录 / 版面 / 图录 / 画册 / 编者按），记录技术探索与生活感悟。
+基于 **Astro 6** 构建，静态输出，部署在 **Cloudflare Pages**（域名 `lushixiao.ccwu.cc`）。
+
+## 视觉与字体
+
+中文刊物杂志风：纸色底 `#f7f4ec`、墨黑 `#1c1b17`、朱砂红 `#c23b22` 印章感强调；发丝线、
+运行页眉、编号索引、CSS 自动编号章节（一、二、三…）、首字下沉、竖排点缀。标题衬线
+display（Fraunces + 宋体）、正文衬线（Lora + 宋体）、UI 小字无衬线（Poppins），全部
+@fontsource 自托管（latin 子集），无渲染阻塞。
 
 ## 技术栈
 
 - [Astro](https://astro.build) 6 — 静态站点生成，启用 View Transitions（站内 SPA 式跳转）
 - [Tailwind CSS](https://tailwindcss.com) 4（通过 `@tailwindcss/vite` 集成）
-- MDX + Shiki 代码高亮（`css-variables` 主题，跟随明暗模式）
+- Shiki 代码高亮（`css-variables` 主题，跟随明暗模式）
 - `@astrojs/sitemap` — 自动生成 sitemap
+- @fontsource（poppins / lora / fraunces / jetbrains-mono）+ sharp（图片优化脚本）
 
 ## 项目结构
 
 ```text
 /
 ├── public/                  # 静态资源（图片、bgm.mp3、favicon 等）
-│   └── gallery/             # 相册与朋友圈图片
+│   └── gallery/             # 画册与图录图片（WebP）
+├── scripts/optimize-images.mjs  # 图片批量优化脚本
 ├── src/
-│   ├── components/          # Header / Footer / PostCard / Timeline / MusicPlayer / Comment
+│   ├── components/          # Header / Footer / Timeline / MusicPlayer / Comment
 │   ├── content/
 │   │   ├── posts/           # 文章（Markdown，frontmatter 见下）
-│   │   └── moments/         # 朋友圈动态（Markdown）
-│   ├── data/timeline.ts     # 首页时间轴数据（类型化）
+│   │   └── moments/         # 图录动态（Markdown）
+│   ├── data/timeline.ts     # 编年史数据（类型化）
 │   ├── layouts/BaseLayout.astro
-│   ├── pages/               # 首页 / 文章 / 朋友圈 / 相册 / 关于 / 404
+│   ├── pages/               # 封面 / 目录 / 图录 / 画册 / 编者按 / 404
 │   ├── styles/global.css    # Tailwind 主题变量 + 明暗模式 + Shiki 配色
 │   ├── types/global.d.ts    # MusicPlayer 跨页全局状态声明
 │   └── content.config.ts    # 内容集合 schema
@@ -93,7 +103,7 @@ Cloudflare Pages（静态，无需 wrangler 配置）：
 
 ## 主题与字体
 
-- 明暗模式：跟随系统，也可手动切换（记忆在 `localStorage.theme`）
-- 标题衬线字体：Noto Serif SC（Google Fonts 加载）
-- 代码字体：JetBrains Mono
+- 明暗模式：跟随系统，也可手动切换（记忆在 `localStorage.theme`）；暗色为墨黑纸底
+- 字体：Fraunces + Lora + Poppins + JetBrains Mono（@fontsource 自托管，latin 子集，
+  `display: swap`）；中文回退系统宋体 / 黑体
 - 背景音乐：`public/bgm.mp3`（WebAudio 解码播放，跨页面保持进度）

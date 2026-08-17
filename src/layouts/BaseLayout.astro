@@ -97,6 +97,21 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
           progressBar.style.width = progress + '%';
         }, { passive: true });
       }
+
+      // 滚动显现（单例 observer，每次导航重新收集元素）
+      if (!window.__revealObserver) {
+        window.__revealObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              window.__revealObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.08 });
+      }
+      document.querySelectorAll('.reveal:not(.is-visible)').forEach(el => {
+        window.__revealObserver.observe(el);
+      });
     </script>
   </body>
 </html>
