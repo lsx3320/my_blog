@@ -10,9 +10,10 @@ const navItems = [
 const currentPath = Astro.url.pathname;
 ---
 
-<header class="sticky top-0 z-50 backdrop-blur-md bg-[var(--color-background)]/80 border-b border-[var(--color-border)]">
+<header class="sticky top-0 z-50 bg-[var(--color-background)] border-b border-[var(--color-border)]">
   <nav class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-    <a href="/" class="text-xl font-serif font-bold tracking-tight hover:opacity-80 transition-opacity">
+    <a href="/" class="flex items-center gap-2 text-[17px] font-semibold tracking-tight hover:opacity-70 transition-opacity">
+      <span class="w-2 h-2 rounded-[1px] bg-[var(--color-primary)]" aria-hidden="true"></span>
       后生仔
     </a>
 
@@ -23,10 +24,10 @@ const currentPath = Astro.url.pathname;
           <a
             href={item.href}
             class:list={[
-              'text-sm font-medium transition-colors hover:text-[var(--color-primary)]',
+              'text-sm tracking-wide transition-colors',
               currentPath === item.href || currentPath.startsWith(item.href + '/')
-                ? 'text-[var(--color-primary)]'
-                : 'text-[var(--color-muted-foreground)]',
+                ? 'text-[var(--color-foreground)] underline decoration-[var(--color-primary)] decoration-[1.5px] underline-offset-[6px]'
+                : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
             ]}
           >
             {item.label}
@@ -35,11 +36,11 @@ const currentPath = Astro.url.pathname;
       ))}
     </ul>
 
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-1">
       <!-- Theme toggle -->
       <button
         id="theme-toggle"
-        class="p-2 rounded-lg hover:bg-[var(--color-muted)] transition-colors"
+        class="p-2 rounded hover:bg-[var(--color-muted)] transition-colors text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
         aria-label="切换主题"
       >
         <svg class="w-5 h-5 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -53,7 +54,7 @@ const currentPath = Astro.url.pathname;
       <!-- Mobile menu button -->
       <button
         id="mobile-menu-toggle"
-        class="md:hidden p-2 rounded-lg hover:bg-[var(--color-muted)] transition-colors"
+        class="md:hidden p-2 rounded hover:bg-[var(--color-muted)] transition-colors text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
         aria-label="打开菜单"
       >
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -65,16 +66,16 @@ const currentPath = Astro.url.pathname;
 
   <!-- Mobile menu -->
   <div id="mobile-menu" class="hidden md:hidden border-t border-[var(--color-border)]">
-    <ul class="px-6 py-4 space-y-3">
+    <ul class="px-6 py-4 space-y-1">
       {navItems.map(item => (
         <li>
           <a
             href={item.href}
             class:list={[
-              'block py-2 text-sm font-medium transition-colors hover:text-[var(--color-primary)]',
+              'block py-2 text-sm tracking-wide transition-colors',
               currentPath === item.href || currentPath.startsWith(item.href + '/')
                 ? 'text-[var(--color-primary)]'
-                : 'text-[var(--color-muted-foreground)]',
+                : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
             ]}
           >
             {item.label}
