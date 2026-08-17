@@ -4,22 +4,30 @@ interface Props {
 }
 
 const { path } = Astro.props;
+
+// 通过 PUBLIC_TWIKOO_ENV_ID 配置 Twikoo 后端地址（构建时注入）。
+// 未配置时整块评论区不渲染，配置后自动启用。
+const envId = import.meta.env.PUBLIC_TWIKOO_ENV_ID;
 ---
 
-<div id="tcomment" class="mt-16 pt-8 border-t border-[var(--color-border)]">
-  <h2 class="text-2xl font-serif font-bold mb-8">评论</h2>
-  <div id="twikoo-container"></div>
-</div>
+{envId && (
+  <div class="mt-16 pt-8 border-t border-[var(--color-border)]">
+    <h2 class="text-2xl font-serif font-bold mb-8">评论</h2>
+    <div id="twikoo-container"></div>
+  </div>
+)}
 
-<script define:vars={{ path }} data-astro-rerun>
+<script define:vars={{ envId, path }} data-astro-rerun>
   // Load Twikoo. Re-runs on every View Transition navigation (data-astro-rerun)
   // because the comment container is freshly created on each navigation.
+  if (!envId) return;
+
   const container = document.getElementById('twikoo-container');
   if (!container) return;
 
   function initTwikoo() {
     window.twikoo.init({
-      envId: 'https://your-twikoo.vercel.app', // Replace with your Twikoo envId
+      envId: envId,
       el: '#twikoo-container',
       path: path,
       lang: 'zh-CN',
