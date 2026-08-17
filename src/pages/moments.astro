@@ -29,10 +29,10 @@ const userName = '后生仔';
         });
 
         return (
-          <article class="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-5 hover:shadow-md transition-all duration-300">
+          <article class="bg-[var(--color-card)] border border-[var(--color-border)] rounded-md p-5 hover:border-[var(--color-primary)] transition-colors">
             <!-- User Info -->
             <div class="flex items-start gap-3 mb-4">
-              <img src={avatarUrl} alt={userName} class="w-10 aspect-square rounded-full object-cover shrink-0 ring-2 ring-[var(--color-primary)]/20 shadow-md" loading="lazy" decoding="async" />
+              <img src={avatarUrl} alt={userName} class="w-10 aspect-square rounded-full object-cover shrink-0 border border-[var(--color-border)]" loading="lazy" decoding="async" />
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
                   <span class="font-medium text-[var(--color-foreground)]">{userName}</span>
@@ -59,8 +59,8 @@ const userName = '后生仔';
             {moment.data.images && moment.data.images.length > 0 && (
               <div class="mb-4 pl-[52px]">
                 {moment.data.images.length === 1 ? (
-                  <div class="max-w-[280px] overflow-hidden rounded-lg cursor-pointer">
-                    <img src={moment.data.images[0]} alt={moment.data.location || '动态图片'} class="moment-img w-full h-auto rounded-lg hover:scale-[1.02] transition-transform duration-300" loading="lazy" decoding="async" />
+                  <div class="max-w-[280px] overflow-hidden rounded-md cursor-pointer">
+                    <img src={moment.data.images[0]} alt={moment.data.location || '动态图片'} class="moment-img w-full h-auto rounded-md hover:scale-[1.02] transition-transform duration-300" loading="lazy" decoding="async" />
                   </div>
                 ) : (
                   <div class={`grid gap-2 ${
@@ -69,7 +69,7 @@ const userName = '后生仔';
                     'grid-cols-3'
                   } max-w-[400px]`}>
                     {moment.data.images.map((img: string) => (
-                      <div class="aspect-square overflow-hidden rounded-lg cursor-pointer">
+                      <div class="aspect-square overflow-hidden rounded-md cursor-pointer">
                         <img src={img} alt={moment.data.location || '动态图片'} class="moment-img w-full h-full object-cover hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" />
                       </div>
                     ))}
@@ -100,7 +100,7 @@ const userName = '后生仔';
   </section>
 <!-- Lightbox -->
 <div id="lightbox" class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-  <img id="lightbox-img" src="" alt="" class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg scale-90 transition-transform duration-300" />
+  <img id="lightbox-img" src="" alt="" class="max-w-[90vw] max-h-[90vh] object-contain rounded-md scale-90 transition-transform duration-300" />
   <button id="lightbox-close" class="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors">
     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
       <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />

@@ -25,21 +25,21 @@ const categories = ['全部', ...new Set(photos.map(p => p.category))];
 <BaseLayout title="相册">
   <section class="max-w-6xl mx-auto px-6 py-16">
     <div class="mb-12">
-      <h1 class="text-3xl md:text-4xl font-serif font-bold mb-4">相册</h1>
+      <h1 class="text-3xl md:text-4xl font-sans font-semibold tracking-tight mb-4">相册</h1>
       <p class="text-[var(--color-muted-foreground)]">
         用镜头记录生活中美好的瞬间
       </p>
     </div>
 
     <!-- Category filter -->
-    <div class="flex flex-wrap gap-2 mb-8">
+    <div class="flex flex-wrap gap-2 mb-10">
       {categories.map((cat, i) => (
         <button
           class:list={[
-            'gallery-filter px-4 py-2 text-sm rounded-lg transition-colors',
+            'gallery-filter px-4 py-1.5 text-sm rounded-sm border transition-colors',
             i === 0
-              ? 'bg-[var(--color-primary)] text-white'
-              : 'bg-[var(--color-muted)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-primary)]/10',
+              ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
+              : 'border-[var(--color-border)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:border-[var(--color-muted-foreground)]',
           ]}
           data-category={cat === '全部' ? 'all' : cat}
         >
@@ -57,7 +57,7 @@ const categories = ['全部', ...new Set(photos.map(p => p.category))];
           data-src={photo.src}
           data-title={photo.title}
         >
-          <div class="relative overflow-hidden rounded-xl bg-[var(--color-muted)]">
+          <div class="relative overflow-hidden rounded-md bg-[var(--color-muted)] border border-[var(--color-border)]">
             <img
               src={photo.src}
               alt={photo.title}
@@ -65,10 +65,10 @@ const categories = ['全部', ...new Set(photos.map(p => p.category))];
               loading="lazy"
               decoding="async"
             />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <div class="absolute bottom-0 left-0 right-0 p-4">
-                <h3 class="text-white font-serif font-bold">{photo.title}</h3>
-                <p class="text-white/80 text-sm">{photo.category}</p>
+                <h3 class="text-white font-sans font-semibold">{photo.title}</h3>
+                <p class="text-white/75 text-sm">{photo.category}</p>
               </div>
             </div>
           </div>
@@ -92,8 +92,8 @@ const categories = ['全部', ...new Set(photos.map(p => p.category))];
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
       </svg>
     </button>
-    <img id="lightbox-img" src="" alt="" class="max-h-[90vh] max-w-[90vw] object-contain rounded-lg" />
-    <div id="lightbox-title" class="absolute bottom-8 left-1/2 -translate-x-1/2 text-white font-serif text-xl"></div>
+    <img id="lightbox-img" src="" alt="" class="max-h-[90vh] max-w-[90vw] object-contain rounded-md" />
+    <div id="lightbox-title" class="absolute bottom-8 left-1/2 -translate-x-1/2 text-white font-sans text-xl"></div>
   </div>
 </BaseLayout>
 
@@ -107,11 +107,11 @@ const categories = ['全部', ...new Set(photos.map(p => p.category))];
 
       // Update button styles
       filterButtons.forEach(btn => {
-        btn.classList.remove('bg-[var(--color-primary)]', 'text-white');
-        btn.classList.add('bg-[var(--color-muted)]', 'text-[var(--color-muted-foreground)]');
+        btn.classList.remove('border-[var(--color-primary)]', 'text-[var(--color-primary)]');
+        btn.classList.add('border-[var(--color-border)]', 'text-[var(--color-muted-foreground)]');
       });
-      button.classList.remove('bg-[var(--color-muted)]', 'text-[var(--color-muted-foreground)]');
-      button.classList.add('bg-[var(--color-primary)]', 'text-white');
+      button.classList.remove('border-[var(--color-border)]', 'text-[var(--color-muted-foreground)]');
+      button.classList.add('border-[var(--color-primary)]', 'text-[var(--color-primary)]');
 
       // Filter photos
       photoItems.forEach(item => {
