@@ -85,12 +85,14 @@ const currentPath = Astro.url.pathname;
   </div>
 </header>
 
-<script>
+<script data-astro-rerun>
   // Theme toggle
   const themeToggle = document.getElementById('theme-toggle');
   themeToggle?.addEventListener('click', () => {
-    const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    const nextDark = !document.documentElement.classList.contains('dark');
+    document.documentElement.classList.toggle('dark', nextDark);
+    document.documentElement.classList.toggle('light', !nextDark);
+    localStorage.setItem('theme', nextDark ? 'dark' : 'light');
   });
 
   // Mobile menu toggle

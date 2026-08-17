@@ -97,8 +97,7 @@ const categories = ['全部', ...new Set(photos.map(p => p.category))];
   </div>
 </BaseLayout>
 
-<script>
-  // Category filtering
+<script data-astro-rerun>
   const filterButtons = document.querySelectorAll('.gallery-filter');
   const photoItems = document.querySelectorAll('.photo-item');
 

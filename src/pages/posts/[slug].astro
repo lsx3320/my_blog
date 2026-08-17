@@ -348,8 +348,7 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
   }
 </style>
 
-<script>
-  // Smooth scroll for TOC links
+<script data-astro-rerun>
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
       e.preventDefault();

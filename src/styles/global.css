@@ -41,9 +41,11 @@
   --color-card-foreground: oklch(0.92 0.008 265);
 }
 
-/* Dark mode - system preference (prevents flash on page load) */
+/* Dark mode - system preference (only applies when the user has not
+   explicitly chosen light/dark via the toggle; the toggle sets a .dark
+   or .light class on <html> which takes precedence). */
 @media (prefers-color-scheme: dark) {
-  html:not(.light) {
+  html:not(.dark):not(.light) {
     --color-background: oklch(0.13 0.015 265);
     --color-foreground: oklch(0.92 0.008 265);
     --color-muted: oklch(0.2 0.015 265);

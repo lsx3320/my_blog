@@ -61,8 +61,7 @@ const categories = [...new Set(posts.map(post => post.data.category))];
   </section>
 </BaseLayout>
 
-<script>
-  // Category filtering
+<script data-astro-rerun>
   const filterButtons = document.querySelectorAll('.category-filter');
   const postItems = document.querySelectorAll('.post-item');
 

@@ -40,9 +40,14 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <ClientRouter />
     <script>
       // Theme initialization - must run before body renders
-      const theme = localStorage.getItem('theme') ||
+      // Always set an explicit light/dark class so the CSS media query
+      // (which only applies when neither class is present) can't override
+      // a user's manual choice.
+      const storedTheme = localStorage.getItem('theme');
+      const theme = storedTheme ||
         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       document.documentElement.classList.toggle('dark', theme === 'dark');
+      document.documentElement.classList.toggle('light', theme === 'light');
     </script>
     <style>
       /* Reading progress bar */
@@ -68,18 +73,28 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <div transition:persist="music-player">
       <MusicPlayer />
     </div>
-    <script>
-      // Listen for system theme changes
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-        if (!localStorage.getItem('theme')) {
-          document.documentElement.classList.toggle('dark', e.matches);
-        }
-      });
-      
+    <script data-astro-rerun>
+      // This script re-runs on every View Transition navigation (data-astro-rerun),
+      // because the body (including the progress bar element) is swapped on
+      // navigation. Guards below keep listeners from being registered twice.
+
+      // Listen for system theme changes (only when user hasn't chosen explicitly)
+      if (!window.__themeListenerBound) {
+        window.__themeListenerBound = true;
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+          if (!localStorage.getItem('theme')) {
+            document.documentElement.classList.toggle('dark', e.matches);
+            document.documentElement.classList.toggle('light', !e.matches);
+          }
+        });
+      }
+
       // Reading progress bar
-      const progressBar = document.getElementById('reading-progress');
-      if (progressBar) {
+      if (!window.__progressBound) {
+        window.__progressBound = true;
         window.addEventListener('scroll', () => {
+          const progressBar = document.getElementById('reading-progress');
+          if (!progressBar) return;
           const scrollTop = window.scrollY;
           const docHeight = document.documentElement.scrollHeight - window.innerHeight;
           const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;

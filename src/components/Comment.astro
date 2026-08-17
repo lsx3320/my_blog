@@ -11,27 +11,28 @@ const { path } = Astro.props;
   <div id="twikoo-container"></div>
 </div>
 
-<script define:vars={{ path }}>
-  // Load Twikoo
-  function loadTwikoo() {
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/twikoo@1.6.39/dist/twikoo.all.min.js';
-    script.onload = () => {
-      twikoo.init({
-        envId: 'https://your-twikoo.vercel.app', // Replace with your Twikoo envId
-        el: '#twikoo-container',
-        path: path,
-        lang: 'zh-CN',
-      });
-    };
-    document.head.appendChild(script);
+<script define:vars={{ path }} data-astro-rerun>
+  // Load Twikoo. Re-runs on every View Transition navigation (data-astro-rerun)
+  // because the comment container is freshly created on each navigation.
+  const container = document.getElementById('twikoo-container');
+  if (!container) return;
+
+  function initTwikoo() {
+    window.twikoo.init({
+      envId: 'https://your-twikoo.vercel.app', // Replace with your Twikoo envId
+      el: '#twikoo-container',
+      path: path,
+      lang: 'zh-CN',
+    });
   }
 
-  // Load on page load
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadTwikoo);
+  if (typeof window.twikoo !== 'undefined') {
+    initTwikoo();
   } else {
-    loadTwikoo();
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/twikoo@1.6.39/dist/twikoo.all.min.js';
+    script.onload = initTwikoo;
+    document.head.appendChild(script);
   }
 </script>
 
