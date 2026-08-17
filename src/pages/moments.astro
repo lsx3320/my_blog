@@ -11,15 +11,20 @@ const moments = allMoments.sort((a, b) => {
   if (db === Infinity) return 1;
   return db - da;
 });
-
-const avatarUrl = '/gallery/ppyq/sylj.webp';
-const userName = '后生仔';
 ---
 
-<BaseLayout title="朋友圈">
-  <section class="max-w-2xl mx-auto px-4 py-16">
-    <!-- Moments Feed -->
-    <div class="space-y-6">
+<BaseLayout title="图录">
+  <section class="max-w-3xl mx-auto px-6 py-16 md:py-20">
+    <div class="flex items-baseline justify-between mb-3">
+      <h1 class="font-display font-bold text-4xl md:text-5xl tracking-tight">图 录</h1>
+      <p class="tag text-[var(--color-muted-foreground)]">片刻集 · 贰零贰陆</p>
+    </div>
+    <p class="text-[var(--color-muted-foreground)] font-serif mb-14">
+      一些值得留下的瞬间。
+    </p>
+
+    <!-- 图录条目 -->
+    <div class="space-y-14">
       {moments.map(async (moment) => {
         const { Content } = await render(moment);
         const formattedDate = moment.data.date?.toLocaleDateString('zh-CN', {
@@ -29,48 +34,42 @@ const userName = '后生仔';
         });
 
         return (
-          <article class="bg-[var(--color-card)] border border-[var(--color-border)] rounded-md p-5 hover:border-[var(--color-primary)] transition-colors">
-            <!-- User Info -->
-            <div class="flex items-start gap-3 mb-4">
-              <img src={avatarUrl} alt={userName} class="w-10 aspect-square rounded-full object-cover shrink-0 border border-[var(--color-border)]" loading="lazy" decoding="async" />
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <span class="font-medium text-[var(--color-foreground)]">{userName}</span>
-                  {moment.data.location && (
-                    <span class="text-xs text-[var(--color-muted-foreground)] flex items-center gap-1">
-                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      {moment.data.location}
-                    </span>
-                  )}
-                </div>
-                {formattedDate && <time class="text-xs text-[var(--color-muted-foreground)]">{formattedDate}</time>}
-              </div>
+          <article class="border-b border-[var(--color-border)] pb-14 last:border-0">
+            <!-- 日期与位置 -->
+            <div class="flex items-center gap-3 font-sans text-xs text-[var(--color-muted-foreground)] mb-5">
+              {formattedDate && <time>{formattedDate}</time>}
+              {moment.data.location && (
+                <span class="flex items-center gap-1">
+                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  {moment.data.location}
+                </span>
+              )}
             </div>
 
-            <!-- Content -->
-            <div class="text-sm text-[var(--color-foreground)] leading-relaxed mb-4 pl-[52px]">
+            <!-- 文字 -->
+            <div class="font-serif text-[var(--color-foreground)] leading-relaxed mb-6">
               <Content />
             </div>
 
-            <!-- Images -->
+            <!-- 图片 -->
             {moment.data.images && moment.data.images.length > 0 && (
-              <div class="mb-4 pl-[52px]">
+              <div class="mb-6">
                 {moment.data.images.length === 1 ? (
-                  <div class="max-w-[280px] overflow-hidden rounded-md cursor-pointer">
-                    <img src={moment.data.images[0]} alt={moment.data.location || '动态图片'} class="moment-img w-full h-auto rounded-md hover:scale-[1.02] transition-transform duration-300" loading="lazy" decoding="async" />
+                  <div class="overflow-hidden cursor-pointer border border-[var(--color-border)]">
+                    <img src={moment.data.images[0]} alt={moment.data.location || '动态图片'} class="moment-img w-full h-auto hover:opacity-90 transition-opacity" loading="lazy" decoding="async" />
                   </div>
                 ) : (
                   <div class={`grid gap-2 ${
                     moment.data.images.length === 2 ? 'grid-cols-2' :
                     moment.data.images.length === 4 ? 'grid-cols-2' :
                     'grid-cols-3'
-                  } max-w-[400px]`}>
+                  }`}>
                     {moment.data.images.map((img: string) => (
-                      <div class="aspect-square overflow-hidden rounded-md cursor-pointer">
-                        <img src={img} alt={moment.data.location || '动态图片'} class="moment-img w-full h-full object-cover hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" />
+                      <div class="aspect-square overflow-hidden cursor-pointer border border-[var(--color-border)]">
+                        <img src={img} alt={moment.data.location || '动态图片'} class="moment-img w-full h-full object-cover hover:opacity-90 transition-opacity" loading="lazy" decoding="async" />
                       </div>
                     ))}
                   </div>
@@ -78,9 +77,9 @@ const userName = '后生仔';
               </div>
             )}
 
-            <!-- Actions -->
-            <div class="flex items-center gap-4 pl-[52px] pt-3 border-t border-[var(--color-border)]">
-              <button class="like-btn flex items-center gap-1.5 text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-colors" data-likes={moment.data.likes}>
+            <!-- 点赞 -->
+            <div class="flex items-center gap-4">
+              <button class="like-btn flex items-center gap-1.5 font-sans text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-colors" data-likes={moment.data.likes}>
                 <svg class="w-4 h-4 heart-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
@@ -98,17 +97,20 @@ const userName = '后生仔';
       </div>
     )}
   </section>
-<!-- Lightbox -->
-<div id="lightbox" class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-  <img id="lightbox-img" src="" alt="" class="max-w-[90vw] max-h-[90vh] object-contain rounded-md scale-90 transition-transform duration-300" />
-  <button id="lightbox-close" class="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors">
-    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-    </svg>
-  </button>
-</div>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+    <img id="lightbox-img" src="" alt="" class="max-w-[90vw] max-h-[90vh] object-contain scale-90 transition-transform duration-300" />
+    <button id="lightbox-close" class="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors">
+      <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+</BaseLayout>
 
 <script is:inline data-astro-rerun>
+  // Lightbox
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightbox-img');
   const lightboxClose = document.getElementById('lightbox-close');
@@ -140,7 +142,7 @@ const userName = '后生仔';
     if (e.key === 'Escape') closeLightbox();
   });
 
-  // Like button functionality
+  // 点赞
   document.querySelectorAll('.like-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const countEl = btn.querySelector('.like-count');
@@ -153,7 +155,6 @@ const userName = '后生仔';
       } else {
         count++;
         btn.classList.add('liked');
-        // Add animation
         heartSvg.classList.add('scale-125');
         setTimeout(() => heartSvg.classList.remove('scale-125'), 200);
       }
@@ -175,11 +176,11 @@ const userName = '后生仔';
   }
 
   .like-btn.liked {
-    color: #ef4444;
+    color: #c23b22;
   }
 
   .like-btn.liked .heart-icon {
-    fill: #ef4444;
-    stroke: #ef4444;
+    fill: #c23b22;
+    stroke: #c23b22;
   }
 </style>
