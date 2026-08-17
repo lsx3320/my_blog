@@ -37,6 +37,7 @@
 | `npm run build` | 构建生产产物到 `dist/` |
 | `npm run preview` | 本地预览构建产物 |
 | `npm run check` | `astro check` 类型检查（含 .astro 模板） |
+| `npm run images:optimize` | 批量优化 `public/gallery` 图片（转 WebP ≤1920px） |
 
 ## 写内容
 
@@ -51,11 +52,12 @@ category: '技术'            # 分类，会用于文章列表的筛选
 tags: ['Transformer', 'AI'] # 可选，默认 []
 draft: false                # 可选，true 时不出现在列表
 # updatedDate: 2026-05-21  # 可选
-# image: '/path/to.jpg'    # 可选（当前 UI 未展示封面图，字段保留备用）
+# image: '/path/to.webp'    # 可选（当前 UI 未展示封面图，字段保留备用）
 ---
 ```
 
 > 文件名即 slug，如 `src/content/posts/transformer-guide.md` → `/posts/transformer-guide`。
+> 图片建议先跑 `npm run images:optimize`（或手动转 WebP），相册图片统一 `.webp`。
 
 ### 朋友圈（`src/content/moments/*.md`）
 
@@ -63,7 +65,7 @@ draft: false                # 可选，true 时不出现在列表
 ---
 date: 2026-05-25          # 可选
 images:                   # 可选，1 张大图 / 多张九宫格
-  - /gallery/xxx.jpg
+  - /gallery/xxx.webp
 likes: 0                  # 初始点赞数
 location: 武汉             # 可选
 ---
