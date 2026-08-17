@@ -40,27 +40,35 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
 ---
 
 <BaseLayout title={post.data.title} description={post.data.description}>
-  <article class="max-w-3xl mx-auto px-6 py-16">
+  <article class="max-w-3xl mx-auto px-6 pt-10 pb-16">
+    <!-- 运行页眉 -->
+    <div class="flex items-center justify-between font-sans text-xs text-[var(--color-muted-foreground)] mb-2">
+      <span>后生仔 · {post.data.category}</span>
+      <span>第 {String(currentIndex + 1).padStart(2, '0')} 篇</span>
+    </div>
+    <div class="h-px bg-[var(--color-border)] mb-10"></div>
+
     <!-- Back link -->
-    <a href="/posts" class="inline-flex items-center gap-1.5 text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-colors mb-12 group">
+    <a href="/posts" class="inline-flex items-center gap-1.5 font-sans text-xs text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-colors mb-10 group">
       <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
-      返回文章列表
+      返回目录
     </a>
 
     <!-- Article header -->
-    <header class="mb-12 text-center">
-      <div class="flex items-center justify-center gap-3 text-sm text-[var(--color-muted-foreground)] mb-6">
+    <header class="mb-14 text-center">
+      <div class="flex items-center justify-center gap-3 font-sans text-xs text-[var(--color-muted-foreground)] mb-5">
         <time datetime={post.data.pubDate.toISOString()}>{formattedDate}</time>
         <span class="w-px h-3 bg-[var(--color-border)]" aria-hidden="true"></span>
         <span>约{readingTime}分钟</span>
         <span class="w-px h-3 bg-[var(--color-border)]" aria-hidden="true"></span>
         <span class="text-[var(--color-primary)]">{post.data.category}</span>
       </div>
-      <h1 class="text-3xl md:text-4xl lg:text-5xl font-sans font-semibold leading-tight mb-6 tracking-tight">
+      <h1 class="font-display font-bold text-3xl md:text-4xl lg:text-5xl leading-tight mb-6 tracking-tight">
         {post.data.title}
       </h1>
+      <p class="font-sans text-xs text-[var(--color-muted-foreground)] mb-6">文 / 后生仔</p>
       <p class="text-lg text-[var(--color-muted-foreground)] max-w-2xl mx-auto leading-relaxed">
         {post.data.description}
       </p>
@@ -137,8 +145,13 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
       </div>
     </div>
 
+    <!-- 文末 -->
+    <div class="mt-20 text-center">
+      <span class="font-serif text-base text-[var(--color-muted-foreground)]">—— 完 ——</span>
+    </div>
+
     <!-- Share & actions -->
-    <div class="mt-16 pt-8 border-t border-[var(--color-border)]">
+    <div class="mt-12 pt-8 border-t border-[var(--color-border)]">
       <div class="flex items-center justify-between">
         <a href="/posts" class="inline-flex items-center gap-2 text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-colors group">
           <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -163,7 +176,7 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
         {prevPost && (
           <a href={`/posts/${prevPost.id}`} class="group p-5 bg-[var(--color-card)] border border-[var(--color-border)] rounded-md hover:border-[var(--color-primary)] transition-colors">
             <div class="text-xs text-[var(--color-muted-foreground)] mb-2">上一篇</div>
-            <div class="font-sans font-semibold text-sm group-hover:text-[var(--color-primary)] transition-colors line-clamp-2">
+            <div class="font-display font-semibold text-sm group-hover:text-[var(--color-primary)] transition-colors line-clamp-2">
               {prevPost.data.title}
             </div>
           </a>
@@ -171,7 +184,7 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
         {nextPost && (
           <a href={`/posts/${nextPost.id}`} class={`group p-5 bg-[var(--color-card)] border border-[var(--color-border)] rounded-md hover:border-[var(--color-primary)] transition-colors ${!prevPost ? 'md:col-start-2' : ''}`}>
             <div class="text-xs text-[var(--color-muted-foreground)] mb-2 text-right">下一篇</div>
-            <div class="font-sans font-semibold text-sm group-hover:text-[var(--color-primary)] transition-colors line-clamp-2 text-right">
+            <div class="font-display font-semibold text-sm group-hover:text-[var(--color-primary)] transition-colors line-clamp-2 text-right">
               {nextPost.data.title}
             </div>
           </a>
@@ -186,14 +199,27 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
 
 <style>
   .article-content {
+    counter-reset: chapter;
     font-family: var(--font-serif);
     font-size: 1.125rem;
     line-height: 1.9;
     color: var(--color-foreground);
   }
 
+  /* 首字下沉：正文第一段首字朱砂衬线大字 */
+  .article-content > p:first-of-type::first-letter {
+    font-family: var(--font-display);
+    font-size: 3em;
+    font-weight: 600;
+    line-height: 1;
+    float: left;
+    margin-right: 0.12em;
+    margin-top: 0.08em;
+    color: var(--color-primary);
+  }
+
   .article-content :global(h2) {
-    font-family: var(--font-sans);
+    font-family: var(--font-display);
     font-size: 1.625rem;
     font-weight: 600;
     margin-top: 3rem;
@@ -201,10 +227,18 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
     padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--color-border);
     letter-spacing: -0.01em;
+    counter-increment: chapter;
+  }
+
+  /* 章节自动编号：一、二、三…… */
+  .article-content :global(h2)::before {
+    content: counter(chapter, cjk-ideographic) '、';
+    color: var(--color-primary);
+    font-weight: 600;
   }
 
   .article-content :global(h3) {
-    font-family: var(--font-sans);
+    font-family: var(--font-display);
     font-size: 1.25rem;
     font-weight: 600;
     margin-top: 2rem;
