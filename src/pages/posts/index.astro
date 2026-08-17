@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import PostCard from '../../components/PostCard.astro';
 import { getCollection } from 'astro:content';
 
 const posts = (await getCollection('posts'))
@@ -8,28 +7,27 @@ const posts = (await getCollection('posts'))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 const categories = [...new Set(posts.map(post => post.data.category))];
+
+const fmtDate = (d: Date) =>
+  d.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit' }).replace('/', '.');
 ---
 
-<BaseLayout title="文章列表">
-  <section class="max-w-5xl mx-auto px-6 py-16">
-    <div class="mb-12">
-      <h1 class="text-3xl md:text-4xl font-sans font-semibold tracking-tight mb-4">文章</h1>
-      <p class="text-[var(--color-muted-foreground)]">
-        记录技术探索与生活感悟的文字空间
-      </p>
+<BaseLayout title="目录">
+  <section class="max-w-4xl mx-auto px-6 py-16 md:py-20">
+    <div class="flex items-baseline justify-between mb-3">
+      <h1 class="font-display font-bold text-4xl md:text-5xl tracking-tight">目 录</h1>
+      <p class="tag text-[var(--color-muted-foreground)]">第壹卷 · 贰零贰陆 · 共 {posts.length} 篇</p>
     </div>
+    <p class="text-[var(--color-muted-foreground)] font-serif mb-12">
+      记录技术探索与生活感悟的文字空间
+    </p>
 
-    <!-- Category filter -->
-    <div class="flex flex-wrap gap-2 mb-10">
-      <button
-        class="category-filter px-4 py-1.5 text-sm rounded-sm border transition-colors border-[var(--color-primary)] text-[var(--color-primary)]"
-        data-category="all"
-      >
-        全部
-      </button>
+    <!-- 分类索引 -->
+    <div class="flex flex-wrap gap-x-6 gap-y-2 mb-8 font-sans text-[13px]">
+      <button class="category-filter text-[var(--color-primary)]" data-category="all">全部</button>
       {categories.map(cat => (
         <button
-          class="category-filter px-4 py-1.5 text-sm rounded-sm border border-[var(--color-border)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:border-[var(--color-muted-foreground)] transition-colors"
+          class="category-filter text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors"
           data-category={cat}
         >
           {cat}
@@ -37,21 +35,27 @@ const categories = [...new Set(posts.map(post => post.data.category))];
       ))}
     </div>
 
-    <!-- Posts grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="posts-grid">
-      {posts.map(post => (
-        <div class="post-item" data-category={post.data.category}>
-          <PostCard
-            title={post.data.title}
-            description={post.data.description}
-            pubDate={post.data.pubDate}
-            category={post.data.category}
-            tags={post.data.tags}
-            slug={post.id}
-          />
-        </div>
+    <!-- 篇目索引 -->
+    <ol class="border-t border-[var(--color-border)]">
+      {posts.map((post, i) => (
+        <li class="post-item border-b border-[var(--color-border)]" data-category={post.data.category}>
+          <a
+            href={`/posts/${post.id}`}
+            class="flex items-baseline gap-4 md:gap-6 py-5 px-2 -mx-2 group hover:bg-[var(--color-muted)]/60 transition-colors"
+          >
+            <span class="font-display font-semibold text-[var(--color-primary)] tabular-nums w-10 shrink-0">
+              {String(i + 1).padStart(3, '0')}
+            </span>
+            <h2 class="flex-1 min-w-0 font-display font-semibold text-lg md:text-xl leading-snug group-hover:text-[var(--color-primary)] transition-colors line-clamp-1">
+              {post.data.title}
+            </h2>
+            <span class="hidden sm:block font-sans text-xs text-[var(--color-muted-foreground)] shrink-0">
+              {post.data.category} · {fmtDate(post.data.pubDate)}
+            </span>
+          </a>
+        </li>
       ))}
-    </div>
+    </ol>
 
     {posts.length === 0 && (
       <div class="text-center py-20">
@@ -62,6 +66,7 @@ const categories = [...new Set(posts.map(post => post.data.category))];
 </BaseLayout>
 
 <script is:inline data-astro-rerun>
+  // 分类索引
   const filterButtons = document.querySelectorAll('.category-filter');
   const postItems = document.querySelectorAll('.post-item');
 
@@ -69,21 +74,16 @@ const categories = [...new Set(posts.map(post => post.data.category))];
     button.addEventListener('click', () => {
       const category = button.getAttribute('data-category');
 
-      // Update button styles
       filterButtons.forEach(btn => {
-        btn.classList.remove('border-[var(--color-primary)]', 'text-[var(--color-primary)]');
-        btn.classList.add('border-[var(--color-border)]', 'text-[var(--color-muted-foreground)]');
+        btn.classList.remove('text-[var(--color-primary)]');
+        btn.classList.add('text-[var(--color-muted-foreground)]');
       });
-      button.classList.remove('border-[var(--color-border)]', 'text-[var(--color-muted-foreground)]');
-      button.classList.add('border-[var(--color-primary)]', 'text-[var(--color-primary)]');
+      button.classList.remove('text-[var(--color-muted-foreground)]');
+      button.classList.add('text-[var(--color-primary)]');
 
-      // Filter posts
       postItems.forEach(item => {
-        if (category === 'all' || item.getAttribute('data-category') === category) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
+        item.style.display =
+          category === 'all' || item.getAttribute('data-category') === category ? '' : 'none';
       });
     });
   });
