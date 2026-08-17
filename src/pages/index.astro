@@ -13,26 +13,23 @@ const recentPosts = allPosts
 
 <BaseLayout title="首页">
   <!-- Hero section -->
-  <section class="relative overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-br from-[var(--color-primary)]/5 via-transparent to-[var(--color-accent)]/5"></div>
-    <div class="absolute top-10 right-10 w-72 h-72 bg-[var(--color-primary)]/5 rounded-full blur-3xl"></div>
-    <div class="absolute bottom-10 left-10 w-56 h-56 bg-[var(--color-accent)]/5 rounded-full blur-3xl"></div>
-    <div class="relative max-w-5xl mx-auto px-6 py-24 md:py-40 text-center">
-      <p class="text-sm font-medium text-[var(--color-primary)] mb-6 tracking-widest uppercase">
+  <section class="relative">
+    <div class="max-w-5xl mx-auto px-6 py-28 md:py-40 text-center">
+      <p class="text-xs font-medium tracking-[0.28em] uppercase text-[var(--color-muted-foreground)] mb-8">
         Welcome to my space
       </p>
-      <h1 class="text-4xl md:text-6xl lg:text-7xl font-serif font-bold leading-tight mb-8 tracking-tight">
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-sans font-semibold leading-[1.15] tracking-tight mb-8">
         于此间记录点滴思考
         <br />
         <span class="text-[var(--color-primary)]">既为自省，亦为留痕</span>
       </h1>
-      <p class="text-lg md:text-xl text-[var(--color-muted-foreground)] leading-relaxed mb-12 max-w-2xl mx-auto">
+      <p class="text-lg md:text-xl text-[var(--color-muted-foreground)] leading-relaxed mb-14 max-w-2xl mx-auto">
         编程心得、项目经验，以及生活中那些值得记录的瞬间。
       </p>
       <div class="flex flex-wrap justify-center gap-4">
         <a
           href="/posts"
-          class="inline-flex items-center px-8 py-3.5 bg-[var(--color-primary)] text-white rounded-xl font-medium text-sm hover:bg-[var(--color-primary-dark)] transition-colors shadow-lg shadow-[var(--color-primary)]/20"
+          class="inline-flex items-center px-7 py-3 bg-[var(--color-foreground)] text-[var(--color-background)] rounded-md font-medium text-sm hover:bg-[var(--color-primary)] transition-colors"
         >
           阅读文章
           <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -41,37 +38,35 @@ const recentPosts = allPosts
         </a>
         <a
           href="/gallery"
-          class="inline-flex items-center px-8 py-3.5 border border-[var(--color-border)] rounded-xl font-medium text-sm text-[var(--color-foreground)] hover:bg-[var(--color-muted)] transition-colors"
+          class="inline-flex items-center px-7 py-3 border border-[var(--color-border)] rounded-md font-medium text-sm text-[var(--color-foreground)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors"
         >
           浏览相册
         </a>
       </div>
-      <div class="mt-16 flex items-center justify-center gap-4">
-        <div class="h-px flex-1 max-w-[80px] bg-gradient-to-r from-transparent to-[var(--color-border)]"></div>
-        <svg class="w-4 h-4 text-[var(--color-muted-foreground)] opacity-40" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-        </svg>
-        <div class="h-px flex-1 max-w-[80px] bg-gradient-to-l from-transparent to-[var(--color-border)]"></div>
+      <div class="mt-16 flex justify-center">
+        <div class="w-12 h-[2px] bg-[var(--color-primary)]" aria-hidden="true"></div>
       </div>
     </div>
   </section>
 
   <!-- Timeline section -->
-  <section class="max-w-5xl mx-auto px-6 pb-20">
+  <section class="max-w-5xl mx-auto px-6 pb-24">
     <div class="text-center mb-16">
-      <h2 class="text-3xl md:text-4xl font-serif font-bold mb-4">时间轴</h2>
+      <h2 class="text-3xl md:text-4xl font-sans font-semibold tracking-tight mb-4">时间轴</h2>
       <p class="text-[var(--color-muted-foreground)] max-w-xl mx-auto">
         记录生活中的重要时刻，留住那些值得回忆的瞬间
       </p>
     </div>
-    <Timeline events={timelineEvents} />
+    <div class="max-w-3xl mx-auto">
+      <Timeline events={timelineEvents} />
+    </div>
   </section>
 
   <!-- Recent posts preview -->
-  <section class="max-w-5xl mx-auto px-6 pb-20">
+  <section class="max-w-5xl mx-auto px-6 pb-24">
     <div class="flex items-center justify-between mb-10">
-      <h2 class="text-2xl font-serif font-bold">最新文章</h2>
-      <a href="/posts" class="text-sm text-[var(--color-primary)] hover:underline">
+      <h2 class="text-2xl font-sans font-semibold tracking-tight">最新文章</h2>
+      <a href="/posts" class="text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-colors">
         查看全部 &rarr;
       </a>
     </div>
