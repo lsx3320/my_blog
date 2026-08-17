@@ -75,7 +75,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <div transition:persist="music-player">
       <MusicPlayer />
     </div>
-    <script data-astro-rerun>
+    <script is:inline data-astro-rerun>
       // This script re-runs on every View Transition navigation (data-astro-rerun),
       // because the body (including the progress bar element) is swapped on
       // navigation. Guards below keep listeners from being registered twice.

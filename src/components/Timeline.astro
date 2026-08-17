@@ -1,11 +1,5 @@
 ---
-interface TimelineEvent {
-  date: string;
-  title: string;
-  description: string;
-  icon?: string;
-  category?: string;
-}
+import type { TimelineEvent } from '../data/timeline';
 
 interface Props {
   events: TimelineEvent[];

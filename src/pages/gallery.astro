@@ -97,7 +97,7 @@ const categories = ['全部', ...new Set(photos.map(p => p.category))];
   </div>
 </BaseLayout>
 
-<script data-astro-rerun>
+<script is:inline data-astro-rerun>
   const filterButtons = document.querySelectorAll('.gallery-filter');
   const photoItems = document.querySelectorAll('.photo-item');
 
@@ -126,7 +126,7 @@ const categories = ['全部', ...new Set(photos.map(p => p.category))];
 
   // Lightbox
   const lightbox = document.getElementById('lightbox');
-  const lightboxImg = document.getElementById('lightbox-img') as HTMLImageElement;
+  const lightboxImg = document.getElementById('lightbox-img');
   const lightboxTitle = document.getElementById('lightbox-title');
   const lightboxClose = document.getElementById('lightbox-close');
 

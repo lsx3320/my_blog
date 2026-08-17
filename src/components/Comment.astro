@@ -17,7 +17,7 @@ const envId = import.meta.env.PUBLIC_TWIKOO_ENV_ID;
   </div>
 )}
 
-<script define:vars={{ envId, path }} data-astro-rerun>
+<script is:inline define:vars={{ envId, path }} data-astro-rerun>
   // Load Twikoo. Re-runs on every View Transition navigation (data-astro-rerun)
   // because the comment container is freshly created on each navigation.
   if (!envId) return;

@@ -53,7 +53,8 @@
 
   // Singleton: reuse existing AudioContext if already created
   if (!window.__bgm_ctx) {
-    window.__bgm_ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    window.__bgm_ctx = new AudioCtx();
     window.__bgm_gain = window.__bgm_ctx.createGain();
     window.__bgm_gain.gain.value = 0;
     window.__bgm_gain.connect(window.__bgm_ctx.destination);
@@ -71,21 +72,21 @@
 
   // Getters/setters for shared state
   function getSource() { return window.__bgm_source; }
-  function setSource(v) { window.__bgm_source = v; }
+  function setSource(v: AudioBufferSourceNode | null) { window.__bgm_source = v; }
   function getBuffer() { return window.__bgm_buffer; }
-  function setBuffer(v) { window.__bgm_buffer = v; }
+  function setBuffer(v: AudioBuffer) { window.__bgm_buffer = v; }
   function getStartedAt() { return window.__bgm_startedAt; }
-  function setStartedAt(v) { window.__bgm_startedAt = v; }
+  function setStartedAt(v: number) { window.__bgm_startedAt = v; }
   function getPausedAt() { return window.__bgm_pausedAt; }
-  function setPausedAt(v) { window.__bgm_pausedAt = v; }
+  function setPausedAt(v: number) { window.__bgm_pausedAt = v; }
   function getIsPlaying() { return window.__bgm_isPlaying; }
-  function setIsPlaying(v) { window.__bgm_isPlaying = v; }
+  function setIsPlaying(v: boolean) { window.__bgm_isPlaying = v; }
 
-  const toggle = document.getElementById('music-toggle');
-  const iconPlay = document.getElementById('icon-play');
-  const iconPause = document.getElementById('icon-pause');
+  const toggle = document.getElementById('music-toggle')!;
+  const iconPlay = document.getElementById('icon-play')!;
+  const iconPause = document.getElementById('icon-pause')!;
 
-  function setUI(playing) {
+  function setUI(playing: boolean) {
     setIsPlaying(playing);
     toggle.classList.toggle('music-playing', playing);
     toggle.classList.toggle('music-paused', !playing);
@@ -93,7 +94,7 @@
     iconPause.classList.toggle('hidden', !playing);
   }
 
-  function play(options = {}) {
+  function play(options: { muted?: boolean } = {}) {
     const buffer = getBuffer();
     if (!buffer) return;
     if (ctx.state === 'suspended') ctx.resume();
@@ -194,8 +195,10 @@
   }
 
   // Re-bind toggle on each View Transition (DOM is persisted but listeners may need refresh)
-  if (!toggle.__bgm_bound) {
-    toggle.__bgm_bound = true;
+  // Processed script runs once per page load; module flag prevents double-binding.
+  let toggleBound = false;
+  if (!toggleBound) {
+    toggleBound = true;
     toggle.addEventListener('click', () => {
       if (getIsPlaying()) {
         window.__bgm_userPaused = true;

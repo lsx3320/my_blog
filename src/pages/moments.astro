@@ -108,12 +108,12 @@ const userName = '后生仔';
   </button>
 </div>
 
-<script data-astro-rerun>
+<script is:inline data-astro-rerun>
   const lightbox = document.getElementById('lightbox');
-  const lightboxImg = document.getElementById('lightbox-img') as HTMLImageElement;
+  const lightboxImg = document.getElementById('lightbox-img');
   const lightboxClose = document.getElementById('lightbox-close');
 
-  function openLightbox(src: string) {
+  function openLightbox(src) {
     lightboxImg.src = src;
     lightbox?.classList.remove('opacity-0', 'pointer-events-none');
     lightboxImg.classList.remove('scale-90');
@@ -129,7 +129,7 @@ const userName = '后生仔';
   }
 
   document.querySelectorAll('.moment-img').forEach(img => {
-    img.addEventListener('click', () => openLightbox((img as HTMLImageElement).src));
+    img.addEventListener('click', () => openLightbox(img.src));
   });
 
   lightbox?.addEventListener('click', (e) => {

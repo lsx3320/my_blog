@@ -4,6 +4,7 @@ export interface TimelineEvent {
   description: string;
   icon?: string;
   category?: string;
+  image?: string;
 }
 
 export const timelineEvents: TimelineEvent[] = [
