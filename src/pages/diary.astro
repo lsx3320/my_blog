@@ -42,7 +42,10 @@ for (const d of allDiaries) {
 
       <!-- 密码门：登录面板 -->
       <div id="diary-gate" class="flex items-center justify-center py-20">
-        <div id="diary-login-panel" class="w-full max-w-sm bg-[#fffdf3] rounded-2xl shadow-[0_8px_22px_rgba(194,59,34,0.12)] border border-[#efe6c8] p-8 text-center">
+        <form
+          id="diary-gate-form"
+          class="w-full max-w-sm bg-[#fffdf3] rounded-2xl shadow-[0_8px_22px_rgba(194,59,34,0.12)] border border-[#efe6c8] p-8 text-center"
+        >
           <div class="w-14 h-14 mx-auto mb-5 rounded-full bg-[#3a3526] flex items-center justify-center">
             <svg class="w-6 h-6 text-[#f5efe0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -59,12 +62,13 @@ for (const d of allDiaries) {
           />
           <button
             id="diary-unlock"
+            type="submit"
             class="mt-5 w-full py-2.5 rounded-xl bg-[#c23b22] text-white text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all"
           >
             进入
           </button>
           <p id="diary-error" class="hidden mt-4 text-xs text-[#d64545] font-sans">答案不对，再想想～</p>
-        </div>
+        </form>
       </div>
 
       <!-- 日记内容（解锁后显示） -->
@@ -174,9 +178,8 @@ for (const d of allDiaries) {
   const gate = document.getElementById('diary-gate');
   const content = document.getElementById('diary-content');
   const input = document.getElementById('diary-answer');
-  const btn = document.getElementById('diary-unlock');
   const err = document.getElementById('diary-error');
-  const panel = document.getElementById('diary-login-panel');
+  const form = document.getElementById('diary-gate-form');
 
   function unlock() {
     if (gate && content) {
@@ -188,38 +191,50 @@ for (const d of allDiaries) {
     }
   }
 
+  function tryUnlock() {
+    if (input && input.value.trim() === ANSWER) {
+      err?.classList.add('hidden');
+      unlock();
+      return true;
+    }
+    return false;
+  }
+
   if (sessionStorage.getItem('diary_unlocked') === '1') {
     unlock();
   }
 
-  // 答错：面板 shake
-  function shake() {
-    if (!panel) return;
-    panel.classList.remove('login-shake');
-    void panel.offsetWidth;
-    panel.classList.add('login-shake');
-    panel.addEventListener('animationend', () => panel.classList.remove('login-shake'), { once: true });
-  }
-
-  btn?.addEventListener('click', () => {
-    if (input && input.value.trim() === ANSWER) {
-      err?.classList.add('hidden');
-      unlock();
-    } else {
+  // 原生表单提交：回车与「进入」按钮都会走这里（最可靠）
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!tryUnlock()) {
       err?.classList.remove('hidden');
       shake();
       input?.focus();
     }
   });
 
+  // 输入法组词中的回车：阻止触发表单提交（避免选字瞬间误判）
   input?.addEventListener('keydown', (e) => {
-    if (e.isComposing || e.keyCode === 229) return;
-    if (e.key === 'Enter') btn?.click();
+    if (e.isComposing || e.keyCode === 229) {
+      e.preventDefault();
+    }
   });
 
+  // 拼音选字上屏后若答案正确，自动进入
   input?.addEventListener('compositionend', () => {
-    if (input.value.trim() === ANSWER) btn?.click();
+    if (tryUnlock()) return;
   });
+
+  // 答错：面板 shake
+  function shake() {
+    const panel = form;
+    if (!panel) return;
+    panel.classList.remove('login-shake');
+    void panel.offsetWidth;
+    panel.classList.add('login-shake');
+    panel.addEventListener('animationend', () => panel.classList.remove('login-shake'), { once: true });
+  }
 
   // 日期
   const now = new Date();
