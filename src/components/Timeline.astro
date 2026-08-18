@@ -7,11 +7,11 @@ interface Props {
 
 const { events } = Astro.props;
 
-// 按年份分组（保留数据顺序，无年份的归入「附录」）
+// 按年份分组（保留数据顺序，无年份的归入「其他」）
 const groups: { year: string; events: TimelineEvent[] }[] = [];
 for (const event of events) {
   const m = event.date.match(/(\d{4})/);
-  const year = m ? m[1] : '附录';
+  const year = m ? m[1] : '其他';
   const last = groups[groups.length - 1];
   if (last && last.year === year) {
     last.events.push(event);
@@ -30,7 +30,6 @@ for (const event of events) {
           {group.year}
         </h3>
         <div class="h-px flex-1 bg-[var(--color-border)]" aria-hidden="true"></div>
-        <span class="tag text-[var(--color-muted-foreground)]">{String(group.events.length).padStart(2, '0')} 条</span>
       </div>
 
       <div class="space-y-9">

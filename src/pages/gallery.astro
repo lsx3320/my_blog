@@ -21,31 +21,29 @@ const photos = [
 
 // 画册章节（保留原顺序）
 const chapterOrder = ['人物', '合影', '回忆'];
-const chapterNames: Record<string, string> = { 人物: '壹', 合影: '贰', 回忆: '叁' };
 const chapters = chapterOrder
-  .map(cat => ({ cat, name: chapterNames[cat], items: photos.filter(p => p.category === cat) }))
+  .map(cat => ({ cat, items: photos.filter(p => p.category === cat) }))
   .filter(ch => ch.items.length > 0);
 ---
 
 <BaseLayout title="画册">
   <section class="max-w-6xl mx-auto px-6 py-16 md:py-20">
     <div class="flex items-baseline justify-between mb-3">
-      <h1 class="font-display font-bold text-4xl md:text-5xl tracking-tight">画 册</h1>
-      <p class="tag text-[var(--color-muted-foreground)]">相片集 · 贰零贰陆</p>
+      <h1 class="font-display font-bold text-4xl md:text-5xl tracking-tight">相册</h1>
+      <p class="tag text-[var(--color-muted-foreground)]">用镜头记录美好的瞬间</p>
     </div>
     <p class="text-[var(--color-muted-foreground)] font-serif mb-14">
-      用镜头记录生活中美好的瞬间。
+      一些照片，和一些记得住的日子。
     </p>
 
-    <!-- 分节画册 -->
+    <!-- 分节相册 -->
     <div class="space-y-20">
       {chapters.map(chapter => (
         <section>
           <div class="flex items-center gap-4 mb-8">
-            <span class="font-display font-bold text-[var(--color-primary)] text-2xl">{chapter.name}</span>
             <h2 class="font-display font-bold text-2xl tracking-tight">{chapter.cat}</h2>
             <div class="h-px flex-1 bg-[var(--color-border)]"></div>
-            <span class="tag text-[var(--color-muted-foreground)]">{String(chapter.items.length).padStart(2, '0')} 帧</span>
+            <span class="tag text-[var(--color-muted-foreground)]">{chapter.items.length} 张</span>
           </div>
 
           <div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4" id="photo-grid">

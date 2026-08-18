@@ -24,7 +24,7 @@ const recentPosts = allPosts
         </p>
         <div class="mt-10 flex items-center gap-4">
           <div class="h-px flex-1 bg-[var(--color-border)]"></div>
-          <span class="tag text-[var(--color-muted-foreground)]">第壹卷 · 贰零贰陆 · 技术与生活的纸上笔记</span>
+          <span class="tag text-[var(--color-muted-foreground)]">2026 · 记录技术探索与生活感悟</span>
           <div class="h-px flex-1 bg-[var(--color-border)]"></div>
         </div>
         <!-- 竖排点缀 -->
@@ -58,7 +58,7 @@ const recentPosts = allPosts
 
         <!-- 本期要目 -->
         <aside class="md:col-span-2">
-          <h2 class="tag text-[var(--color-primary)] mb-4">本期要目</h2>
+          <h2 class="tag text-[var(--color-primary)] mb-4">最新文章</h2>
           <ol class="border-t border-[var(--color-border)]">
             {recentPosts.map((post, i) => (
               <li class="border-b border-[var(--color-border)] py-4 group reveal" style={`transition-delay: ${i * 60}ms`}>
@@ -81,18 +81,18 @@ const recentPosts = allPosts
             ))}
           </ol>
           <a href="/posts" class="mt-5 inline-block font-sans text-xs text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-colors">
-            全部篇目 &rarr;
+            全部文章 &rarr;
           </a>
         </aside>
       </div>
     </div>
   </section>
 
-  <!-- 编年史 -->
+  <!-- 时间轴 -->
   <section class="max-w-6xl mx-auto px-6 py-20">
     <div class="flex items-baseline justify-between mb-12">
-      <h2 class="font-display font-bold text-3xl md:text-4xl tracking-tight">编年史</h2>
-      <p class="font-sans text-xs text-[var(--color-muted-foreground)]">二〇二一 — 二〇二六 · 摘录</p>
+      <h2 class="font-display font-bold text-3xl md:text-4xl tracking-tight">时间轴</h2>
+      <p class="font-sans text-xs text-[var(--color-muted-foreground)]">2021 — 2026 · 摘录</p>
     </div>
     <div class="max-w-3xl">
       <Timeline events={timelineEvents} />

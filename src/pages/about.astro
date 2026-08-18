@@ -1,18 +1,18 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 
-// 本刊档案
+// 日常数据
 const stats = [
-  { label: '编年', value: '005', note: '年' },
-  { label: '篇目', value: '010', note: '篇' },
-  { label: '相片', value: '045', note: '帧' },
-  { label: '旅行', value: '012', note: '座' },
+  { label: '代码提交', value: '2,847', suffix: '+' },
+  { label: '咖啡续命', value: '1,024', suffix: '杯' },
+  { label: '深夜Debug', value: '365', suffix: '夜' },
+  { label: '旅行城市', value: '12', suffix: '座' },
 ];
 
 const socialLinks = [
   { name: 'GitHub', url: 'https://github.com/lsx3320', icon: 'github' },
   { name: '微信', url: '#wechat', icon: 'wechat' },
-  { name: '来信', url: '#copy-email', icon: 'email' },
+  { name: '邮箱', url: '#copy-email', icon: 'email' },
 ];
 ---
 
@@ -21,8 +21,8 @@ const socialLinks = [
     <!-- 编者按 -->
     <div class="mb-16">
       <div class="flex items-baseline justify-between mb-3">
-        <h1 class="font-display font-bold text-4xl md:text-5xl tracking-tight">编者按</h1>
-        <p class="tag text-[var(--color-muted-foreground)]">关于本刊</p>
+        <h1 class="font-display font-bold text-4xl md:text-5xl tracking-tight">关于我</h1>
+        <p class="tag text-[var(--color-muted-foreground)]">你好，我是后生仔</p>
       </div>
       <div class="h-px bg-[var(--color-border)] mb-10"></div>
 
@@ -42,28 +42,28 @@ const socialLinks = [
       </div>
     </div>
 
-    <!-- 本刊档案 -->
+    <!-- 日常数据 -->
     <div class="mb-16">
       <div class="flex items-center gap-4 mb-8">
-        <h2 class="font-display font-bold text-2xl tracking-tight">本刊档案</h2>
+        <h2 class="font-display font-bold text-2xl tracking-tight">日常数据</h2>
         <div class="h-px flex-1 bg-[var(--color-border)]"></div>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 border-t border-l border-[var(--color-border)]">
         {stats.map(stat => (
           <div class="border-b border-r border-[var(--color-border)] p-6 text-center group hover:bg-[var(--color-muted)]/60 transition-colors">
             <div class="font-display font-bold text-3xl text-[var(--color-primary)] tabular-nums mb-1">
-              {stat.value}
+              {stat.value}<span class="text-base text-[var(--color-muted-foreground)]">{stat.suffix}</span>
             </div>
-            <div class="tag text-[var(--color-muted-foreground)]">{stat.label} · {stat.note}</div>
+            <div class="tag text-[var(--color-muted-foreground)]">{stat.label}</div>
           </div>
         ))}
       </div>
     </div>
 
-    <!-- 往来 -->
+    <!-- 联系方式 -->
     <div>
       <div class="flex items-center gap-4 mb-8">
-        <h2 class="font-display font-bold text-2xl tracking-tight">往来</h2>
+        <h2 class="font-display font-bold text-2xl tracking-tight">联系方式</h2>
         <div class="h-px flex-1 bg-[var(--color-border)]"></div>
       </div>
       <div class="flex flex-wrap gap-x-8 gap-y-4">
