@@ -46,18 +46,18 @@ const chapters = chapterOrder
             <span class="tag text-[var(--color-muted-foreground)]">{chapter.items.length} 张</span>
           </div>
 
-          <div class="grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-4" id="photo-grid">
-            {chapter.items.map((photo, i) => (
+          <div class="columns-1 sm:columns-2 md:columns-3 gap-4 space-y-4" id="photo-grid">
+            {chapter.items.map(photo => (
               <div
-                class="photo-item group cursor-pointer"
+                class="photo-item break-inside-avoid group cursor-pointer"
                 data-src={photo.src}
                 data-title={photo.title}
               >
-                <div class="relative overflow-hidden border border-[var(--color-border)] bg-[var(--color-muted)] aspect-[3/2]">
+                <div class="relative overflow-hidden border border-[var(--color-border)] bg-[var(--color-muted)]">
                   <img
                     src={photo.src}
                     alt={photo.title}
-                    class="w-full h-full object-cover group-hover:opacity-80 transition-opacity duration-300"
+                    class="w-full h-auto object-cover group-hover:opacity-80 transition-opacity duration-300"
                     loading="lazy"
                     decoding="async"
                   />
