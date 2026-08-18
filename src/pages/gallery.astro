@@ -19,7 +19,7 @@ const photos = [
   { id: 12, title: '故宫', category: '回忆', src: '/gallery/故宫.webp' },
 ];
 
-// 画册章节（保留原顺序）
+// 相册章节（保留原顺序）
 const chapterOrder = ['人物', '合影', '回忆'];
 const chapters = chapterOrder
   .map(cat => ({ cat, items: photos.filter(p => p.category === cat) }))

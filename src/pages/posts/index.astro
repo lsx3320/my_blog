@@ -35,7 +35,7 @@ const fmtDate = (d: Date) =>
       ))}
     </div>
 
-    <!-- 篇目索引 -->
+    <!-- 文章索引 -->
     <ol class="border-t border-[var(--color-border)]">
       {posts.map((post, i) => (
         <li class="post-item border-b border-[var(--color-border)] reveal" style={`transition-delay: ${Math.min(i, 8) * 40}ms`} data-category={post.data.category}>
