@@ -161,6 +161,7 @@ const allDiaries = (await getCollection('diaries')).sort(
   }
 
   btn?.addEventListener('click', () => {
+    // 输入法组词中（composition）不判断，避免拼音选字瞬间误判
     if (input && input.value.trim() === ANSWER) {
       err?.classList.add('hidden');
       unlock();
@@ -170,8 +171,15 @@ const allDiaries = (await getCollection('diaries')).sort(
     }
   });
 
+  // 回车进入：跳过输入法组词中的 Enter（e.isComposing / keyCode 229）
   input?.addEventListener('keydown', (e) => {
+    if (e.isComposing || e.keyCode === 229) return;
     if (e.key === 'Enter') btn?.click();
+  });
+
+  // 组词结束（拼音选字上屏）后再按回车也能进入
+  input?.addEventListener('compositionend', () => {
+    if (input.value.trim() === ANSWER) btn?.click();
   });
 
   // 工具条：今日日期
