@@ -53,11 +53,11 @@ const chapters = chapterOrder
                 data-src={photo.src}
                 data-title={photo.title}
               >
-                <div class="relative overflow-hidden border border-[var(--color-border)] bg-[var(--color-muted)]">
+                <div class="relative overflow-hidden border border-[var(--color-border)] bg-[var(--color-muted)] aspect-[3/2]">
                   <img
                     src={photo.src}
                     alt={photo.title}
-                    class="w-full h-auto object-cover group-hover:opacity-80 transition-opacity duration-300"
+                    class="w-full h-full object-cover group-hover:opacity-80 transition-opacity duration-300"
                     loading="lazy"
                     decoding="async"
                   />
