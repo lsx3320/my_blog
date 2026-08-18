@@ -9,45 +9,114 @@ const allDiaries = (await getCollection('diaries')).sort(
 
 <BaseLayout title="日记">
   <!-- Apple Notes 纸面 -->
-  <div class="bg-[#fef9e3] border-b border-[#e8dfc0]">
+  <div class="bg-[#fef9e3] border-b border-[#e8dfc0] min-h-[80vh]">
     <div class="max-w-3xl mx-auto px-6 py-14">
-      <div class="flex items-baseline justify-between mb-10">
-        <h1 class="font-sans font-bold text-3xl tracking-tight text-[#3a3526]">日记</h1>
-        <p class="font-sans text-xs text-[#8a8270]">{allDiaries.length} 篇</p>
+
+      <!-- 密码门 -->
+      <div id="diary-gate" class="flex items-center justify-center py-20">
+        <div class="w-full max-w-sm bg-white rounded-2xl shadow-lg p-8 text-center">
+          <div class="w-14 h-14 mx-auto mb-5 rounded-full bg-[#f5e6c8] flex items-center justify-center">
+            <svg class="w-6 h-6 text-[#b08a3e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h2 class="font-sans font-semibold text-lg text-[#3a3526] mb-1">私人日记</h2>
+          <p class="font-sans text-sm text-[#8a8270] mb-6">进入前请回答：我现在在哪里？</p>
+          <input
+            id="diary-answer"
+            type="text"
+            placeholder="输入答案"
+            autocomplete="off"
+            class="w-full px-4 py-2.5 rounded-lg border border-[#e0d7b8] bg-[#fdfaf0] text-[#3a3526] text-sm focus:outline-none focus:ring-2 focus:ring-[#007aff]/30 focus:border-[#007aff] mb-3"
+          />
+          <button
+            id="diary-unlock"
+            class="w-full py-2.5 rounded-lg bg-[#007aff] text-white text-sm font-medium hover:bg-[#0066d6] transition-colors"
+          >
+            进入
+          </button>
+          <p id="diary-error" class="hidden mt-3 text-xs text-[#d64545]">答案不对，再想想～</p>
+        </div>
       </div>
 
-      <!-- 历史日记 -->
-      <div class="space-y-4">
-        {allDiaries.map(async (d) => {
-          const { Content } = await render(d);
-          const formattedDate = d.data.date.toLocaleDateString('zh-CN', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            weekday: 'long',
-          });
-          return (
-            <article class="bg-white rounded-xl shadow-sm p-6">
-              <div class="flex items-baseline justify-between gap-4 mb-2">
-                <h2 class="font-sans font-semibold text-[#3a3526] truncate">
-                  {d.data.title || formattedDate}
-                </h2>
-                <time class="font-sans text-xs text-[#8a8270] shrink-0">{formattedDate}</time>
-              </div>
-              {d.data.mood && (
-                <p class="font-sans text-xs text-[#b08a3e] mb-2">{d.data.mood}</p>
-              )}
-              <div class="text-[15px] text-[#5a5340] leading-relaxed line-clamp-5">
-                <Content />
-              </div>
-            </article>
-          );
-        })}
+      <!-- 日记内容（解锁后显示） -->
+      <div id="diary-content" class="hidden">
+        <div class="flex items-baseline justify-between mb-10">
+          <h1 class="font-sans font-bold text-3xl tracking-tight text-[#3a3526]">日记</h1>
+          <p class="font-sans text-xs text-[#8a8270]">{allDiaries.length} 篇</p>
+        </div>
 
-        {allDiaries.length === 0 && (
-          <div class="text-center py-20 text-[#8a8270] font-sans">还没有日记，写第一篇吧。</div>
-        )}
+        <!-- 历史日记 -->
+        <div class="space-y-4">
+          {allDiaries.map(async (d) => {
+            const { Content } = await render(d);
+            const formattedDate = d.data.date.toLocaleDateString('zh-CN', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              weekday: 'long',
+            });
+            return (
+              <article class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-baseline justify-between gap-4 mb-2">
+                  <h2 class="font-sans font-semibold text-[#3a3526] truncate">
+                    {d.data.title || formattedDate}
+                  </h2>
+                  <time class="font-sans text-xs text-[#8a8270] shrink-0">{formattedDate}</time>
+                </div>
+                {d.data.mood && (
+                  <p class="font-sans text-xs text-[#b08a3e] mb-2">{d.data.mood}</p>
+                )}
+                <div class="text-[15px] text-[#5a5340] leading-relaxed line-clamp-5">
+                  <Content />
+                </div>
+              </article>
+            );
+          })}
+
+          {allDiaries.length === 0 && (
+            <div class="text-center py-16 text-[#8a8270] font-sans">还没有日记，写第一篇吧。</div>
+          )}
+        </div>
       </div>
+
     </div>
   </div>
 </BaseLayout>
+
+<script is:inline data-astro-rerun>
+  // 密码门：我现在在哪里？→ 武汉
+  const ANSWER = '武汉';
+  const gate = document.getElementById('diary-gate');
+  const content = document.getElementById('diary-content');
+  const input = document.getElementById('diary-answer');
+  const btn = document.getElementById('diary-unlock');
+  const err = document.getElementById('diary-error');
+
+  function unlock() {
+    if (gate && content) {
+      gate.classList.add('hidden');
+      content.classList.remove('hidden');
+      sessionStorage.setItem('diary_unlocked', '1');
+    }
+  }
+
+  // 本会话已通过则直接进入
+  if (sessionStorage.getItem('diary_unlocked') === '1') {
+    unlock();
+  }
+
+  btn?.addEventListener('click', () => {
+    if (input && input.value.trim() === ANSWER) {
+      err?.classList.add('hidden');
+      unlock();
+    } else {
+      err?.classList.remove('hidden');
+      input?.focus();
+    }
+  });
+
+  input?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') btn?.click();
+  });
+</script>
