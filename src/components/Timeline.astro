@@ -39,12 +39,12 @@ for (const event of events) {
               {event.category && (
                 <span class="text-[var(--color-primary)] font-medium tracking-wide">{event.category}</span>
               )}
-              {event.date && <span class="text-[var(--color-muted-foreground)]">{event.date}</span>}
+              {event.date && <span class="text-[var(--color-foreground)] opacity-70">{event.date}</span>}
             </div>
             <h4 class="font-display font-semibold text-lg leading-snug mb-2 group-hover:text-[var(--color-primary)] transition-colors">
               {event.title}
             </h4>
-            <div class="text-sm text-[var(--color-muted-foreground)] leading-relaxed space-y-1.5">
+            <div class="text-[15px] text-[var(--color-foreground)] leading-relaxed space-y-1.5">
               {event.description.split('\n').map(line => (
                 line.trim() && <p>{line.trim()}</p>
               ))}
