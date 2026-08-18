@@ -9,117 +9,126 @@ const allDiaries = (await getCollection('diaries')).sort(
 
 <BaseLayout title="日记">
   <!-- Apple Notes 纸面 -->
-  <div class="bg-[#fef9e3] border-b border-[#e8dfc0] min-h-[80vh]">
-    <div class="max-w-3xl mx-auto px-6 py-14">
+  <div class="bg-[#fdf6e3] border-b border-[#e8dfc0] min-h-[80vh]">
+
+    <!-- 工具条 -->
+    <div class="border-b border-[#e8dfc0] bg-[#f6edd0]">
+      <div class="max-w-3xl mx-auto px-6 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-[#8a8270]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span class="font-sans text-sm text-[#5a5340]">日记</span>
+        </div>
+        <span id="diary-today" class="font-sans text-xs text-[#8a8270]"></span>
+      </div>
+    </div>
+
+    <div class="max-w-3xl mx-auto px-6 py-12">
 
       <!-- 密码门 -->
-      <div id="diary-gate" class="flex items-center justify-center py-20">
-        <div class="w-full max-w-sm bg-white rounded-2xl shadow-lg p-8 text-center">
-          <div class="w-14 h-14 mx-auto mb-5 rounded-full bg-[#f5e6c8] flex items-center justify-center">
-            <svg class="w-6 h-6 text-[#b08a3e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-          </div>
-          <h2 class="font-sans font-semibold text-lg text-[#3a3526] mb-1">私人日记</h2>
-          <p class="font-sans text-sm text-[#8a8270] mb-6">进入前请回答：我现在在哪里？</p>
-          <input
-            id="diary-answer"
-            type="text"
-            placeholder="输入答案"
-            autocomplete="off"
-            class="w-full px-4 py-2.5 rounded-lg border border-[#e0d7b8] bg-[#fdfaf0] text-[#3a3526] text-sm focus:outline-none focus:ring-2 focus:ring-[#007aff]/30 focus:border-[#007aff] mb-3"
-          />
-          <button
-            id="diary-unlock"
-            class="w-full py-2.5 rounded-lg bg-[#007aff] text-white text-sm font-medium hover:bg-[#0066d6] transition-colors"
-          >
-            进入
-          </button>
-          <p id="diary-error" class="hidden mt-3 text-xs text-[#d64545]">答案不对，再想想～</p>
-        </div>
+      <div id="diary-gate" class="flex flex-col items-center justify-center py-24 text-center">
+        <svg class="w-8 h-8 text-[#8a8270] mb-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+        <p class="font-sans text-base text-[#3a3526] mb-8">我现在在哪里？</p>
+        <input
+          id="diary-answer"
+          type="text"
+          placeholder="输入答案"
+          autocomplete="off"
+          class="w-64 bg-transparent border-b border-[#c9bf9d] py-2 text-center text-[#3a3526] font-sans text-base focus:outline-none focus:border-[#c23b22] placeholder:text-[#b5ab8c]"
+        />
+        <button
+          id="diary-unlock"
+          class="mt-8 px-8 py-2 rounded-md bg-[#3a3526] text-[#fdf6e3] text-sm font-medium hover:bg-[#c23b22] transition-colors"
+        >
+          进入
+        </button>
+        <p id="diary-error" class="hidden mt-4 text-xs text-[#d64545] font-sans">答案不对，再想想～</p>
       </div>
 
       <!-- 日记内容（解锁后显示） -->
       <div id="diary-content" class="hidden">
-        <div class="flex items-baseline justify-between mb-8">
-          <h1 class="font-sans font-bold text-3xl tracking-tight text-[#3a3526]">日记</h1>
-          <p class="font-sans text-xs text-[#8a8270]">{allDiaries.length} 篇</p>
-        </div>
 
-        <!-- 新建笔记 -->
-        <div class="bg-white rounded-xl shadow-sm mb-10 overflow-hidden">
-          <div class="flex items-center justify-between px-6 py-3 border-b border-[#f0ead0]">
-            <span class="font-sans text-xs text-[#8a8270]" id="diary-today"></span>
-            <span class="font-sans text-xs text-[#b08a3e]">笔记</span>
-          </div>
-          <div class="p-6">
+        <!-- 书写区 -->
+        <div class="mb-12">
+          <div class="flex items-center gap-3 mb-6">
             <input
-              id="diary-title"
-              placeholder="标题（可选）"
-              class="w-full font-sans font-semibold text-xl text-[#3a3526] placeholder:text-[#c4baa0] focus:outline-none mb-4"
+              id="diary-mood"
+              placeholder="心情，如：平静"
+              class="w-36 bg-transparent border-b border-[#d8cfae] pb-1 font-sans text-sm text-[#5a5340] focus:outline-none focus:border-[#c23b22] placeholder:text-[#b5ab8c]"
             />
-            <div class="flex gap-3 mb-4">
-              <input
-                id="diary-mood"
-                placeholder="心情，如：平静"
-                class="w-1/2 font-sans text-sm text-[#5a5340] border border-[#e8dfc0] rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#007aff]"
-              />
-              <input
-                id="diary-weather"
-                placeholder="天气，如：晴"
-                class="w-1/2 font-sans text-sm text-[#5a5340] border border-[#e8dfc0] rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#007aff]"
-              />
-            </div>
-            <textarea
-              id="diary-body"
-              placeholder="写点什么……"
-              rows="7"
-              class="w-full font-sans text-[15px] text-[#3a3526] leading-relaxed resize-y focus:outline-none placeholder:text-[#c4baa0]"
-            ></textarea>
-          </div>
-          <div class="px-6 py-3 border-t border-[#f0ead0] flex items-center justify-between gap-4">
-            <span id="diary-status" class="font-sans text-xs text-[#8a8270]"></span>
+            <input
+              id="diary-weather"
+              placeholder="天气，如：晴"
+              class="w-36 bg-transparent border-b border-[#d8cfae] pb-1 font-sans text-sm text-[#5a5340] focus:outline-none focus:border-[#c23b22] placeholder:text-[#b5ab8c]"
+            />
+            <div class="flex-1"></div>
             <button
               id="diary-save"
-              class="shrink-0 px-5 py-2 rounded-lg bg-[#007aff] text-white text-sm font-medium hover:bg-[#0066d6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-6 py-1.5 rounded-md bg-[#3a3526] text-[#fdf6e3] text-sm font-medium hover:bg-[#c23b22] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               保存
             </button>
           </div>
+
+          <input
+            id="diary-title"
+            placeholder="标题"
+            class="w-full bg-transparent font-sans font-semibold text-2xl text-[#3a3526] placeholder:text-[#c4baa0] focus:outline-none mb-5"
+          />
+          <textarea
+            id="diary-body"
+            placeholder="写点什么……"
+            rows="10"
+            class="w-full bg-transparent resize-y font-sans text-[16px] leading-loose text-[#3a3526] focus:outline-none placeholder:text-[#c4baa0]"
+          ></textarea>
+
+          <div class="mt-3 flex items-center justify-between">
+            <span id="diary-status" class="font-sans text-xs text-[#8a8270]"></span>
+          </div>
         </div>
 
         <!-- 历史日记 -->
-        <div class="space-y-4">
-          {allDiaries.map(async (d) => {
-            const { Content } = await render(d);
-            const formattedDate = d.data.date.toLocaleDateString('zh-CN', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              weekday: 'long',
-            });
-            return (
-              <article class="bg-white rounded-xl shadow-sm p-6">
-                <div class="flex items-baseline justify-between gap-4 mb-2">
-                  <h2 class="font-sans font-semibold text-[#3a3526] truncate">
-                    {d.data.title || formattedDate}
-                  </h2>
-                  <time class="font-sans text-xs text-[#8a8270] shrink-0">{formattedDate}</time>
-                </div>
-                {d.data.mood && (
-                  <p class="font-sans text-xs text-[#b08a3e] mb-2">{d.data.mood}</p>
-                )}
-                <div class="text-[15px] text-[#5a5340] leading-relaxed line-clamp-5">
-                  <Content />
-                </div>
-              </article>
-            );
-          })}
+        <div>
+          <div class="flex items-baseline justify-between mb-6">
+            <h2 class="font-sans font-semibold text-base text-[#5a5340]">过往</h2>
+            <p class="font-sans text-xs text-[#8a8270]">{allDiaries.length} 篇</p>
+          </div>
+          <div class="space-y-4">
+            {allDiaries.map(async (d) => {
+              const { Content } = await render(d);
+              const formattedDate = d.data.date.toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long',
+              });
+              return (
+                <article class="bg-[#fffdf3] rounded-lg shadow-sm p-5 border border-[#efe6c8]">
+                  <div class="flex items-baseline justify-between gap-4 mb-1.5">
+                    <h3 class="font-sans font-semibold text-[#3a3526] truncate">
+                      {d.data.title || formattedDate}
+                    </h3>
+                    <time class="font-sans text-xs text-[#8a8270] shrink-0">{formattedDate}</time>
+                  </div>
+                  {d.data.mood && (
+                    <p class="font-sans text-xs text-[#b08a3e] mb-1.5">{d.data.mood}</p>
+                  )}
+                  <div class="text-[15px] text-[#5a5340] leading-relaxed line-clamp-5">
+                    <Content />
+                  </div>
+                </article>
+              );
+            })}
 
-          {allDiaries.length === 0 && (
-            <div class="text-center py-16 text-[#8a8270] font-sans">还没有日记，写第一篇吧。</div>
-          )}
+            {allDiaries.length === 0 && (
+              <div class="text-center py-16 text-[#8a8270] font-sans">还没有日记，写第一篇吧。</div>
+            )}
+          </div>
         </div>
+
       </div>
 
     </div>
@@ -140,6 +149,9 @@ const allDiaries = (await getCollection('diaries')).sort(
       gate.classList.add('hidden');
       content.classList.remove('hidden');
       sessionStorage.setItem('diary_unlocked', '1');
+      // 解锁后直接聚焦正文，进入书写状态
+      const body = document.getElementById('diary-body');
+      if (body) body.focus();
     }
   }
 
@@ -162,10 +174,10 @@ const allDiaries = (await getCollection('diaries')).sort(
     if (e.key === 'Enter') btn?.click();
   });
 
-  // 编辑器：今日日期
+  // 工具条：今日日期
   const todayEl = document.getElementById('diary-today');
   if (todayEl) {
-    todayEl.textContent = '今天 · ' + new Date().toLocaleDateString('zh-CN', {
+    todayEl.textContent = new Date().toLocaleDateString('zh-CN', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
