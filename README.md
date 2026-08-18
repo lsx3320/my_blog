@@ -95,6 +95,18 @@ Cloudflare Pages（静态，无需 wrangler 配置）：
 | 变量 | 说明 |
 | :--- | :--- |
 | `PUBLIC_TWIKOO_ENV_ID` | Twikoo 评论后端地址。**未配置时评论区自动隐藏**，配置后启用（构建时注入，改后需重新部署） |
+| `GITHUB_TOKEN` | 日记功能专用。GitHub Personal Access Token（需 `repo` 权限，设为 **secret**），由 Pages Function `/api/diary` 用来把日记写入本仓库并触发自动重建。**只放在 Cloudflare 后台，绝不进前端** |
+| `GITHUB_REPO` | 可选，默认 `lsx3320/my_blog`（格式 `owner/repo`） |
+
+## 日记功能（/diary）
+
+- 访问 `/diary` 需先通过密码门（问题：**我现在在哪里？** 答案：**武汉**，客户端校验 + 会话记忆）
+- Apple Notes 风格编辑器：写标题 / 心情 / 天气 / 正文 → 保存
+- 保存流程：前端 POST → Pages Function `/api/diary` → 写入
+  `src/content/diaries/YYYY-MM-DD.md`（当天重复提交会更新当天那篇）→ push 到
+  main → Cloudflare Pages 自动重建部署 → 日记出现在历史列表
+- 注意：本地 `npm run dev` 不运行 Pages Functions，`/api/diary` 需部署后才生效
+- 密码答案在 `src/pages/diary.astro` 中（`ANSWER` 常量），属防君子级别，如需更严格可改为服务端校验
 
 ## 评论（Twikoo）
 
