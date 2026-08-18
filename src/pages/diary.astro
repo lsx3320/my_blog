@@ -6,7 +6,7 @@ const allDiaries = (await getCollection('diaries')).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
 );
 
-// 按月份分组（历史时间线）
+// 按月份分组（历史便签墙）
 const months: { label: string; items: typeof allDiaries }[] = [];
 for (const d of allDiaries) {
   const label = d.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' });
@@ -17,23 +17,20 @@ for (const d of allDiaries) {
 ---
 
 <BaseLayout title="日记">
-  <!-- 苹果备忘录纸面 -->
-  <div class="bg-[#fdf6e3] border-b border-[#e8dfc0] min-h-[80vh]">
+  <div class="bg-[#f5efe0] border-b border-[#e5ddc8] min-h-[80vh]">
 
-    <!-- 工具条（毛玻璃） -->
-    <div class="backdrop-blur-md bg-[#fdf6e3]/75 border-b border-[#e8dfc0]">
-      <div class="max-w-3xl mx-auto px-6 py-3 flex items-center justify-between">
+    <!-- 毛玻璃工具条 -->
+    <div class="sticky top-0 z-40 backdrop-blur-md bg-[#f5efe0]/75 border-b border-[#e5ddc8]">
+      <div class="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-          <svg class="w-4.5 h-4.5 text-[#8a8270]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <span class="font-sans font-semibold text-[#3a3526]">日记</span>
+          <span class="font-display font-semibold text-[#3a3526] tracking-tight">日记</span>
+          <span class="font-mono text-xs text-[#8a8270]">{String(allDiaries.length).padStart(2, '0')} 篇</span>
         </div>
         <div class="flex items-center gap-4">
-          <span id="diary-today" class="font-sans text-xs text-[#8a8270]"></span>
+          <span id="diary-today" class="hidden sm:inline font-mono text-xs text-[#8a8270]"></span>
           <button
             id="diary-save"
-            class="px-5 py-1.5 rounded-full bg-[#3a3526] text-[#fdf6e3] text-sm font-medium hover:bg-[#c23b22] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-5 py-1.5 rounded-full bg-[#c23b22] text-[#fffdf3] text-sm font-medium hover:opacity-90 active:scale-[0.97] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             保存
           </button>
@@ -41,123 +38,132 @@ for (const d of allDiaries) {
       </div>
     </div>
 
-    <div class="max-w-3xl mx-auto px-6 py-10">
+    <div class="max-w-5xl mx-auto px-6 py-10">
 
-      <!-- 密码门：极简锁定 -->
-      <div id="diary-gate" class="flex flex-col items-center py-28 text-center">
-        <div class="w-16 h-16 rounded-2xl bg-[#3a3526] flex items-center justify-center mb-7 shadow-sm">
-          <svg class="w-7 h-7 text-[#fdf6e3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
+      <!-- 密码门：登录面板 -->
+      <div id="diary-gate" class="flex items-center justify-center py-20">
+        <div id="diary-login-panel" class="w-full max-w-sm bg-[#fffdf3] rounded-2xl shadow-[0_8px_22px_rgba(194,59,34,0.12)] border border-[#efe6c8] p-8 text-center">
+          <div class="w-14 h-14 mx-auto mb-5 rounded-full bg-[#3a3526] flex items-center justify-center">
+            <svg class="w-6 h-6 text-[#f5efe0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h2 class="font-display font-semibold text-xl text-[#3a3526] mb-1">私人日记</h2>
+          <p class="font-sans text-sm text-[#8a8270] mb-7">回答：我现在在哪里？</p>
+          <input
+            id="diary-answer"
+            type="text"
+            placeholder="输入答案"
+            autocomplete="off"
+            class="w-full px-4 py-2.5 rounded-xl bg-[#f6edd0] border border-transparent text-[#3a3526] font-sans text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#c23b22]/40 placeholder:text-[#b5ab8c]"
+          />
+          <button
+            id="diary-unlock"
+            class="mt-5 w-full py-2.5 rounded-xl bg-[#c23b22] text-white text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all"
+          >
+            进入
+          </button>
+          <p id="diary-error" class="hidden mt-4 text-xs text-[#d64545] font-sans">答案不对，再想想～</p>
         </div>
-        <p class="font-sans text-lg text-[#3a3526] mb-1.5">私人日记</p>
-        <p class="font-sans text-sm text-[#8a8270] mb-8">回答：我现在在哪里？</p>
-        <input
-          id="diary-answer"
-          type="text"
-          placeholder="输入答案"
-          autocomplete="off"
-          class="w-60 bg-transparent border-b border-[#c9bf9d] pb-2 text-center text-[#3a3526] font-sans text-base focus:outline-none focus:border-[#c23b22] placeholder:text-[#b5ab8c]"
-        />
-        <button
-          id="diary-unlock"
-          class="mt-8 px-8 py-2 rounded-full bg-[#3a3526] text-[#fdf6e3] text-sm font-medium hover:bg-[#c23b22] transition-colors"
-        >
-          进入
-        </button>
-        <p id="diary-error" class="hidden mt-4 text-xs text-[#d64545] font-sans">答案不对，再想想～</p>
       </div>
 
       <!-- 日记内容（解锁后显示） -->
       <div id="diary-content" class="hidden">
 
-        <!-- 今日新条目（Day One 式日期头） -->
-        <div class="bg-[#fffdf3] rounded-2xl shadow-sm border border-[#efe6c8] overflow-hidden mb-12">
-          <div class="px-7 pt-6 pb-4">
-            <div class="flex items-center gap-4">
-              <span id="diary-date-num" class="font-display font-bold text-4xl text-[#3a3526] leading-none">21</span>
-              <div>
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-8 items-start">
+
+          <!-- 左：书写面板 -->
+          <div class="bg-[#fffdf3] rounded-2xl shadow-sm border border-[#efe6c8] overflow-hidden">
+            <div class="px-7 pt-6 pb-2 flex items-center gap-4">
+              <span id="diary-date-num" class="font-mono font-medium text-4xl text-[#c23b22] leading-none">21</span>
+              <div class="flex-1">
                 <p id="diary-date-full" class="font-sans text-sm text-[#3a3526]">2026年6月 · 星期六</p>
                 <p class="font-sans text-xs text-[#8a8270] mt-0.5">今天 · 随笔</p>
               </div>
-              <div class="flex-1"></div>
               <input
                 id="diary-mood"
                 placeholder="心情"
-                class="w-24 bg-[#f6edd0] rounded-full px-3 py-1.5 font-sans text-xs text-[#5a5340] text-center focus:outline-none focus:ring-2 focus:ring-[#c23b22]/40 placeholder:text-[#b5ab8c]"
+                class="w-20 bg-[#f6edd0] rounded-full px-3 py-1.5 font-sans text-xs text-[#5a5340] text-center focus:outline-none focus:ring-2 focus:ring-[#c23b22]/40 placeholder:text-[#b5ab8c]"
               />
               <input
                 id="diary-weather"
                 placeholder="天气"
-                class="w-24 bg-[#f6edd0] rounded-full px-3 py-1.5 font-sans text-xs text-[#5a5340] text-center focus:outline-none focus:ring-2 focus:ring-[#c23b22]/40 placeholder:text-[#b5ab8c]"
+                class="w-20 bg-[#f6edd0] rounded-full px-3 py-1.5 font-sans text-xs text-[#5a5340] text-center focus:outline-none focus:ring-2 focus:ring-[#c23b22]/40 placeholder:text-[#b5ab8c]"
               />
             </div>
+            <div class="px-7 py-5">
+              <input
+                id="diary-title"
+                placeholder="标题（可选）"
+                class="w-full bg-transparent font-display font-semibold text-2xl text-[#3a3526] placeholder:text-[#c4baa0] focus:outline-none mb-5"
+              />
+              <textarea
+                id="diary-body"
+                placeholder="写点什么……"
+                rows="12"
+                class="w-full bg-transparent resize-y font-serif text-[16px] leading-loose text-[#3a3526] focus:outline-none placeholder:text-[#c4baa0]"
+              ></textarea>
+            </div>
+            <div class="px-7 pb-5">
+              <span id="diary-status" class="font-sans text-xs text-[#8a8270]"></span>
+            </div>
           </div>
-          <div class="px-7 pb-7">
-            <input
-              id="diary-title"
-              placeholder="标题（可选）"
-              class="w-full bg-transparent font-sans font-semibold text-xl text-[#3a3526] placeholder:text-[#c4baa0] focus:outline-none mb-4"
-            />
-            <textarea
-              id="diary-body"
-              placeholder="写点什么……"
-              rows="9"
-              class="w-full bg-transparent resize-y font-sans text-[16px] leading-loose text-[#3a3526] focus:outline-none placeholder:text-[#c4baa0]"
-            ></textarea>
-          </div>
-          <div class="px-7 pb-5">
-            <span id="diary-status" class="font-sans text-xs text-[#8a8270]"></span>
-          </div>
-        </div>
 
-        <!-- 历史时间线（按月份） -->
-        <div>
-          <p class="font-sans text-xs tracking-wider text-[#8a8270] mb-6">过往</p>
-          <div class="space-y-8">
-            {months.map(month => (
-              <section>
-                <div class="flex items-center gap-3 mb-3">
-                  <h2 class="font-sans font-semibold text-sm text-[#5a5340]">{month.label}</h2>
-                  <div class="h-px flex-1 bg-[#e8dfc0]"></div>
-                </div>
-                <div class="space-y-3">
-                  {month.items.map(async (d) => {
-                    const { Content } = await render(d);
-                    const day = d.data.date.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' });
-                    const weekday = d.data.date.toLocaleDateString('zh-CN', { weekday: 'short' });
-                    return (
-                      <article class="flex gap-4 bg-[#fffdf3] rounded-xl border border-[#efe6c8] p-4 hover:shadow-sm transition-shadow">
-                        <div class="shrink-0 w-12 pt-0.5 text-center">
-                          <p class="font-sans text-sm text-[#3a3526]">{day}</p>
-                          <p class="font-sans text-[11px] text-[#8a8270]">{weekday}</p>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                          <h3 class="font-sans font-semibold text-[15px] text-[#3a3526] mb-1 truncate">
-                            {d.data.title || '（无题）'}
-                          </h3>
-                          <div class="text-sm text-[#6b6350] leading-relaxed line-clamp-3">
-                            <Content />
-                          </div>
-                          {d.data.mood && (
-                            <p class="font-sans text-xs text-[#b08a3e] mt-1.5">{d.data.mood}</p>
-                          )}
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              </section>
-            ))}
+          <!-- 右：历史便签墙 -->
+          <div class="lg:sticky lg:top-16">
+            <div class="flex items-baseline justify-between mb-4">
+              <h2 class="font-sans font-semibold text-sm text-[#5a5340]">过往</h2>
+              <span class="font-mono text-xs text-[#8a8270]">{allDiaries.length} 张</span>
+            </div>
 
-            {months.length === 0 && (
+            <div class="grid grid-cols-2 gap-3">
+              {allDiaries.map(async (d) => {
+                const { Content } = await render(d);
+                const day = d.data.date.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' });
+                const weekday = d.data.date.toLocaleDateString('zh-CN', { weekday: 'short' });
+                return (
+                  <button
+                    class="diary-card text-left bg-gradient-to-b from-[#fff7d6] to-[#fdf3c0] text-[#6b5a2e] rounded-xl border border-[#efe0b0] p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all"
+                    data-title={d.data.title || '（无题）'}
+                  >
+                    <div class="flex items-baseline justify-between mb-2">
+                      <span class="font-mono text-xs text-[#8a7a4a]">{day} {weekday}</span>
+                    </div>
+                    <h3 class="font-display font-semibold text-[15px] text-[#5c4d28] mb-1 truncate">
+                      {d.data.title || '（无题）'}
+                    </h3>
+                    <div class="text-[13px] text-[#7a6a3e] leading-relaxed line-clamp-4">
+                      <Content />
+                    </div>
+                    {d.data.mood && (
+                      <span class="mt-2 inline-block font-sans text-[11px] text-[#b08a3e]">{d.data.mood}</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {allDiaries.length === 0 && (
               <div class="text-center py-16 text-[#8a8270] font-sans">还没有日记，写第一篇吧。</div>
             )}
           </div>
+
         </div>
 
       </div>
 
+    </div>
+  </div>
+
+  <!-- 历史便签查看弹窗 -->
+  <div id="diary-modal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <div id="diary-modal-card" class="max-w-lg w-full max-h-[85vh] overflow-y-auto bg-gradient-to-b from-[#fff7d6] to-[#fdf3c0] text-[#6b5a2e] rounded-2xl shadow-xl p-7 relative">
+      <button id="diary-modal-close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center text-[#8a7a4a] transition-colors" aria-label="关闭">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <div id="diary-modal-inner"></div>
     </div>
   </div>
 </BaseLayout>
@@ -170,21 +176,29 @@ for (const d of allDiaries) {
   const input = document.getElementById('diary-answer');
   const btn = document.getElementById('diary-unlock');
   const err = document.getElementById('diary-error');
+  const panel = document.getElementById('diary-login-panel');
 
   function unlock() {
     if (gate && content) {
       gate.classList.add('hidden');
       content.classList.remove('hidden');
       sessionStorage.setItem('diary_unlocked', '1');
-      // 解锁后直接聚焦正文，进入书写状态
       const body = document.getElementById('diary-body');
       if (body) body.focus();
     }
   }
 
-  // 本会话已通过则直接进入
   if (sessionStorage.getItem('diary_unlocked') === '1') {
     unlock();
+  }
+
+  // 答错：面板 shake
+  function shake() {
+    if (!panel) return;
+    panel.classList.remove('login-shake');
+    void panel.offsetWidth;
+    panel.classList.add('login-shake');
+    panel.addEventListener('animationend', () => panel.classList.remove('login-shake'), { once: true });
   }
 
   btn?.addEventListener('click', () => {
@@ -193,39 +207,34 @@ for (const d of allDiaries) {
       unlock();
     } else {
       err?.classList.remove('hidden');
+      shake();
       input?.focus();
     }
   });
 
-  // 回车进入：跳过输入法组词中的 Enter
   input?.addEventListener('keydown', (e) => {
     if (e.isComposing || e.keyCode === 229) return;
     if (e.key === 'Enter') btn?.click();
   });
 
-  // 拼音选字上屏后自动判断
   input?.addEventListener('compositionend', () => {
     if (input.value.trim() === ANSWER) btn?.click();
   });
 
-  // 今日日期（工具条 + 新条目日期头）
+  // 日期
   const now = new Date();
   const todayEl = document.getElementById('diary-today');
   if (todayEl) {
-    todayEl.textContent = now.toLocaleDateString('zh-CN', {
-      year: 'numeric', month: 'long', day: 'numeric', weekday: 'long',
-    });
+    todayEl.textContent = now.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '.');
   }
   const dateNum = document.getElementById('diary-date-num');
   if (dateNum) dateNum.textContent = String(now.getDate());
   const dateFull = document.getElementById('diary-date-full');
   if (dateFull) {
-    dateFull.textContent = now.toLocaleDateString('zh-CN', {
-      year: 'numeric', month: 'long',
-    }) + ' · ' + now.toLocaleDateString('zh-CN', { weekday: 'long' });
+    dateFull.textContent = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' }) + ' · ' + now.toLocaleDateString('zh-CN', { weekday: 'long' });
   }
 
-  // 提交到 GitHub（经本站 Pages Function /api/diary）
+  // 保存 → GitHub
   const saveBtn = document.getElementById('diary-save');
   const statusEl = document.getElementById('diary-status');
 
@@ -263,4 +272,58 @@ for (const d of allDiaries) {
       saveBtn.disabled = false;
     }
   });
+
+  // 便签查看弹窗
+  const modal = document.getElementById('diary-modal');
+  const modalInner = document.getElementById('diary-modal-inner');
+  const modalCard = document.getElementById('diary-modal-card');
+  const modalClose = document.getElementById('diary-modal-close');
+
+  document.querySelectorAll('.diary-card').forEach(card => {
+    card.addEventListener('click', () => {
+      // 把卡片内容克隆到弹窗里展示
+      const clone = card.cloneNode(true);
+      clone.classList.remove('cursor-pointer', 'hover:-translate-y-0.5', 'hover:shadow-md', 'transition-all', 'active:translate-y-0');
+      clone.removeAttribute('data-title');
+      clone.classList.add('w-full', 'shadow-none', 'border-0', 'p-0');
+      if (modalInner) {
+        modalInner.innerHTML = '';
+        modalInner.appendChild(clone);
+      }
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  function closeModal() {
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+    document.body.style.overflow = '';
+  }
+
+  modalClose?.addEventListener('click', closeModal);
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
 </script>
+
+<style>
+  /* 答错抖动（参考便签卡片站的登录动效） */
+  @keyframes login-shake {
+    10%, 90% { transform: translateX(-1px); }
+    20%, 80% { transform: translateX(2px); }
+    30%, 50%, 70% { transform: translateX(-4px); }
+    40%, 60% { transform: translateX(4px); }
+  }
+  .login-shake {
+    animation: login-shake 0.4s ease;
+  }
+</style>
