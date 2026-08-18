@@ -41,9 +41,51 @@ const allDiaries = (await getCollection('diaries')).sort(
 
       <!-- 日记内容（解锁后显示） -->
       <div id="diary-content" class="hidden">
-        <div class="flex items-baseline justify-between mb-10">
+        <div class="flex items-baseline justify-between mb-8">
           <h1 class="font-sans font-bold text-3xl tracking-tight text-[#3a3526]">日记</h1>
           <p class="font-sans text-xs text-[#8a8270]">{allDiaries.length} 篇</p>
+        </div>
+
+        <!-- 新建笔记 -->
+        <div class="bg-white rounded-xl shadow-sm mb-10 overflow-hidden">
+          <div class="flex items-center justify-between px-6 py-3 border-b border-[#f0ead0]">
+            <span class="font-sans text-xs text-[#8a8270]" id="diary-today"></span>
+            <span class="font-sans text-xs text-[#b08a3e]">笔记</span>
+          </div>
+          <div class="p-6">
+            <input
+              id="diary-title"
+              placeholder="标题（可选）"
+              class="w-full font-sans font-semibold text-xl text-[#3a3526] placeholder:text-[#c4baa0] focus:outline-none mb-4"
+            />
+            <div class="flex gap-3 mb-4">
+              <input
+                id="diary-mood"
+                placeholder="心情，如：平静"
+                class="w-1/2 font-sans text-sm text-[#5a5340] border border-[#e8dfc0] rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#007aff]"
+              />
+              <input
+                id="diary-weather"
+                placeholder="天气，如：晴"
+                class="w-1/2 font-sans text-sm text-[#5a5340] border border-[#e8dfc0] rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#007aff]"
+              />
+            </div>
+            <textarea
+              id="diary-body"
+              placeholder="写点什么……"
+              rows="7"
+              class="w-full font-sans text-[15px] text-[#3a3526] leading-relaxed resize-y focus:outline-none placeholder:text-[#c4baa0]"
+            ></textarea>
+          </div>
+          <div class="px-6 py-3 border-t border-[#f0ead0] flex items-center justify-between gap-4">
+            <span id="diary-status" class="font-sans text-xs text-[#8a8270]"></span>
+            <button
+              id="diary-save"
+              class="shrink-0 px-5 py-2 rounded-lg bg-[#007aff] text-white text-sm font-medium hover:bg-[#0066d6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              保存
+            </button>
+          </div>
         </div>
 
         <!-- 历史日记 -->
@@ -118,5 +160,55 @@ const allDiaries = (await getCollection('diaries')).sort(
 
   input?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') btn?.click();
+  });
+
+  // 编辑器：今日日期
+  const todayEl = document.getElementById('diary-today');
+  if (todayEl) {
+    todayEl.textContent = '今天 · ' + new Date().toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      weekday: 'long',
+    });
+  }
+
+  // 提交到 GitHub（经本站 Pages Function /api/diary）
+  const saveBtn = document.getElementById('diary-save');
+  const statusEl = document.getElementById('diary-status');
+
+  saveBtn?.addEventListener('click', async () => {
+    const title = document.getElementById('diary-title').value.trim();
+    const mood = document.getElementById('diary-mood').value.trim();
+    const weather = document.getElementById('diary-weather').value.trim();
+    const body = document.getElementById('diary-body').value.trim();
+
+    if (!body) {
+      statusEl.textContent = '先写点什么再保存吧';
+      return;
+    }
+
+    saveBtn.disabled = true;
+    statusEl.textContent = '正在提交到 GitHub…';
+
+    try {
+      const res = await fetch('/api/diary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, mood, weather, body }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || '提交失败');
+
+      statusEl.textContent = '已提交，站点正在自动重建，约 1-2 分钟后可见';
+      document.getElementById('diary-title').value = '';
+      document.getElementById('diary-mood').value = '';
+      document.getElementById('diary-weather').value = '';
+      document.getElementById('diary-body').value = '';
+    } catch (e) {
+      statusEl.textContent = '提交失败：' + e.message;
+    } finally {
+      saveBtn.disabled = false;
+    }
   });
 </script>
