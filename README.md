@@ -95,18 +95,17 @@ Cloudflare Pages（静态，无需 wrangler 配置）：
 | 变量 | 说明 |
 | :--- | :--- |
 | `PUBLIC_TWIKOO_ENV_ID` | Twikoo 评论后端地址。**未配置时评论区自动隐藏**，配置后启用（构建时注入，改后需重新部署） |
-| `GITHUB_TOKEN` | 日记功能专用。GitHub Personal Access Token（需 `repo` 权限，设为 **secret**），由 Pages Function `/api/diary` 用来把日记写入本仓库并触发自动重建。**只放在 Cloudflare 后台，绝不进前端** |
-| `GITHUB_REPO` | 可选，默认 `lsx3320/my_blog`（格式 `owner/repo`） |
 
 ## 日记功能（/diary）
 
 - 访问 `/diary` 需先通过密码门（问题：**我现在在哪里？** 答案：**武汉**，客户端校验 + 会话记忆）
-- Apple Notes 风格编辑器：写标题 / 心情 / 天气 / 正文 → 保存
-- 保存流程：前端 POST → Pages Function `/api/diary` → 写入
-  `src/content/diaries/YYYY-MM-DD.md`（当天重复提交会更新当天那篇）→ push 到
-  main → Cloudflare Pages 自动重建部署 → 日记出现在历史列表
-- 注意：本地 `npm run dev` 不运行 Pages Functions，`/api/diary` 需部署后才生效
-- 密码答案在 `src/pages/diary.astro` 中（`ANSWER` 常量），属防君子级别，如需更严格可改为服务端校验
+- Apple Notes 质感界面：毛玻璃工具条、大日期数字、衬线书写区、黄色便签墙
+- **存储：jsonbin.io 云存储**（参考 memo-card 项目方案）——API key 与 bin ID 固定在前端代码
+  （`src/pages/diary.astro` 顶部常量），localStorage 缓存 + 云端合并去重：
+  - 保存：写入本地 → 合并 → PUT 到 jsonbin
+  - 打开页面：从 jsonbin 拉取渲染便签墙（任何设备可见）
+  - 便签 hover 右上角可删除
+- 数据源与 GitHub 无关，不触发自动重建；如需改 bin/密钥，改 `CLOUD_KEY` / `CLOUD_BIN` 两个常量即可
 
 ## 评论（Twikoo）
 

@@ -1,19 +1,5 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getCollection, render } from 'astro:content';
-
-const allDiaries = (await getCollection('diaries')).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-);
-
-// 按月份分组（历史便签墙）
-const months: { label: string; items: typeof allDiaries }[] = [];
-for (const d of allDiaries) {
-  const label = d.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' });
-  const last = months[months.length - 1];
-  if (last && last.label === label) last.items.push(d);
-  else months.push({ label, items: [d] });
-}
 ---
 
 <BaseLayout title="日记">
@@ -24,7 +10,7 @@ for (const d of allDiaries) {
       <div class="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
           <span class="font-display font-semibold text-[#3a3526] tracking-tight">日记</span>
-          <span class="font-mono text-xs text-[#8a8270]">{String(allDiaries.length).padStart(2, '0')} 篇</span>
+          <span id="diary-count" class="font-mono text-xs text-[#8a8270]"></span>
         </div>
         <div class="flex items-center gap-4">
           <span id="diary-today" class="hidden sm:inline font-mono text-xs text-[#8a8270]"></span>
@@ -40,7 +26,7 @@ for (const d of allDiaries) {
 
     <div class="max-w-5xl mx-auto px-6 py-10">
 
-      <!-- 密码门：登录面板 -->
+      <!-- 密码门 -->
       <div id="diary-gate" class="flex items-center justify-center py-20">
         <form
           id="diary-gate-form"
@@ -81,7 +67,7 @@ for (const d of allDiaries) {
             <div class="px-7 pt-6 pb-2 flex items-center gap-4">
               <span id="diary-date-num" class="font-mono font-medium text-4xl text-[#c23b22] leading-none">21</span>
               <div class="flex-1">
-                <p id="diary-date-full" class="font-sans text-sm text-[#3a3526]">2026年6月 · 星期六</p>
+                <p id="diary-date-full" class="font-sans text-sm text-[#3a3526]">2026年8月 · 星期四</p>
                 <p class="font-sans text-xs text-[#8a8270] mt-0.5">今天 · 随笔</p>
               </div>
               <input
@@ -113,43 +99,13 @@ for (const d of allDiaries) {
             </div>
           </div>
 
-          <!-- 右：历史便签墙 -->
+          <!-- 右：历史便签墙（前端从云端加载） -->
           <div class="lg:sticky lg:top-16">
             <div class="flex items-baseline justify-between mb-4">
               <h2 class="font-sans font-semibold text-sm text-[#5a5340]">过往</h2>
-              <span class="font-mono text-xs text-[#8a8270]">{allDiaries.length} 张</span>
+              <span id="diary-cloud-state" class="font-mono text-xs text-[#8a8270]"></span>
             </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              {allDiaries.map(async (d) => {
-                const { Content } = await render(d);
-                const day = d.data.date.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' });
-                const weekday = d.data.date.toLocaleDateString('zh-CN', { weekday: 'short' });
-                return (
-                  <button
-                    class="diary-card text-left bg-gradient-to-b from-[#fff7d6] to-[#fdf3c0] text-[#6b5a2e] rounded-xl border border-[#efe0b0] p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all"
-                    data-title={d.data.title || '（无题）'}
-                  >
-                    <div class="flex items-baseline justify-between mb-2">
-                      <span class="font-mono text-xs text-[#8a7a4a]">{day} {weekday}</span>
-                    </div>
-                    <h3 class="font-display font-semibold text-[15px] text-[#5c4d28] mb-1 truncate">
-                      {d.data.title || '（无题）'}
-                    </h3>
-                    <div class="text-[13px] text-[#7a6a3e] leading-relaxed line-clamp-4">
-                      <Content />
-                    </div>
-                    {d.data.mood && (
-                      <span class="mt-2 inline-block font-sans text-[11px] text-[#b08a3e]">{d.data.mood}</span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {allDiaries.length === 0 && (
-              <div class="text-center py-16 text-[#8a8270] font-sans">还没有日记，写第一篇吧。</div>
-            )}
+            <div id="history-wall" class="grid grid-cols-2 gap-3"></div>
           </div>
 
         </div>
@@ -159,7 +115,7 @@ for (const d of allDiaries) {
     </div>
   </div>
 
-  <!-- 历史便签查看弹窗 -->
+  <!-- 便签查看弹窗 -->
   <div id="diary-modal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/40 backdrop-blur-sm p-4">
     <div id="diary-modal-card" class="max-w-lg w-full max-h-[85vh] overflow-y-auto bg-gradient-to-b from-[#fff7d6] to-[#fdf3c0] text-[#6b5a2e] rounded-2xl shadow-xl p-7 relative">
       <button id="diary-modal-close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center text-[#8a7a4a] transition-colors" aria-label="关闭">
@@ -173,7 +129,144 @@ for (const d of allDiaries) {
 </BaseLayout>
 
 <script is:inline data-astro-rerun>
-  // 密码门：我现在在哪里？→ 武汉
+  // ========== jsonbin 云存储（参考 memo-card 方案，key 固定在前端） ==========
+  const CLOUD_KEY = '$2a$10$Iyqn3eO8f2SOtdwE9A9k1uY7MIXfb5k1Z7pYYkWZW9lYtxc1bJlbi';
+  const CLOUD_BIN = '6a86f47cda38895dfefb5b57';
+  const BIN_URL = 'https://api.jsonbin.io/v3/b';
+  const LOCAL_KEY = 'diary:local';
+
+  let diaries = [];
+
+  function loadLocal() {
+    try { return JSON.parse(localStorage.getItem(LOCAL_KEY)) || []; } catch { return []; }
+  }
+  function saveLocal(list) {
+    try { localStorage.setItem(LOCAL_KEY, JSON.stringify(list)); } catch { /* ignore */ }
+  }
+  async function cloudGet() {
+    const r = await fetch(`${BIN_URL}/${CLOUD_BIN}/latest`, { headers: { 'X-Master-Key': CLOUD_KEY } });
+    if (!r.ok) throw new Error('云端读取失败（' + r.status + '）');
+    const j = await r.json();
+    const rec = j.record || {};
+    return Array.isArray(rec.diaries) ? rec.diaries : [];
+  }
+  async function cloudPut(list) {
+    const r = await fetch(`${BIN_URL}/${CLOUD_BIN}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': CLOUD_KEY },
+      body: JSON.stringify({ diaries: list }),
+    });
+    if (!r.ok) throw new Error('云端写入失败（' + r.status + '）');
+  }
+  // 合并去重（id 为唯一键），按时间倒序
+  function merge(a, b) {
+    const map = new Map();
+    [...b, ...a].forEach(d => { if (d && d.id) map.set(d.id, d); });
+    return [...map.values()].sort((x, y) => (y.createdAt || 0) - (x.createdAt || 0));
+  }
+  function todayCN() {
+    const now = new Date(Date.now() + 8 * 3600 * 1000);
+    const y = now.getUTCFullYear();
+    const m = String(now.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(now.getUTCDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  // ========== 便签墙渲染 ==========
+  function esc(s) {
+    const div = document.createElement('div');
+    div.textContent = s == null ? '' : String(s);
+    return div.innerHTML;
+  }
+  function renderWall() {
+    const wall = document.getElementById('history-wall');
+    const count = document.getElementById('diary-count');
+    if (count) count.textContent = diaries.length + ' 篇';
+    if (!wall) return;
+    wall.innerHTML = '';
+    if (diaries.length === 0) {
+      wall.innerHTML = '<div class="col-span-2 text-center py-16 text-[#8a8270] font-sans">还没有日记，写第一篇吧。</div>';
+      return;
+    }
+    diaries.forEach(d => {
+      const card = document.createElement('div');
+      card.className = 'relative group bg-gradient-to-b from-[#fff7d6] to-[#fdf3c0] text-[#6b5a2e] rounded-xl border border-[#efe0b0] p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer';
+      card.innerHTML =
+        '<div class="font-mono text-xs text-[#8a7a4a] mb-2">' + esc(d.date) + '</div>' +
+        '<h3 class="font-display font-semibold text-[15px] text-[#5c4d28] mb-1 truncate">' + esc(d.title || '（无题）') + '</h3>' +
+        '<div class="text-[13px] text-[#7a6a3e] leading-relaxed line-clamp-4">' + esc(d.body) + '</div>' +
+        (d.mood ? '<span class="mt-2 inline-block font-sans text-[11px] text-[#b08a3e]">' + esc(d.mood) + '</span>' : '') +
+        '<button class="diary-del absolute -top-2 -right-2 hidden group-hover:flex w-6 h-6 rounded-full bg-[#c23b22] text-white items-center justify-center" aria-label="删除">' +
+          '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>' +
+        '</button>';
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.diary-del')) return;
+        openModal(d);
+      });
+      card.querySelector('.diary-del').addEventListener('click', (e) => {
+        e.stopPropagation();
+        removeDiary(d.id);
+      });
+      wall.appendChild(card);
+    });
+  }
+
+  // ========== 弹窗 ==========
+  const modal = document.getElementById('diary-modal');
+  const modalInner = document.getElementById('diary-modal-inner');
+  const modalClose = document.getElementById('diary-modal-close');
+
+  function openModal(d) {
+    if (!modalInner) return;
+    modalInner.innerHTML =
+      '<div class="font-mono text-xs text-[#8a7a4a] mb-3">' + esc(d.date) + '</div>' +
+      '<h3 class="font-display font-semibold text-xl text-[#5c4d28] mb-3">' + esc(d.title || '（无题）') + '</h3>' +
+      '<div class="font-serif text-[15px] leading-relaxed whitespace-pre-wrap">' + esc(d.body) + '</div>' +
+      (d.mood ? '<p class="mt-4 font-sans text-xs text-[#b08a3e]">' + esc(d.mood) + '</p>' : '');
+    if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+    document.body.style.overflow = '';
+  }
+  modalClose?.addEventListener('click', closeModal);
+  modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+  // ========== 删除 ==========
+  function removeDiary(id) {
+    if (!window.confirm('删除这篇日记？')) return;
+    diaries = diaries.filter(d => d.id !== id);
+    saveLocal(diaries);
+    renderWall();
+    const state = document.getElementById('diary-cloud-state');
+    if (state) state.textContent = '删除中…';
+    cloudPut(diaries).then(() => {
+      if (state) state.textContent = '已同步云端';
+    }).catch(() => {
+      if (state) state.textContent = '云端同步失败';
+    });
+  }
+
+  // ========== 云同步 ==========
+  async function syncFromCloud() {
+    const state = document.getElementById('diary-cloud-state');
+    if (state) state.textContent = '同步中…';
+    try {
+      const cloud = await cloudGet();
+      diaries = merge(loadLocal(), cloud);
+      saveLocal(diaries);
+      renderWall();
+      if (state) state.textContent = '已同步';
+    } catch (e) {
+      diaries = loadLocal();
+      renderWall();
+      if (state) state.textContent = '离线模式';
+    }
+  }
+
+  // ========== 密码门 ==========
   const ANSWER = '武汉';
   const gate = document.getElementById('diary-gate');
   const content = document.getElementById('diary-content');
@@ -186,11 +279,11 @@ for (const d of allDiaries) {
       gate.classList.add('hidden');
       content.classList.remove('hidden');
       sessionStorage.setItem('diary_unlocked', '1');
+      syncFromCloud();
       const body = document.getElementById('diary-body');
       if (body) body.focus();
     }
   }
-
   function tryUnlock() {
     if (input && input.value.trim() === ANSWER) {
       err?.classList.add('hidden');
@@ -199,12 +292,9 @@ for (const d of allDiaries) {
     }
     return false;
   }
-
   if (sessionStorage.getItem('diary_unlocked') === '1') {
     unlock();
   }
-
-  // 原生表单提交：回车与「进入」按钮都会走这里（最可靠）
   form?.addEventListener('submit', (e) => {
     e.preventDefault();
     if (!tryUnlock()) {
@@ -213,30 +303,20 @@ for (const d of allDiaries) {
       input?.focus();
     }
   });
-
-  // 输入法组词中的回车：阻止触发表单提交（避免选字瞬间误判）
   input?.addEventListener('keydown', (e) => {
-    if (e.isComposing || e.keyCode === 229) {
-      e.preventDefault();
-    }
+    if (e.isComposing || e.keyCode === 229) e.preventDefault();
   });
+  input?.addEventListener('compositionend', () => { if (tryUnlock()) return; });
 
-  // 拼音选字上屏后若答案正确，自动进入
-  input?.addEventListener('compositionend', () => {
-    if (tryUnlock()) return;
-  });
-
-  // 答错：面板 shake
   function shake() {
-    const panel = form;
-    if (!panel) return;
-    panel.classList.remove('login-shake');
-    void panel.offsetWidth;
-    panel.classList.add('login-shake');
-    panel.addEventListener('animationend', () => panel.classList.remove('login-shake'), { once: true });
+    if (!form) return;
+    form.classList.remove('login-shake');
+    void form.offsetWidth;
+    form.classList.add('login-shake');
+    form.addEventListener('animationend', () => form.classList.remove('login-shake'), { once: true });
   }
 
-  // 日期
+  // ========== 日期 ==========
   const now = new Date();
   const todayEl = document.getElementById('diary-today');
   if (todayEl) {
@@ -249,7 +329,7 @@ for (const d of allDiaries) {
     dateFull.textContent = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' }) + ' · ' + now.toLocaleDateString('zh-CN', { weekday: 'long' });
   }
 
-  // 保存 → GitHub
+  // ========== 保存 ==========
   const saveBtn = document.getElementById('diary-save');
   const statusEl = document.getElementById('diary-status');
 
@@ -264,81 +344,42 @@ for (const d of allDiaries) {
       return;
     }
 
+    const entry = {
+      id: 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      date: todayCN(),
+      title, mood, weather, body,
+      createdAt: Date.now(),
+    };
+
+    const next = [entry, ...diaries];
+    diaries = next;
+    saveLocal(next);
+    renderWall();
+
     saveBtn.disabled = true;
-    statusEl.textContent = '正在提交到 GitHub…';
-
+    statusEl.textContent = '正在保存到云端…';
     try {
-      const res = await fetch('/api/diary', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, mood, weather, body }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || '提交失败');
-
-      statusEl.textContent = '已提交，站点正在自动重建，约 1-2 分钟后可见';
-      document.getElementById('diary-title').value = '';
-      document.getElementById('diary-mood').value = '';
-      document.getElementById('diary-weather').value = '';
-      document.getElementById('diary-body').value = '';
+      await cloudPut(next);
+      statusEl.textContent = '已保存到云端 ✓';
     } catch (e) {
-      statusEl.textContent = '提交失败：' + e.message;
+      statusEl.textContent = '云端保存失败（已存本地）：' + e.message;
     } finally {
       saveBtn.disabled = false;
     }
-  });
 
-  // 便签查看弹窗
-  const modal = document.getElementById('diary-modal');
-  const modalInner = document.getElementById('diary-modal-inner');
-  const modalCard = document.getElementById('diary-modal-card');
-  const modalClose = document.getElementById('diary-modal-close');
-
-  document.querySelectorAll('.diary-card').forEach(card => {
-    card.addEventListener('click', () => {
-      // 把卡片内容克隆到弹窗里展示
-      const clone = card.cloneNode(true);
-      clone.classList.remove('cursor-pointer', 'hover:-translate-y-0.5', 'hover:shadow-md', 'transition-all', 'active:translate-y-0');
-      clone.removeAttribute('data-title');
-      clone.classList.add('w-full', 'shadow-none', 'border-0', 'p-0');
-      if (modalInner) {
-        modalInner.innerHTML = '';
-        modalInner.appendChild(clone);
-      }
-      if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-      }
-      document.body.style.overflow = 'hidden';
-    });
-  });
-
-  function closeModal() {
-    if (modal) {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-    document.body.style.overflow = '';
-  }
-
-  modalClose?.addEventListener('click', closeModal);
-  modal?.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeModal();
+    document.getElementById('diary-title').value = '';
+    document.getElementById('diary-mood').value = '';
+    document.getElementById('diary-weather').value = '';
+    document.getElementById('diary-body').value = '';
   });
 </script>
 
 <style>
-  /* 答错抖动（参考便签卡片站的登录动效） */
   @keyframes login-shake {
     10%, 90% { transform: translateX(-1px); }
     20%, 80% { transform: translateX(2px); }
     30%, 50%, 70% { transform: translateX(-4px); }
     40%, 60% { transform: translateX(4px); }
   }
-  .login-shake {
-    animation: login-shake 0.4s ease;
-  }
+  .login-shake { animation: login-shake 0.4s ease; }
 </style>
