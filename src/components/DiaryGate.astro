@@ -44,17 +44,35 @@ const { title = '日记' } = Astro.props;
 
 <script is:inline data-astro-rerun>
   // 密码门：我现在在哪里？→ 武汉
+  // 状态用 localStorage 持久保存：登录一次，长期有效（跨标签页/跨会话）
   const ANSWER = '武汉';
+  const KEY = 'diary_unlocked';
   const gate = document.getElementById('diary-gate');
   const app = document.getElementById('diary-app');
   const input = document.getElementById('diary-answer');
   const err = document.getElementById('diary-error');
   const form = document.getElementById('diary-gate-form');
 
+  function isUnlocked() {
+    try {
+      // 兼容旧 sessionStorage 状态；新版统一存 localStorage
+      if (localStorage.getItem(KEY) === '1') return true;
+      if (sessionStorage.getItem(KEY) === '1') {
+        localStorage.setItem(KEY, '1');
+        return true;
+      }
+    } catch { /* ignore */ }
+    return false;
+  }
+
+  function markUnlocked() {
+    try { localStorage.setItem(KEY, '1'); } catch { /* ignore */ }
+  }
+
   function enter() {
     if (!gate || !app) return;
-    // 先记录会话状态（立即生效，避免延迟期间跳转丢失）
-    sessionStorage.setItem('diary_unlocked', '1');
+    // 先记录状态（立即生效）
+    markUnlocked();
     // 平滑过渡：密码门淡出 → 内容淡入
     gate.style.transition = 'opacity 0.22s ease';
     gate.style.opacity = '0';
@@ -66,9 +84,9 @@ const { title = '日记' } = Astro.props;
     }, 200);
   }
 
-  // 已解锁则直接进入（页面加载 / SPA 导航后都会执行）
+  // 已登录则直接进入
   function applyUnlocked() {
-    if (sessionStorage.getItem('diary_unlocked') === '1' && gate && app) {
+    if (isUnlocked() && gate && app) {
       gate.classList.add('hidden');
       app.classList.remove('hidden');
       app.classList.add('diary-app-in');
@@ -82,11 +100,10 @@ const { title = '日记' } = Astro.props;
     setTimeout(() => input?.focus(), 80);
   }
 
-  // View Transitions 每次导航后兜底检查（防止偶发时序丢状态）
+  // View Transitions 每次导航后兜底检查
   if (!window.__diaryGateBound) {
     window.__diaryGateBound = true;
     document.addEventListener('astro:page-load', () => {
-      // 本脚本会随 data-astro-rerun 重跑，这里主要防 React 挂载后覆盖
       setTimeout(applyUnlocked, 0);
     });
   }
