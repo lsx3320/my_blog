@@ -25,13 +25,13 @@ function base64utf8(text: string): string {
 }
 
 function todayCN(): string {
-  // 中国时区的 YYYY-MM-DD
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Shanghai',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date());
+  // 中国时区（UTC+8，无夏令时）YYYY-MM-DD
+  // 注意：Workers 的 Intl 是 limited ICU，timeZone 选项可能抛异常，故手工偏移
+  const now = new Date(Date.now() + 8 * 3600 * 1000);
+  const y = now.getUTCFullYear();
+  const m = String(now.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(now.getUTCDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
 function buildMarkdown(payload: DiaryPayload, date: string): string {
@@ -79,23 +79,32 @@ export const onRequestPost = async ({
 
   // 当天已存在则先取 sha（用于更新）
   let sha: string | undefined;
-  const getRes = await fetch(`${GITHUB_API}/repos/${repo}/contents/${path}`, {
-    headers: authHeaders,
-  });
-  if (getRes.ok) {
-    const existing = (await getRes.json()) as { sha: string };
-    sha = existing.sha;
+  try {
+    const getRes = await fetch(`${GITHUB_API}/repos/${repo}/contents/${path}`, {
+      headers: authHeaders,
+    });
+    if (getRes.ok) {
+      const existing = (await getRes.json()) as { sha: string };
+      sha = existing.sha;
+    }
+  } catch {
+    return Response.json({ error: '无法连接 GitHub API' }, { status: 502 });
   }
 
-  const putRes = await fetch(`${GITHUB_API}/repos/${repo}/contents/${path}`, {
-    method: 'PUT',
-    headers: { ...authHeaders, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      message: sha ? `diary: 更新 ${date}` : `diary: ${date}`,
-      content,
-      ...(sha ? { sha } : {}),
-    }),
-  });
+  let putRes: Response;
+  try {
+    putRes = await fetch(`${GITHUB_API}/repos/${repo}/contents/${path}`, {
+      method: 'PUT',
+      headers: { ...authHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: sha ? `diary: 更新 ${date}` : `diary: ${date}`,
+        content,
+        ...(sha ? { sha } : {}),
+      }),
+    });
+  } catch {
+    return Response.json({ error: '无法连接 GitHub API' }, { status: 502 });
+  }
 
   if (!putRes.ok) {
     const detail = (await putRes.json().catch(() => ({}))) as { message?: string };
