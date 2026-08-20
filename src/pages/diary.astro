@@ -7,24 +7,27 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     <!-- 毛玻璃工具条 -->
     <div class="sticky top-0 z-40 backdrop-blur-md bg-[#f5efe0]/75 border-b border-[#e5ddc8]">
-      <div class="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-          <span class="font-display font-semibold text-[#3a3526] tracking-tight">日记</span>
+      <div class="max-w-6xl mx-auto px-6 py-3.5 flex items-center justify-between">
+        <div class="flex items-baseline gap-3">
+          <span class="font-display font-semibold text-xl text-[#3a3526] tracking-tight">日记</span>
           <span id="diary-count" class="font-mono text-xs text-[#8a8270]"></span>
         </div>
         <div class="flex items-center gap-4">
           <span id="diary-today" class="hidden sm:inline font-mono text-xs text-[#8a8270]"></span>
           <button
-            id="diary-save"
-            class="px-5 py-1.5 rounded-full bg-[#c23b22] text-[#fffdf3] text-sm font-medium hover:opacity-90 active:scale-[0.97] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            id="diary-write-open"
+            class="px-5 py-1.5 rounded-full bg-[#c23b22] text-white text-sm font-medium hover:opacity-90 active:scale-[0.97] transition-all inline-flex items-center gap-1.5"
           >
-            保存
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+            </svg>
+            写一篇
           </button>
         </div>
       </div>
     </div>
 
-    <div class="max-w-5xl mx-auto px-6 py-10">
+    <div class="max-w-6xl mx-auto px-6 py-10">
 
       <!-- 密码门 -->
       <div id="diary-gate" class="flex items-center justify-center py-20">
@@ -57,61 +60,81 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </form>
       </div>
 
-      <!-- 日记内容（解锁后显示） -->
+      <!-- 日记内容（解锁后显示：主页面 = 便签墙） -->
       <div id="diary-content" class="hidden">
-
-        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-8 items-start">
-
-          <!-- 左：书写面板 -->
-          <div class="bg-[#fffdf3] rounded-2xl shadow-sm border border-[#efe6c8] overflow-hidden">
-            <div class="px-7 pt-6 pb-2 flex items-center gap-4">
-              <span id="diary-date-num" class="font-mono font-medium text-4xl text-[#c23b22] leading-none">21</span>
-              <div class="flex-1">
-                <p id="diary-date-full" class="font-sans text-sm text-[#3a3526]">2026年8月 · 星期四</p>
-                <p class="font-sans text-xs text-[#8a8270] mt-0.5">今天 · 随笔</p>
-              </div>
-              <input
-                id="diary-mood"
-                placeholder="心情"
-                class="w-20 bg-[#f6edd0] rounded-full px-3 py-1.5 font-sans text-xs text-[#5a5340] text-center focus:outline-none focus:ring-2 focus:ring-[#c23b22]/40 placeholder:text-[#b5ab8c]"
-              />
-              <input
-                id="diary-weather"
-                placeholder="天气"
-                class="w-20 bg-[#f6edd0] rounded-full px-3 py-1.5 font-sans text-xs text-[#5a5340] text-center focus:outline-none focus:ring-2 focus:ring-[#c23b22]/40 placeholder:text-[#b5ab8c]"
-              />
-            </div>
-            <div class="px-7 py-5">
-              <input
-                id="diary-title"
-                placeholder="标题（可选）"
-                class="w-full bg-transparent font-display font-semibold text-2xl text-[#3a3526] placeholder:text-[#c4baa0] focus:outline-none mb-5"
-              />
-              <textarea
-                id="diary-body"
-                placeholder="写点什么……"
-                rows="12"
-                class="w-full bg-transparent resize-y font-serif text-[16px] leading-loose text-[#3a3526] focus:outline-none placeholder:text-[#c4baa0]"
-              ></textarea>
-            </div>
-            <div class="px-7 pb-5">
-              <span id="diary-status" class="font-sans text-xs text-[#8a8270]"></span>
-            </div>
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h1 class="font-display font-semibold text-2xl text-[#3a3526] tracking-tight">随手记</h1>
+            <p class="font-sans text-xs text-[#8a8270] mt-1">写下的每一句，都是生活的注脚</p>
           </div>
-
-          <!-- 右：历史便签墙（前端从云端加载） -->
-          <div class="lg:sticky lg:top-16">
-            <div class="flex items-baseline justify-between mb-4">
-              <h2 class="font-sans font-semibold text-sm text-[#5a5340]">过往</h2>
-              <span id="diary-cloud-state" class="font-mono text-xs text-[#8a8270]"></span>
-            </div>
-            <div id="history-wall" class="grid grid-cols-2 gap-3"></div>
-          </div>
-
+          <span id="diary-cloud-state" class="font-mono text-xs text-[#8a8270]"></span>
         </div>
 
+        <!-- 便签墙（主视图） -->
+        <div id="history-wall" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- 写作窗口 -->
+  <div id="diary-write-modal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+    <div class="w-full max-w-xl max-h-[88vh] overflow-y-auto bg-[#fffdf3] rounded-2xl shadow-2xl border border-[#efe6c8]">
+      <!-- 窗口头部 -->
+      <div class="sticky top-0 z-10 px-7 pt-6 pb-3 bg-[#fffdf3]/90 backdrop-blur border-b border-[#f0ead0] flex items-center gap-4">
+        <span id="diary-date-num" class="font-mono font-medium text-3xl text-[#c23b22] leading-none">20</span>
+        <div class="flex-1 min-w-0">
+          <p id="diary-date-full" class="font-sans text-sm text-[#3a3526]">2026年8月 · 星期四</p>
+          <p class="font-sans text-xs text-[#8a8270] mt-0.5">今天 · 随笔</p>
+        </div>
+        <input
+          id="diary-mood"
+          placeholder="心情"
+          class="w-20 bg-[#f6edd0] rounded-full px-3 py-1.5 font-sans text-xs text-[#5a5340] text-center focus:outline-none focus:ring-2 focus:ring-[#c23b22]/40 placeholder:text-[#b5ab8c]"
+        />
+        <input
+          id="diary-weather"
+          placeholder="天气"
+          class="w-20 bg-[#f6edd0] rounded-full px-3 py-1.5 font-sans text-xs text-[#5a5340] text-center focus:outline-none focus:ring-2 focus:ring-[#c23b22]/40 placeholder:text-[#b5ab8c]"
+        />
+        <button id="diary-write-close" class="w-8 h-8 rounded-full hover:bg-[#f0ead0] flex items-center justify-center text-[#8a8270] transition-colors" aria-label="关闭">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <!-- 书写区 -->
+      <div class="px-7 py-5">
+        <input
+          id="diary-title"
+          placeholder="标题（可选）"
+          class="w-full bg-transparent font-display font-semibold text-2xl text-[#3a3526] placeholder:text-[#c4baa0] focus:outline-none mb-5"
+        />
+        <textarea
+          id="diary-body"
+          placeholder="写点什么……"
+          rows="10"
+          class="w-full bg-transparent resize-y font-serif text-[16px] leading-loose text-[#3a3526] focus:outline-none placeholder:text-[#c4baa0]"
+        ></textarea>
+      </div>
+      <!-- 窗口底部 -->
+      <div class="sticky bottom-0 z-10 px-7 py-4 bg-[#fffdf3]/90 backdrop-blur border-t border-[#f0ead0] flex items-center justify-between gap-4">
+        <span id="diary-status" class="font-sans text-xs text-[#8a8270] truncate"></span>
+        <div class="flex items-center gap-3 shrink-0">
+          <button
+            id="diary-write-cancel"
+            class="px-5 py-2 rounded-full border border-[#e0d7b8] text-[#5a5340] text-sm font-medium hover:border-[#c9bf9d] transition-colors"
+          >
+            取消
+          </button>
+          <button
+            id="diary-save"
+            class="px-6 py-2 rounded-full bg-[#c23b22] text-white text-sm font-medium hover:opacity-90 active:scale-[0.97] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            保存
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -126,10 +149,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <div id="diary-modal-inner"></div>
     </div>
   </div>
+
+  <!-- 悬浮写按钮（FAB） -->
+  <button
+    id="diary-fab"
+    class="fixed bottom-8 right-8 z-[70] hidden w-14 h-14 rounded-full bg-[#c23b22] text-white shadow-lg shadow-[#c23b22]/30 hover:scale-105 active:scale-95 transition-all items-center justify-center"
+    aria-label="写日记"
+  >
+    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+    </svg>
+  </button>
 </BaseLayout>
 
 <script is:inline data-astro-rerun>
-  // ========== jsonbin 云存储（参考 memo-card 方案，key 固定在前端） ==========
+  // ========== jsonbin 云存储 ==========
   const CLOUD_KEY = '$2a$10$Iyqn3eO8f2SOtdwE9A9k1uY7MIXfb5k1Z7pYYkWZW9lYtxc1bJlbi';
   const CLOUD_BIN = '6a86f47cda38895dfefb5b57';
   const BIN_URL = 'https://api.jsonbin.io/v3/b';
@@ -158,7 +192,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     });
     if (!r.ok) throw new Error('云端写入失败（' + r.status + '）');
   }
-  // 合并去重（id 为唯一键），按时间倒序
   function merge(a, b) {
     const map = new Map();
     [...b, ...a].forEach(d => { if (d && d.id) map.set(d.id, d); });
@@ -172,12 +205,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     return `${y}-${m}-${d}`;
   }
 
-  // ========== 便签墙渲染 ==========
   function esc(s) {
     const div = document.createElement('div');
     div.textContent = s == null ? '' : String(s);
     return div.innerHTML;
   }
+
+  // ========== 便签墙渲染（主视图） ==========
   function renderWall() {
     const wall = document.getElementById('history-wall');
     const count = document.getElementById('diary-count');
@@ -185,12 +219,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (!wall) return;
     wall.innerHTML = '';
     if (diaries.length === 0) {
-      wall.innerHTML = '<div class="col-span-2 text-center py-16 text-[#8a8270] font-sans">还没有日记，写第一篇吧。</div>';
+      wall.innerHTML =
+        '<div class="col-span-full text-center py-24">' +
+          '<p class="font-serif text-lg text-[#8a8270] mb-6">还没有日记，写第一篇吧</p>' +
+          '<button class="diary-empty-write px-6 py-2 rounded-full bg-[#c23b22] text-white text-sm font-medium hover:opacity-90 transition-opacity">写第一篇</button>' +
+        '</div>';
+      wall.querySelector('.diary-empty-write').addEventListener('click', openWrite);
       return;
     }
     diaries.forEach(d => {
       const card = document.createElement('div');
-      card.className = 'relative group bg-gradient-to-b from-[#fff7d6] to-[#fdf3c0] text-[#6b5a2e] rounded-xl border border-[#efe0b0] p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer';
+      card.className = 'relative group bg-gradient-to-b from-[#fff7d6] to-[#fdf3c0] text-[#6b5a2e] rounded-xl border border-[#efe0b0] p-4 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer';
       card.innerHTML =
         '<div class="font-mono text-xs text-[#8a7a4a] mb-2">' + esc(d.date) + '</div>' +
         '<h3 class="font-display font-semibold text-[15px] text-[#5c4d28] mb-1 truncate">' + esc(d.title || '（无题）') + '</h3>' +
@@ -211,7 +250,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     });
   }
 
-  // ========== 弹窗 ==========
+  // ========== 查看弹窗 ==========
   const modal = document.getElementById('diary-modal');
   const modalInner = document.getElementById('diary-modal-inner');
   const modalClose = document.getElementById('diary-modal-close');
@@ -232,7 +271,37 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
   modalClose?.addEventListener('click', closeModal);
   modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closeWrite(); } });
+
+  // ========== 写作窗口 ==========
+  const writeModal = document.getElementById('diary-write-modal');
+  const fab = document.getElementById('diary-fab');
+
+  function openWrite() {
+    if (!writeModal) return;
+    // 刷新日期头
+    const now = new Date();
+    const num = document.getElementById('diary-date-num');
+    if (num) num.textContent = String(now.getDate());
+    const full = document.getElementById('diary-date-full');
+    if (full) full.textContent = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' }) + ' · ' + now.toLocaleDateString('zh-CN', { weekday: 'long' });
+    writeModal.classList.remove('hidden');
+    writeModal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    const body = document.getElementById('diary-body');
+    if (body) setTimeout(() => body.focus(), 50);
+  }
+  function closeWrite() {
+    if (!writeModal) return;
+    writeModal.classList.add('hidden');
+    writeModal.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('diary-write-open')?.addEventListener('click', openWrite);
+  document.getElementById('diary-write-close')?.addEventListener('click', closeWrite);
+  document.getElementById('diary-write-cancel')?.addEventListener('click', closeWrite);
+  fab?.addEventListener('click', openWrite);
+  writeModal?.addEventListener('click', (e) => { if (e.target === writeModal) closeWrite(); });
 
   // ========== 删除 ==========
   function removeDiary(id) {
@@ -278,10 +347,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (gate && content) {
       gate.classList.add('hidden');
       content.classList.remove('hidden');
+      fab?.classList.remove('hidden');
+      fab?.classList.add('flex');
       sessionStorage.setItem('diary_unlocked', '1');
       syncFromCloud();
-      const body = document.getElementById('diary-body');
-      if (body) body.focus();
     }
   }
   function tryUnlock() {
@@ -316,20 +385,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     form.addEventListener('animationend', () => form.classList.remove('login-shake'), { once: true });
   }
 
-  // ========== 日期 ==========
-  const now = new Date();
-  const todayEl = document.getElementById('diary-today');
-  if (todayEl) {
-    todayEl.textContent = now.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '.');
-  }
-  const dateNum = document.getElementById('diary-date-num');
-  if (dateNum) dateNum.textContent = String(now.getDate());
-  const dateFull = document.getElementById('diary-date-full');
-  if (dateFull) {
-    dateFull.textContent = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' }) + ' · ' + now.toLocaleDateString('zh-CN', { weekday: 'long' });
-  }
-
-  // ========== 保存 ==========
+  // ========== 保存（写入窗口内） ==========
   const saveBtn = document.getElementById('diary-save');
   const statusEl = document.getElementById('diary-status');
 
@@ -371,6 +427,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     document.getElementById('diary-mood').value = '';
     document.getElementById('diary-weather').value = '';
     document.getElementById('diary-body').value = '';
+    setTimeout(() => { statusEl.textContent = ''; closeWrite(); }, 900);
   });
 </script>
 
