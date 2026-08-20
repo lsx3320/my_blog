@@ -18,13 +18,15 @@ const { title = '日记' } = Astro.props;
       </svg>
     </div>
     <h2 class="font-display font-semibold text-xl text-[#1c1c1e] mb-1">私人{title}</h2>
-    <p class="font-sans text-sm text-[#8a8a8e] mb-7">我现在在哪里？</p>
+    <p class="font-sans text-sm text-[#8a8a8e] mb-7">我的生日（8 位数字）</p>
     <input
       id="diary-answer"
-      type="text"
-      placeholder="输入答案，回车进入"
+      type="password"
+      inputmode="numeric"
+      maxlength="8"
+      placeholder="输入生日密码"
       autocomplete="off"
-      class="w-full px-4 py-2.5 rounded-xl bg-[#f2f2f7] border border-transparent text-[#1c1c1e] font-sans text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#0a84ff]/40 placeholder:text-[#c7c7cc]"
+      class="w-full px-4 py-2.5 rounded-xl bg-[#f2f2f7] border border-transparent text-[#1c1c1e] font-mono text-lg text-center tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-[#0a84ff]/40 placeholder:text-[#c7c7cc]"
     />
     <button
       id="diary-unlock"
@@ -33,7 +35,7 @@ const { title = '日记' } = Astro.props;
     >
       进入
     </button>
-    <p id="diary-error" class="hidden mt-4 text-xs text-[#ff3b30] font-sans">答案不对，再想想～</p>
+    <p id="diary-error" class="hidden mt-4 text-xs text-[#ff3b30] font-sans">密码不对，再想想～</p>
   </form>
 </div>
 
@@ -43,9 +45,9 @@ const { title = '日记' } = Astro.props;
 </div>
 
 <script is:inline data-astro-rerun>
-  // 密码门：我现在在哪里？→ 武汉
+  // 密码门：数字密码（生日），规避中文输入法组词的不稳定问题
   // 状态用 localStorage 持久保存：登录一次，长期有效（跨标签页/跨会话）
-  const ANSWER = '武汉';
+  const ANSWER = '20020423';
   const KEY = 'diary_unlocked';
   const gate = document.getElementById('diary-gate');
   const app = document.getElementById('diary-app');
