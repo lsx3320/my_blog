@@ -50,6 +50,19 @@ export const onRequestPost = async ({
   request: Request;
   env: Record<string, string | undefined>;
 }): Promise<Response> => {
+  try {
+    return await handle(request, env);
+  } catch (e) {
+    // 兜底：任何未捕获异常都返回具体信息，便于排查
+    const message = e instanceof Error ? e.message : String(e);
+    return Response.json({ error: `内部错误：${message}` }, { status: 500 });
+  }
+};
+
+async function handle(
+  request: Request,
+  env: Record<string, string | undefined>,
+): Promise<Response> {
   const token = env.GITHUB_TOKEN;
   if (!token) {
     return Response.json({ error: '服务端未配置 GITHUB_TOKEN' }, { status: 500 });
