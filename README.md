@@ -96,16 +96,17 @@ Cloudflare Pages（静态，无需 wrangler 配置）：
 | :--- | :--- |
 | `PUBLIC_TWIKOO_ENV_ID` | Twikoo 评论后端地址。**未配置时评论区自动隐藏**，配置后启用（构建时注入，改后需重新部署） |
 
-## 日记功能（/diary）
+## 日记功能（/diary · 便签卡片）
 
 - 访问 `/diary` 需先通过密码门（问题：**我现在在哪里？** 答案：**武汉**，客户端校验 + 会话记忆）
-- Apple Notes 质感界面：毛玻璃工具条、大日期数字、衬线书写区、黄色便签墙
-- **存储：jsonbin.io 云存储**（参考 memo-card 项目方案）——API key 与 bin ID 固定在前端代码
-  （`src/pages/diary.astro` 顶部常量），localStorage 缓存 + 云端合并去重：
-  - 保存：写入本地 → 合并 → PUT 到 jsonbin
-  - 打开页面：从 jsonbin 拉取渲染便签墙（任何设备可见）
-  - 便签 hover 右上角可删除
-- 数据源与 GitHub 无关，不触发自动重建；如需改 bin/密钥，改 `CLOUD_KEY` / `CLOUD_BIN` 两个常量即可
+- 完全引用 [memo-card](https://github.com/lsx3320/memo-card) 的便签卡片应用（React 19 + 自定义样式）：
+  - 写作区 + 实时卡片预览（1080×1350，**备忘录白 / 便签黄 / 深色极简**三种模板）
+  - **✨ AI 一键整理**：调用 DeepSeek（key 在 ⚙️ 设置里配置，存 localStorage；无后端代理时前端直连）
+  - 本地自动排版（短句金句、列表、段落识别）、生成卡片图片下载
+  - 历史卡片墙 + 放大查看 + 删除
+- **存储：jsonbin.io 云同步**（`src/memo-card/lib/storage.js` 的 `CLOUD_KEY` / `CLOUD_BIN` 常量）：
+  本地 localStorage 缓存 + 云端合并去重，保存后自动同步，任何设备打开可见
+- 相关代码在 `src/memo-card/`（React 组件 + styles.css），通过 `@astrojs/react` 挂载到日记页
 
 ## 评论（Twikoo）
 

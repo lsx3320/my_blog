@@ -1,356 +1,65 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import MemoApp from '../memo-card/App.jsx';
+import '../memo-card/styles.css';
 ---
 
 <BaseLayout title="日记">
-  <div class="bg-[#f5efe0] border-b border-[#e5ddc8] min-h-[80vh]">
+  <div class="min-h-[80vh]">
 
-    <!-- 毛玻璃工具条 -->
-    <div class="sticky top-0 z-40 backdrop-blur-md bg-[#f5efe0]/75 border-b border-[#e5ddc8]">
-      <div class="max-w-6xl mx-auto px-6 py-3.5 flex items-center justify-between">
-        <div class="flex items-baseline gap-3">
-          <span class="font-display font-semibold text-xl text-[#3a3526] tracking-tight">日记</span>
-          <span id="diary-count" class="font-mono text-xs text-[#8a8270]"></span>
-        </div>
-        <div class="flex items-center gap-4">
-          <span id="diary-today" class="hidden sm:inline font-mono text-xs text-[#8a8270]"></span>
-          <button
-            id="diary-write-open"
-            class="px-5 py-1.5 rounded-full bg-[#c23b22] text-white text-sm font-medium hover:opacity-90 active:scale-[0.97] transition-all inline-flex items-center gap-1.5"
-          >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-            </svg>
-            写一篇
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div class="max-w-6xl mx-auto px-6 py-10">
-
-      <!-- 密码门 -->
-      <div id="diary-gate" class="flex items-center justify-center py-20">
-        <form
-          id="diary-gate-form"
-          class="w-full max-w-sm bg-[#fffdf3] rounded-2xl shadow-[0_8px_22px_rgba(194,59,34,0.12)] border border-[#efe6c8] p-8 text-center"
-        >
-          <div class="w-14 h-14 mx-auto mb-5 rounded-full bg-[#3a3526] flex items-center justify-center">
-            <svg class="w-6 h-6 text-[#f5efe0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-          </div>
-          <h2 class="font-display font-semibold text-xl text-[#3a3526] mb-1">私人日记</h2>
-          <p class="font-sans text-sm text-[#8a8270] mb-7">回答：我现在在哪里？</p>
-          <input
-            id="diary-answer"
-            type="text"
-            placeholder="输入答案"
-            autocomplete="off"
-            class="w-full px-4 py-2.5 rounded-xl bg-[#f6edd0] border border-transparent text-[#3a3526] font-sans text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#c23b22]/40 placeholder:text-[#b5ab8c]"
-          />
-          <button
-            id="diary-unlock"
-            type="submit"
-            class="mt-5 w-full py-2.5 rounded-xl bg-[#c23b22] text-white text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all"
-          >
-            进入
-          </button>
-          <p id="diary-error" class="hidden mt-4 text-xs text-[#d64545] font-sans">答案不对，再想想～</p>
-        </form>
-      </div>
-
-      <!-- 日记内容（解锁后显示：主页面 = 便签墙） -->
-      <div id="diary-content" class="hidden">
-        <div class="flex items-center justify-between mb-6">
-          <div>
-            <h1 class="font-display font-semibold text-2xl text-[#3a3526] tracking-tight">随手记</h1>
-            <p class="font-sans text-xs text-[#8a8270] mt-1">写下的每一句，都是生活的注脚</p>
-          </div>
-          <span id="diary-cloud-state" class="font-mono text-xs text-[#8a8270]"></span>
-        </div>
-
-        <!-- 便签墙（主视图） -->
-        <div id="history-wall" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- 写作窗口 -->
-  <div id="diary-write-modal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-    <div class="w-full max-w-xl max-h-[88vh] overflow-y-auto bg-[#fffdf3] rounded-2xl shadow-2xl border border-[#efe6c8]">
-      <!-- 窗口头部 -->
-      <div class="sticky top-0 z-10 px-7 pt-6 pb-3 bg-[#fffdf3]/90 backdrop-blur border-b border-[#f0ead0] flex items-center gap-4">
-        <span id="diary-date-num" class="font-mono font-medium text-3xl text-[#c23b22] leading-none">20</span>
-        <div class="flex-1 min-w-0">
-          <p id="diary-date-full" class="font-sans text-sm text-[#3a3526]">2026年8月 · 星期四</p>
-          <p class="font-sans text-xs text-[#8a8270] mt-0.5">今天 · 随笔</p>
-        </div>
-        <input
-          id="diary-mood"
-          placeholder="心情"
-          class="w-20 bg-[#f6edd0] rounded-full px-3 py-1.5 font-sans text-xs text-[#5a5340] text-center focus:outline-none focus:ring-2 focus:ring-[#c23b22]/40 placeholder:text-[#b5ab8c]"
-        />
-        <input
-          id="diary-weather"
-          placeholder="天气"
-          class="w-20 bg-[#f6edd0] rounded-full px-3 py-1.5 font-sans text-xs text-[#5a5340] text-center focus:outline-none focus:ring-2 focus:ring-[#c23b22]/40 placeholder:text-[#b5ab8c]"
-        />
-        <button id="diary-write-close" class="w-8 h-8 rounded-full hover:bg-[#f0ead0] flex items-center justify-center text-[#8a8270] transition-colors" aria-label="关闭">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+    <!-- 密码门 -->
+    <div id="diary-gate" class="flex items-center justify-center py-24 bg-[#f2f2f7]">
+      <form
+        id="diary-gate-form"
+        class="w-full max-w-sm bg-white rounded-2xl shadow-[0_8px_22px_rgba(10,132,255,0.10)] border border-[#e5e5ea] p-8 text-center"
+      >
+        <div class="w-14 h-14 mx-auto mb-5 rounded-full bg-[#1c1c1e] flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
-        </button>
-      </div>
-      <!-- 书写区 -->
-      <div class="px-7 py-5">
-        <input
-          id="diary-title"
-          placeholder="标题（可选）"
-          class="w-full bg-transparent font-display font-semibold text-2xl text-[#3a3526] placeholder:text-[#c4baa0] focus:outline-none mb-5"
-        />
-        <textarea
-          id="diary-body"
-          placeholder="写点什么……"
-          rows="10"
-          class="w-full bg-transparent resize-y font-serif text-[16px] leading-loose text-[#3a3526] focus:outline-none placeholder:text-[#c4baa0]"
-        ></textarea>
-      </div>
-      <!-- 窗口底部 -->
-      <div class="sticky bottom-0 z-10 px-7 py-4 bg-[#fffdf3]/90 backdrop-blur border-t border-[#f0ead0] flex items-center justify-between gap-4">
-        <span id="diary-status" class="font-sans text-xs text-[#8a8270] truncate"></span>
-        <div class="flex items-center gap-3 shrink-0">
-          <button
-            id="diary-write-cancel"
-            class="px-5 py-2 rounded-full border border-[#e0d7b8] text-[#5a5340] text-sm font-medium hover:border-[#c9bf9d] transition-colors"
-          >
-            取消
-          </button>
-          <button
-            id="diary-save"
-            class="px-6 py-2 rounded-full bg-[#c23b22] text-white text-sm font-medium hover:opacity-90 active:scale-[0.97] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            保存
-          </button>
         </div>
-      </div>
+        <h2 class="font-sans font-semibold text-xl text-[#1c1c1e] mb-1">私人日记</h2>
+        <p class="font-sans text-sm text-[#8a8a8e] mb-7">回答：我现在在哪里？</p>
+        <input
+          id="diary-answer"
+          type="text"
+          placeholder="输入答案"
+          autocomplete="off"
+          class="w-full px-4 py-2.5 rounded-xl bg-[#f2f2f7] border border-transparent text-[#1c1c1e] font-sans text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#0a84ff]/40 placeholder:text-[#c7c7cc]"
+        />
+        <button
+          id="diary-unlock"
+          type="submit"
+          class="mt-5 w-full py-2.5 rounded-xl bg-[#0a84ff] text-white text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all"
+        >
+          进入
+        </button>
+        <p id="diary-error" class="hidden mt-4 text-xs text-[#ff3b30] font-sans">答案不对，再想想～</p>
+      </form>
     </div>
-  </div>
 
-  <!-- 便签查看弹窗 -->
-  <div id="diary-modal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-    <div id="diary-modal-card" class="max-w-lg w-full max-h-[85vh] overflow-y-auto bg-gradient-to-b from-[#fff7d6] to-[#fdf3c0] text-[#6b5a2e] rounded-2xl shadow-xl p-7 relative">
-      <button id="diary-modal-close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center text-[#8a7a4a] transition-colors" aria-label="关闭">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-      <div id="diary-modal-inner"></div>
+    <!-- 便签卡片应用（解锁后显示） -->
+    <div id="diary-app" class="hidden">
+      <MemoApp client:only="react" />
     </div>
-  </div>
 
-  <!-- 悬浮写按钮（FAB） -->
-  <button
-    id="diary-fab"
-    class="fixed bottom-8 right-8 z-[70] hidden w-14 h-14 rounded-full bg-[#c23b22] text-white shadow-lg shadow-[#c23b22]/30 hover:scale-105 active:scale-95 transition-all items-center justify-center"
-    aria-label="写日记"
-  >
-    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-    </svg>
-  </button>
+  </div>
 </BaseLayout>
 
 <script is:inline data-astro-rerun>
-  // ========== jsonbin 云存储 ==========
-  const CLOUD_KEY = '$2a$10$Iyqn3eO8f2SOtdwE9A9k1uY7MIXfb5k1Z7pYYkWZW9lYtxc1bJlbi';
-  const CLOUD_BIN = '6a86f47cda38895dfefb5b57';
-  const BIN_URL = 'https://api.jsonbin.io/v3/b';
-  const LOCAL_KEY = 'diary:local';
-
-  let diaries = [];
-
-  function loadLocal() {
-    try { return JSON.parse(localStorage.getItem(LOCAL_KEY)) || []; } catch { return []; }
-  }
-  function saveLocal(list) {
-    try { localStorage.setItem(LOCAL_KEY, JSON.stringify(list)); } catch { /* ignore */ }
-  }
-  async function cloudGet() {
-    const r = await fetch(`${BIN_URL}/${CLOUD_BIN}/latest`, { headers: { 'X-Master-Key': CLOUD_KEY } });
-    if (!r.ok) throw new Error('云端读取失败（' + r.status + '）');
-    const j = await r.json();
-    const rec = j.record || {};
-    return Array.isArray(rec.diaries) ? rec.diaries : [];
-  }
-  async function cloudPut(list) {
-    const r = await fetch(`${BIN_URL}/${CLOUD_BIN}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Master-Key': CLOUD_KEY },
-      body: JSON.stringify({ diaries: list }),
-    });
-    if (!r.ok) throw new Error('云端写入失败（' + r.status + '）');
-  }
-  function merge(a, b) {
-    const map = new Map();
-    [...b, ...a].forEach(d => { if (d && d.id) map.set(d.id, d); });
-    return [...map.values()].sort((x, y) => (y.createdAt || 0) - (x.createdAt || 0));
-  }
-  function todayCN() {
-    const now = new Date(Date.now() + 8 * 3600 * 1000);
-    const y = now.getUTCFullYear();
-    const m = String(now.getUTCMonth() + 1).padStart(2, '0');
-    const d = String(now.getUTCDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-  }
-
-  function esc(s) {
-    const div = document.createElement('div');
-    div.textContent = s == null ? '' : String(s);
-    return div.innerHTML;
-  }
-
-  // ========== 便签墙渲染（主视图） ==========
-  function renderWall() {
-    const wall = document.getElementById('history-wall');
-    const count = document.getElementById('diary-count');
-    if (count) count.textContent = diaries.length + ' 篇';
-    if (!wall) return;
-    wall.innerHTML = '';
-    if (diaries.length === 0) {
-      wall.innerHTML =
-        '<div class="col-span-full text-center py-24">' +
-          '<p class="font-serif text-lg text-[#8a8270] mb-6">还没有日记，写第一篇吧</p>' +
-          '<button class="diary-empty-write px-6 py-2 rounded-full bg-[#c23b22] text-white text-sm font-medium hover:opacity-90 transition-opacity">写第一篇</button>' +
-        '</div>';
-      wall.querySelector('.diary-empty-write').addEventListener('click', openWrite);
-      return;
-    }
-    diaries.forEach(d => {
-      const card = document.createElement('div');
-      card.className = 'relative group bg-gradient-to-b from-[#fff7d6] to-[#fdf3c0] text-[#6b5a2e] rounded-xl border border-[#efe0b0] p-4 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer';
-      card.innerHTML =
-        '<div class="font-mono text-xs text-[#8a7a4a] mb-2">' + esc(d.date) + '</div>' +
-        '<h3 class="font-display font-semibold text-[15px] text-[#5c4d28] mb-1 truncate">' + esc(d.title || '（无题）') + '</h3>' +
-        '<div class="text-[13px] text-[#7a6a3e] leading-relaxed line-clamp-4">' + esc(d.body) + '</div>' +
-        (d.mood ? '<span class="mt-2 inline-block font-sans text-[11px] text-[#b08a3e]">' + esc(d.mood) + '</span>' : '') +
-        '<button class="diary-del absolute -top-2 -right-2 hidden group-hover:flex w-6 h-6 rounded-full bg-[#c23b22] text-white items-center justify-center" aria-label="删除">' +
-          '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>' +
-        '</button>';
-      card.addEventListener('click', (e) => {
-        if (e.target.closest('.diary-del')) return;
-        openModal(d);
-      });
-      card.querySelector('.diary-del').addEventListener('click', (e) => {
-        e.stopPropagation();
-        removeDiary(d.id);
-      });
-      wall.appendChild(card);
-    });
-  }
-
-  // ========== 查看弹窗 ==========
-  const modal = document.getElementById('diary-modal');
-  const modalInner = document.getElementById('diary-modal-inner');
-  const modalClose = document.getElementById('diary-modal-close');
-
-  function openModal(d) {
-    if (!modalInner) return;
-    modalInner.innerHTML =
-      '<div class="font-mono text-xs text-[#8a7a4a] mb-3">' + esc(d.date) + '</div>' +
-      '<h3 class="font-display font-semibold text-xl text-[#5c4d28] mb-3">' + esc(d.title || '（无题）') + '</h3>' +
-      '<div class="font-serif text-[15px] leading-relaxed whitespace-pre-wrap">' + esc(d.body) + '</div>' +
-      (d.mood ? '<p class="mt-4 font-sans text-xs text-[#b08a3e]">' + esc(d.mood) + '</p>' : '');
-    if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
-    document.body.style.overflow = 'hidden';
-  }
-  function closeModal() {
-    if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
-    document.body.style.overflow = '';
-  }
-  modalClose?.addEventListener('click', closeModal);
-  modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closeWrite(); } });
-
-  // ========== 写作窗口 ==========
-  const writeModal = document.getElementById('diary-write-modal');
-  const fab = document.getElementById('diary-fab');
-
-  function openWrite() {
-    if (!writeModal) return;
-    // 刷新日期头
-    const now = new Date();
-    const num = document.getElementById('diary-date-num');
-    if (num) num.textContent = String(now.getDate());
-    const full = document.getElementById('diary-date-full');
-    if (full) full.textContent = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' }) + ' · ' + now.toLocaleDateString('zh-CN', { weekday: 'long' });
-    writeModal.classList.remove('hidden');
-    writeModal.classList.add('flex');
-    document.body.style.overflow = 'hidden';
-    const body = document.getElementById('diary-body');
-    if (body) setTimeout(() => body.focus(), 50);
-  }
-  function closeWrite() {
-    if (!writeModal) return;
-    writeModal.classList.add('hidden');
-    writeModal.classList.remove('flex');
-    document.body.style.overflow = '';
-  }
-  document.getElementById('diary-write-open')?.addEventListener('click', openWrite);
-  document.getElementById('diary-write-close')?.addEventListener('click', closeWrite);
-  document.getElementById('diary-write-cancel')?.addEventListener('click', closeWrite);
-  fab?.addEventListener('click', openWrite);
-  writeModal?.addEventListener('click', (e) => { if (e.target === writeModal) closeWrite(); });
-
-  // ========== 删除 ==========
-  function removeDiary(id) {
-    if (!window.confirm('删除这篇日记？')) return;
-    diaries = diaries.filter(d => d.id !== id);
-    saveLocal(diaries);
-    renderWall();
-    const state = document.getElementById('diary-cloud-state');
-    if (state) state.textContent = '删除中…';
-    cloudPut(diaries).then(() => {
-      if (state) state.textContent = '已同步云端';
-    }).catch(() => {
-      if (state) state.textContent = '云端同步失败';
-    });
-  }
-
-  // ========== 云同步 ==========
-  async function syncFromCloud() {
-    const state = document.getElementById('diary-cloud-state');
-    if (state) state.textContent = '同步中…';
-    try {
-      const cloud = await cloudGet();
-      diaries = merge(loadLocal(), cloud);
-      saveLocal(diaries);
-      renderWall();
-      if (state) state.textContent = '已同步';
-    } catch (e) {
-      diaries = loadLocal();
-      renderWall();
-      if (state) state.textContent = '离线模式';
-    }
-  }
-
-  // ========== 密码门 ==========
+  // 密码门：我现在在哪里？→ 武汉
   const ANSWER = '武汉';
   const gate = document.getElementById('diary-gate');
-  const content = document.getElementById('diary-content');
+  const app = document.getElementById('diary-app');
   const input = document.getElementById('diary-answer');
   const err = document.getElementById('diary-error');
   const form = document.getElementById('diary-gate-form');
 
   function unlock() {
-    if (gate && content) {
+    if (gate && app) {
       gate.classList.add('hidden');
-      content.classList.remove('hidden');
-      fab?.classList.remove('hidden');
-      fab?.classList.add('flex');
+      app.classList.remove('hidden');
       sessionStorage.setItem('diary_unlocked', '1');
-      syncFromCloud();
     }
   }
   function tryUnlock() {
@@ -384,51 +93,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     form.classList.add('login-shake');
     form.addEventListener('animationend', () => form.classList.remove('login-shake'), { once: true });
   }
-
-  // ========== 保存（写入窗口内） ==========
-  const saveBtn = document.getElementById('diary-save');
-  const statusEl = document.getElementById('diary-status');
-
-  saveBtn?.addEventListener('click', async () => {
-    const title = document.getElementById('diary-title').value.trim();
-    const mood = document.getElementById('diary-mood').value.trim();
-    const weather = document.getElementById('diary-weather').value.trim();
-    const body = document.getElementById('diary-body').value.trim();
-
-    if (!body) {
-      statusEl.textContent = '先写点什么再保存吧';
-      return;
-    }
-
-    const entry = {
-      id: 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      date: todayCN(),
-      title, mood, weather, body,
-      createdAt: Date.now(),
-    };
-
-    const next = [entry, ...diaries];
-    diaries = next;
-    saveLocal(next);
-    renderWall();
-
-    saveBtn.disabled = true;
-    statusEl.textContent = '正在保存到云端…';
-    try {
-      await cloudPut(next);
-      statusEl.textContent = '已保存到云端 ✓';
-    } catch (e) {
-      statusEl.textContent = '云端保存失败（已存本地）：' + e.message;
-    } finally {
-      saveBtn.disabled = false;
-    }
-
-    document.getElementById('diary-title').value = '';
-    document.getElementById('diary-mood').value = '';
-    document.getElementById('diary-weather').value = '';
-    document.getElementById('diary-body').value = '';
-    setTimeout(() => { statusEl.textContent = ''; closeWrite(); }, 900);
-  });
 </script>
 
 <style>
