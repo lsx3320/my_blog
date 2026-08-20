@@ -53,6 +53,8 @@ const { title = '日记' } = Astro.props;
 
   function enter() {
     if (!gate || !app) return;
+    // 先记录会话状态（立即生效，避免延迟期间跳转丢失）
+    sessionStorage.setItem('diary_unlocked', '1');
     // 平滑过渡：密码门淡出 → 内容淡入
     gate.style.transition = 'opacity 0.22s ease';
     gate.style.opacity = '0';
@@ -61,8 +63,32 @@ const { title = '日记' } = Astro.props;
       gate.style.opacity = '';
       app.classList.remove('hidden');
       app.classList.add('diary-app-in');
-      sessionStorage.setItem('diary_unlocked', '1');
     }, 200);
+  }
+
+  // 已解锁则直接进入（页面加载 / SPA 导航后都会执行）
+  function applyUnlocked() {
+    if (sessionStorage.getItem('diary_unlocked') === '1' && gate && app) {
+      gate.classList.add('hidden');
+      app.classList.remove('hidden');
+      app.classList.add('diary-app-in');
+      return true;
+    }
+    return false;
+  }
+
+  // 页面加载时
+  if (!applyUnlocked()) {
+    setTimeout(() => input?.focus(), 80);
+  }
+
+  // View Transitions 每次导航后兜底检查（防止偶发时序丢状态）
+  if (!window.__diaryGateBound) {
+    window.__diaryGateBound = true;
+    document.addEventListener('astro:page-load', () => {
+      // 本脚本会随 data-astro-rerun 重跑，这里主要防 React 挂载后覆盖
+      setTimeout(applyUnlocked, 0);
+    });
   }
 
   function fail() {
@@ -89,13 +115,6 @@ const { title = '日记' } = Astro.props;
     return false;
   }
 
-  // 本会话已解锁则直接进入
-  if (sessionStorage.getItem('diary_unlocked') === '1') {
-    gate?.classList.add('hidden');
-    app?.classList.remove('hidden');
-    app?.classList.add('diary-app-in');
-  }
-
   // 表单提交：回车与「进入」按钮都走这里
   form?.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -115,9 +134,6 @@ const { title = '日记' } = Astro.props;
   input?.addEventListener('input', () => {
     if (tryUnlock()) return;
   });
-
-  // 打开即聚焦，直接可输
-  setTimeout(() => input?.focus(), 80);
 </script>
 
 <style>
