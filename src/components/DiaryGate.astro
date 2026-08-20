@@ -18,11 +18,11 @@ const { title = '日记' } = Astro.props;
       </svg>
     </div>
     <h2 class="font-display font-semibold text-xl text-[#3a3526] mb-1">私人{title}</h2>
-    <p class="font-sans text-sm text-[#8a8270] mb-7">回答：我现在在哪里？</p>
+    <p class="font-sans text-sm text-[#8a8270] mb-7">我现在在哪里？</p>
     <input
       id="diary-answer"
       type="text"
-      placeholder="输入答案"
+      placeholder="输入答案，回车进入"
       autocomplete="off"
       class="w-full px-4 py-2.5 rounded-xl bg-[#f6edd0] border border-transparent text-[#3a3526] font-sans text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#c23b22]/40 placeholder:text-[#b5ab8c]"
     />
@@ -51,44 +51,73 @@ const { title = '日记' } = Astro.props;
   const err = document.getElementById('diary-error');
   const form = document.getElementById('diary-gate-form');
 
-  function unlock() {
-    if (gate && app) {
+  function enter() {
+    if (!gate || !app) return;
+    // 平滑过渡：密码门淡出 → 内容淡入
+    gate.style.transition = 'opacity 0.22s ease';
+    gate.style.opacity = '0';
+    setTimeout(() => {
       gate.classList.add('hidden');
+      gate.style.opacity = '';
       app.classList.remove('hidden');
+      app.classList.add('diary-app-in');
       sessionStorage.setItem('diary_unlocked', '1');
+    }, 200);
+  }
+
+  function fail() {
+    err?.classList.remove('hidden');
+    if (form) {
+      form.classList.remove('login-shake');
+      void form.offsetWidth;
+      form.classList.add('login-shake');
+      form.addEventListener('animationend', () => form.classList.remove('login-shake'), { once: true });
+    }
+    // 答错自动清空，聚焦等待重输
+    if (input) {
+      input.value = '';
+      input.focus();
     }
   }
+
   function tryUnlock() {
     if (input && input.value.trim() === ANSWER) {
       err?.classList.add('hidden');
-      unlock();
+      enter();
       return true;
     }
     return false;
   }
+
+  // 本会话已解锁则直接进入
   if (sessionStorage.getItem('diary_unlocked') === '1') {
-    unlock();
+    gate?.classList.add('hidden');
+    app?.classList.remove('hidden');
+    app?.classList.add('diary-app-in');
   }
+
+  // 表单提交：回车与「进入」按钮都走这里
   form?.addEventListener('submit', (e) => {
     e.preventDefault();
-    if (!tryUnlock()) {
-      err?.classList.remove('hidden');
-      shake();
-      input?.focus();
+    if (!tryUnlock()) fail();
+  });
+
+  // 输入法组词中的回车不提交；普通回车提交表单
+  input?.addEventListener('keydown', (e) => {
+    if (e.isComposing || e.keyCode === 229) return;
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      form?.requestSubmit();
     }
   });
-  input?.addEventListener('keydown', (e) => {
-    if (e.isComposing || e.keyCode === 229) e.preventDefault();
-  });
-  input?.addEventListener('compositionend', () => { if (tryUnlock()) return; });
 
-  function shake() {
-    if (!form) return;
-    form.classList.remove('login-shake');
-    void form.offsetWidth;
-    form.classList.add('login-shake');
-    form.addEventListener('animationend', () => form.classList.remove('login-shake'), { once: true });
-  }
+  // 输入变化时自动校验：中文选字上屏后立即判断，答对即进（无需再按回车/点按钮）
+  input?.addEventListener('input', () => {
+    if (tryUnlock()) return;
+  });
+
+  // 打开即聚焦，直接可输
+  setTimeout(() => input?.focus(), 80);
 </script>
 
 <style>
@@ -99,4 +128,10 @@ const { title = '日记' } = Astro.props;
     40%, 60% { transform: translateX(4px); }
   }
   .login-shake { animation: login-shake 0.4s ease; }
+
+  @keyframes diaryFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  .diary-app-in { animation: diaryFadeIn 0.3s ease; }
 </style>
