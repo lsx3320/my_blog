@@ -6,8 +6,8 @@ interface Props {
 const { title = '日记' } = Astro.props;
 ---
 
-<!-- 密码门 -->
-<div id="diary-gate" class="flex items-center justify-center py-24 bg-[#f2f2f7]">
+<!-- 密码门：全屏遮罩层（React 应用始终在下方渲染，解锁即揭开） -->
+<div id="diary-gate" class="fixed inset-0 z-[60] flex items-center justify-center bg-[#f2f2f7]">
   <form
     id="diary-gate-form"
     class="w-full max-w-sm bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.08)] border border-[#e5e5ea] p-8 text-center"
@@ -39,8 +39,8 @@ const { title = '日记' } = Astro.props;
   </form>
 </div>
 
-<!-- 内容（解锁后显示） -->
-<div id="diary-app" class="hidden">
+<!-- 内容（React 始终渲染，密码门遮罩揭开后可见） -->
+<div id="diary-app">
   <slot />
 </div>
 
@@ -50,7 +50,6 @@ const { title = '日记' } = Astro.props;
   const ANSWER = '20020423';
   const KEY = 'diary_unlocked';
   const gate = document.getElementById('diary-gate');
-  const app = document.getElementById('diary-app');
   const input = document.getElementById('diary-answer');
   const err = document.getElementById('diary-error');
   const form = document.getElementById('diary-gate-form');
@@ -72,26 +71,16 @@ const { title = '日记' } = Astro.props;
   }
 
   function enter() {
-    if (!gate || !app) return;
-    // 先记录状态（立即生效）
+    if (!gate) return;
+    // 立即记录状态 + 揭开遮罩（React 内容始终已在下方渲染，无空白）
     markUnlocked();
-    // 平滑过渡：密码门淡出 → 内容淡入
-    gate.style.transition = 'opacity 0.22s ease';
-    gate.style.opacity = '0';
-    setTimeout(() => {
-      gate.classList.add('hidden');
-      gate.style.opacity = '';
-      app.classList.remove('hidden');
-      app.classList.add('diary-app-in');
-    }, 200);
+    gate.classList.add('hidden');
   }
 
   // 已登录则直接进入
   function applyUnlocked() {
-    if (isUnlocked() && gate && app) {
+    if (isUnlocked() && gate) {
       gate.classList.add('hidden');
-      app.classList.remove('hidden');
-      app.classList.add('diary-app-in');
       return true;
     }
     return false;
@@ -149,9 +138,13 @@ const { title = '日记' } = Astro.props;
     }
   });
 
-  // 输入变化时自动校验：中文选字上屏后立即判断，答对即进（无需再按回车/点按钮）
+  // 输入变化时自动校验：输满密码位数立即判定——正确即进，错误立即提示
   input?.addEventListener('input', () => {
     if (tryUnlock()) return;
+    // 已输满 8 位且不对 → 立即反馈并清空重输（绝不无响应）
+    if (input.value.length >= 8) {
+      fail();
+    }
   });
 </script>
 
@@ -163,10 +156,4 @@ const { title = '日记' } = Astro.props;
     40%, 60% { transform: translateX(4px); }
   }
   .login-shake { animation: login-shake 0.4s ease; }
-
-  @keyframes diaryFadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: none; }
-  }
-  .diary-app-in { animation: diaryFadeIn 0.3s ease; }
 </style>
