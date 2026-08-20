@@ -1,53 +1,41 @@
-// 设置弹层：云同步状态（固定 key）+ AI key（用户配置，存 localStorage）
+// 设置弹窗：配置 DeepSeek API key（AI 整理用，存 localStorage）
 import { useState } from 'react';
 
-export default function SettingsModal({ aiKey, syncedAt, onClose, onSaveAI }) {
-  const [aiInput, setAiInput] = useState(aiKey);
-  const [msg, setMsg] = useState('');
-
-  const saveAI = () => {
-    onSaveAI(aiInput.trim());
-    setMsg('已保存 AI key');
-  };
+export default function SettingsModal({ aiKey, onClose, onSaveAI }) {
+  const [key, setKey] = useState(aiKey || '');
 
   return (
-    <div className="history-modal" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="settings-panel">
-        <h3 className="settings-title">设置</h3>
-
-        {/* 云同步（固定 key，只读状态） */}
-        <div className="settings-section">
-          <p className="settings-label">☁️ 云同步</p>
-          <p className="settings-ok">✓ 已配置云端共享（固定 key，所有浏览器共用同一份数据）</p>
-          <p className="settings-hint">
-            保存卡片自动上传云端；换浏览器点工具栏「☁️ 同步」即可拉取。每 5 秒自动刷新。
-          </p>
-          {syncedAt > 0 && (
-            <p className="settings-hint">上次同步：{new Date(syncedAt).toLocaleString()}</p>
-          )}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="font-sans font-semibold text-lg text-[#3a3526] mb-1">设置</h3>
+        <p className="font-sans text-xs text-[#8a8270] mb-4">AI 整理使用 DeepSeek，key 保存在本浏览器 localStorage</p>
+        <input
+          value={key}
+          onChange={(e) => setKey(e.target.value)}
+          placeholder="sk-…"
+          spellCheck={false}
+          className="w-full border border-[#e0d7b8] rounded-lg px-3 py-2 font-mono text-sm text-[#3a3526] focus:outline-none focus:border-[#c23b22] mb-5"
+        />
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-full border border-[#e0d7b8] text-[#5a5340] text-sm font-medium hover:border-[#c9bf9d] transition-colors"
+          >
+            取消
+          </button>
+          <button
+            onClick={() => { onSaveAI(key.trim()); onClose(); }}
+            className="px-5 py-2 rounded-full bg-[#c23b22] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            保存
+          </button>
         </div>
-
-        <div className="settings-divider" />
-
-        {/* AI 直连 key（用户配置） */}
-        <div className="settings-section">
-          <p className="settings-label">✨ AI 整理 · DeepSeek API key</p>
-          <p className="settings-hint">纯静态部署直连用。填一次保存在本浏览器，之后 AI 整理可用。</p>
-          <input
-            type="password"
-            className="settings-input"
-            placeholder="DeepSeek API key（sk-...）"
-            value={aiInput}
-            onChange={(e) => setAiInput(e.target.value)}
-          />
-          <div className="settings-actions">
-            <button type="button" className="btn btn-ghost" onClick={saveAI}>保存</button>
-          </div>
-        </div>
-
-        {msg && <p className="settings-msg">{msg}</p>}
-
-        <button type="button" className="btn btn-ghost settings-close" onClick={onClose}>关闭</button>
       </div>
     </div>
   );

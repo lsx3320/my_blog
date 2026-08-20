@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import DiaryGate from '../../components/DiaryGate.astro';
+import DiaryView from '../../memo-card/components/DiaryView.jsx';
+---
+
+<BaseLayout title="日记">
+  <DiaryGate title="日记">
+    <DiaryView client:only="react" />
+  </DiaryGate>
+</BaseLayout>
