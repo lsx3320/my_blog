@@ -26,10 +26,10 @@ export default function DiaryView() {
 
   if (notFound) {
     return (
-      <div className="min-h-screen bg-[#f5efe0]">
-        <div className="max-w-2xl mx-auto px-6 py-32 text-center">
-          <p className="font-serif text-lg text-[#8a8270] mb-8">这条记录不存在或已被删除</p>
-          <a href="/diary" className="px-6 py-2.5 rounded-full border border-[#3a3526] text-[#3a3526] text-sm font-medium hover:border-[#c23b22] hover:text-[#c23b22] transition-colors">
+      <div className="min-h-screen bg-[#f2f2f7]">
+        <div className="max-w-2xl mx-auto px-5 py-32 text-center">
+          <p className="font-serif text-lg text-[#8a8a8e] mb-8">这条记录不存在或已被删除</p>
+          <a href="/diary" className="px-6 py-2.5 rounded-full bg-[#0a84ff] text-white text-sm font-medium hover:opacity-90 transition-opacity">
             返回日记
           </a>
         </div>
@@ -39,49 +39,62 @@ export default function DiaryView() {
 
   if (!item) {
     return (
-      <div className="min-h-screen bg-[#f5efe0] flex items-center justify-center">
-        <p className="font-sans text-sm text-[#8a8270]">加载中…</p>
+      <div className="min-h-screen bg-[#f2f2f7] flex items-center justify-center">
+        <p className="text-sm text-[#8a8a8e]">加载中…</p>
       </div>
     );
   }
 
   return (
-    <article className="min-h-screen bg-[#f5efe0] border-b border-[#e5ddc8]">
-      <div className="max-w-2xl mx-auto px-6 py-14">
-        <a
-          href="/diary"
-          className="inline-flex items-center gap-1.5 font-sans text-sm text-[#6b6350] hover:text-[#c23b22] transition-colors mb-12"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-          </svg>
-          返回日记
-        </a>
+    <div className="min-h-screen bg-[#f2f2f7]">
+      <div className="max-w-2xl mx-auto px-5 py-10">
+        <div className="flex items-center justify-between mb-6">
+          <a
+            href="/diary"
+            className="inline-flex items-center gap-1.5 text-sm text-[#8a8a8e] hover:text-[#0a84ff] transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            返回日记
+          </a>
+          <a
+            href={`/diary/write?edit=${item.id}`}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white shadow-sm text-sm text-[#1c1c1e] font-medium hover:bg-[#f2f2f7] transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            编辑
+          </a>
+        </div>
 
-        <header className="mb-12">
-          <div className="flex items-center gap-3 font-sans text-xs text-[#8a8270] mb-5">
-            <time>{item.date}</time>
-            {item.mood && (
-              <>
-                <span className="w-px h-3 bg-[#d8cfae]" aria-hidden="true"></span>
-                <span className="text-[#b08a3e]">{item.mood}</span>
-              </>
-            )}
+        <article className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.06)] p-8 md:p-12">
+          <header className="mb-10">
+            <div className="flex items-center gap-3 text-xs text-[#8a8a8e] mb-5">
+              <time>{item.date}</time>
+              {item.mood && (
+                <>
+                  <span className="w-px h-3 bg-[#e5e5ea]" aria-hidden="true"></span>
+                  <span className="text-[#b08a3e]">{item.mood}</span>
+                </>
+              )}
+            </div>
+            <h1 className="font-serif font-bold text-3xl md:text-4xl text-[#1c1c1e] leading-tight tracking-tight mb-8">
+              {item.title || '（无题）'}
+            </h1>
+            <div className="w-12 h-[2px] bg-[#0a84ff]" aria-hidden="true"></div>
+          </header>
+
+          <div className="font-serif text-[17px] md:text-lg text-[#1c1c1e] leading-[1.95] whitespace-pre-wrap">
+            {item.content}
           </div>
-          <h1 className="font-display font-bold text-3xl md:text-4xl text-[#3a3526] leading-tight tracking-tight mb-8">
-            {item.title || '（无题）'}
-          </h1>
-          <div className="w-12 h-[2px] bg-[#c23b22]" aria-hidden="true"></div>
-        </header>
 
-        <div className="font-serif text-[17px] md:text-lg text-[#3a3526] leading-[1.95] whitespace-pre-wrap">
-          {item.content}
-        </div>
-
-        <div className="mt-20 text-center">
-          <span className="font-serif text-sm text-[#8a8270]">—— 完 ——</span>
-        </div>
+          <div className="mt-16 text-center">
+            <span className="font-serif text-sm text-[#8a8a8e]">—— 完 ——</span>
+          </div>
+        </article>
       </div>
-    </article>
+    </div>
   );
 }
