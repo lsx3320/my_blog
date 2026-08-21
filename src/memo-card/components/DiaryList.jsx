@@ -1,5 +1,6 @@
 // 日记列表页：查看所有记录（主视图）
 import { useEffect, useState } from 'react';
+import '@fontsource/noto-serif-tibetan/tibetan-400.css';
 import { loadHistory, saveHistory, cloudSync, cloudRemove } from '../lib/storage.js';
 
 export default function DiaryList() {
@@ -56,32 +57,38 @@ export default function DiaryList() {
         </header>
 
         {/* 个性公告 */}
-        <section className="relative bg-gradient-to-b from-[#fff8d6] to-[#fdf3c0] border border-[#efe0b0] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.06)] p-7 md:p-9 mb-8 overflow-hidden">
-          <span className="absolute top-4 right-5 text-[10px] tracking-[0.15em] text-[#a09060] border border-[#e8d9a8] rounded-full px-2.5 py-0.5">
+        <section className="relative bg-[#1c1c1e] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.1),0_12px_32px_rgba(0,0,0,0.25)] p-7 md:p-9 mb-8 overflow-hidden">
+          <span className="absolute top-4 right-5 text-[10px] tracking-[0.15em] text-[#e6c86a] border border-[#e6c86a]/40 rounded-full px-2.5 py-0.5">
             公告
           </span>
-          <h2 className="font-serif font-bold text-2xl text-[#5c4d28] mb-5">致翻到这里的朋友</h2>
-          <div className="text-[15px] text-[#6b5a2e] leading-relaxed space-y-3">
+          <h2 className="font-serif font-bold text-2xl text-white mb-5">致翻到这里的朋友</h2>
+          <div className="text-[15px] text-[#d1cfc9] leading-relaxed space-y-3">
             <p>
               我去！朋友你能翻到这里，说明你有点儿水平，且咱俩关系还不错。
             </p>
             <p>
-              这里面就是我<span className="font-semibold text-[#a3562c]">随便写写的东西</span>，你就当个乐子看就行了。
+              这里面就是我<span className="font-semibold text-[#ffd94a]">随便写写的东西</span>，你就当个乐子看就行了。
             </p>
             <p>
-              点击右上角<span className="font-semibold text-[#0a6dc2]">蓝色加号</span>可以留言保存哦～
+              点击右上角<span className="font-semibold text-[#64b5f6]">蓝色加号</span>可以留言保存哦～
             </p>
             <p>
-              整个留言功能是个黑盒，我并不清楚你的身份，所以说<span className="font-semibold text-[#a3562c]">大胆写吧</span>——生活的不愉快、想喷的人和事都可以，也可以喷我（但是能看到这条留言，咱们都是哥们儿，轻点儿喷）。
+              整个留言功能是个黑盒，我并不清楚你的身份，所以说<span className="font-semibold text-[#ffd94a]">大胆写吧</span>——生活的不愉快、想喷的人和事都可以，也可以喷我（但是能看到这条留言，咱们都是哥们儿，轻点儿喷）。
             </p>
-            <p className="font-semibold text-[#5c4d28]">
+            <p className="font-semibold text-white">
               最后，祝你生活愉快。
             </p>
           </div>
-          <p className="mt-6 font-serif text-sm text-[#8a7a4a] leading-relaxed">
-            འཁྲུལ་སྟོང་འཁྱམས་པའི་སེམས་ཅན་ཐམས་ཅད་རྫོགས་པ་ཆེན་པོར་གནས་ཤོག།
-          </p>
-          <p className="mt-4 text-right text-xs text-[#a09060]">—— 后生仔</p>
+          {/* 藏文祝福：金色大号，独立突出 */}
+          <div className="mt-7 pt-6 border-t border-white/10 text-center">
+            <p
+              className="text-[#e6c86a] text-xl md:text-[26px] leading-[2.1] tracking-wide"
+              style={{ fontFamily: "'Noto Serif Tibetan','Kailasa','Tibetan Machine Uni',serif" }}
+            >
+              འཁྲུལ་སྟོང་འཁྱམས་པའི་སེམས་ཅན་ཐམས་ཅད་རྫོགས་པ་ཆེན་པོར་གནས་ཤོག།
+            </p>
+          </div>
+          <p className="mt-4 text-right text-xs text-[#8a8a8e]">—— 后生仔</p>
         </section>
 
         <div className="space-y-3">
