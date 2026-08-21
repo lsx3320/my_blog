@@ -57,32 +57,32 @@ export default function DiaryList() {
         </header>
 
         {/* 个性公告 */}
-        <section className="relative bg-[#1c1c1e] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.1),0_12px_32px_rgba(0,0,0,0.25)] p-7 md:p-9 mb-8 overflow-hidden">
-          <span className="absolute top-4 right-5 text-[10px] tracking-[0.15em] text-[#e6c86a] border border-[#e6c86a]/40 rounded-full px-2.5 py-0.5">
+        <section className="relative bg-white rounded-2xl border border-[#e5e5ea] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.06)] p-7 md:p-9 mb-8 overflow-hidden">
+          <span className="absolute top-4 right-5 text-[10px] tracking-[0.15em] text-[#8a8a8e] border border-[#d1d1d6] rounded-full px-2.5 py-0.5">
             公告
           </span>
-          <h2 className="font-serif font-bold text-2xl text-white mb-5">致翻到这里的朋友</h2>
-          <div className="text-[15px] text-[#d1cfc9] leading-relaxed space-y-3">
+          <h2 className="font-serif font-bold text-2xl text-[#1c1c1e] mb-5">致翻到这里的朋友</h2>
+          <div className="text-[15px] text-[#3a3a3c] leading-relaxed space-y-3">
             <p>
               我去！朋友你能翻到这里，说明你有点儿水平，且咱俩关系还不错。
             </p>
             <p>
-              这里面就是我<span className="font-semibold text-[#ffd94a]">随便写写的东西</span>，你就当个乐子看就行了。
+              这里面就是我<span className="font-semibold text-[#c2503a]">随便写写的东西</span>，你就当个乐子看就行了。
             </p>
             <p>
-              点击右上角<span className="font-semibold text-[#64b5f6]">蓝色加号</span>可以留言保存哦～
+              点击右上角<span className="font-semibold text-[#0a84ff]">蓝色加号</span>可以留言保存哦～
             </p>
             <p>
-              整个留言功能是个黑盒，我并不清楚你的身份，所以说<span className="font-semibold text-[#ffd94a]">大胆写吧</span>——生活的不愉快、想喷的人和事都可以，也可以喷我（但是能看到这条留言，咱们都是哥们儿，轻点儿喷）。
+              整个留言功能是个黑盒，我并不清楚你的身份，所以说<span className="font-semibold text-[#c2503a]">大胆写吧</span>——生活的不愉快、想喷的人和事都可以，也可以喷我（但是能看到这条留言，咱们都是哥们儿，轻点儿喷）。
             </p>
-            <p className="font-semibold text-white">
+            <p className="font-semibold text-[#1c1c1e]">
               最后，祝你生活愉快。
             </p>
           </div>
-          {/* 藏文祝福：金色大号，独立突出 */}
-          <div className="mt-7 pt-6 border-t border-white/10 text-center">
+          {/* 藏文祝福：朱砂大号，独立突出 */}
+          <div className="mt-7 pt-6 border-t border-[#e5e5ea] text-center">
             <p
-              className="text-[#e6c86a] text-xl md:text-[26px] leading-[2.1] tracking-wide"
+              className="text-[#c2503a] text-xl md:text-[26px] leading-[2.1] tracking-wide"
               style={{ fontFamily: "'Noto Serif Tibetan','Kailasa','Tibetan Machine Uni',serif" }}
             >
               འཁྲུལ་སྟོང་འཁྱམས་པའི་སེམས་ཅན་ཐམས་ཅད་རྫོགས་པ་ཆེན་པོར་གནས་ཤོག།
