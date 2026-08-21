@@ -30,7 +30,7 @@ export default function DiaryView() {
         <div className="max-w-2xl mx-auto px-5 py-32 text-center">
           <p className="font-serif text-lg text-[#8a8a8e] mb-8">这条记录不存在或已被删除</p>
           <a href="/diary" className="px-6 py-2.5 rounded-full bg-[#0a84ff] text-white text-sm font-medium hover:opacity-90 transition-opacity">
-            返回日记
+            返回随笔
           </a>
         </div>
       </div>
@@ -56,7 +56,7 @@ export default function DiaryView() {
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
             </svg>
-            返回日记
+            返回随笔
           </a>
           <a
             href={`/diary/write?edit=${item.id}`}

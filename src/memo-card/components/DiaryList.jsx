@@ -1,4 +1,4 @@
-// 日记列表页：查看所有记录（主视图）
+// 随笔列表页：查看所有记录（主视图）
 import { useEffect, useState } from 'react';
 import '@fontsource/noto-serif-tibetan/tibetan-400.css';
 import { loadHistory, saveHistory, cloudSync, cloudRemove } from '../lib/storage.js';
@@ -41,7 +41,7 @@ export default function DiaryList() {
       <div className="max-w-3xl mx-auto px-5 py-12">
         <header className="flex items-end justify-between mb-8">
           <div>
-            <h1 className="font-serif font-semibold text-[28px] text-[#1c1c1e] tracking-tight">日记</h1>
+            <h1 className="font-serif font-semibold text-[28px] text-[#1c1c1e] tracking-tight">随笔</h1>
             <p className="text-xs text-[#8a8a8e] mt-1.5">{items.length} 篇 · {state}</p>
           </div>
           <a

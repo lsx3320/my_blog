@@ -96,7 +96,7 @@ Cloudflare Pages（静态，无需 wrangler 配置）：
 | :--- | :--- |
 | `PUBLIC_TWIKOO_ENV_ID` | Twikoo 评论后端地址。**未配置时评论区自动隐藏**，配置后启用（构建时注入，改后需重新部署） |
 
-## 日记功能（/diary · 便签卡片）
+## 随笔功能（/diary · 便签卡片）
 
 - 访问 `/diary` 需先通过密码门（问题：**我现在在哪里？** 答案：**武汉**，客户端校验 + 会话记忆）
 - 完全引用 [memo-card](https://github.com/lsx3320/memo-card) 的便签卡片应用（React 19 + 自定义样式）：
@@ -106,7 +106,7 @@ Cloudflare Pages（静态，无需 wrangler 配置）：
   - 历史卡片墙 + 放大查看 + 删除
 - **存储：jsonbin.io 云同步**（`src/memo-card/lib/storage.js` 的 `CLOUD_KEY` / `CLOUD_BIN` 常量）：
   本地 localStorage 缓存 + 云端合并去重，保存后自动同步，任何设备打开可见
-- 相关代码在 `src/memo-card/`（React 组件 + styles.css），通过 `@astrojs/react` 挂载到日记页
+- 相关代码在 `src/memo-card/`（React 组件 + styles.css），通过 `@astrojs/react` 挂载到随笔页
 
 ## 评论（Twikoo）
 

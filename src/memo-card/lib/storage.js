@@ -47,7 +47,7 @@ export function removeHistory(id) {
 
 // ========== 云同步（jsonbin.io，固定 key + bin，所有浏览器共享同一份数据） ==========
 const CLOUD_KEY = '$2a$10$Iyqn3eO8f2SOtdwE9A9k1uY7MIXfb5k1Z7pYYkWZW9lYtxc1bJlbi';
-const CLOUD_BIN = '6a86f47cda38895dfefb5b57'; // 博客日记专用 bin
+const CLOUD_BIN = '6a86f47cda38895dfefb5b57'; // 博客随笔专用 bin
 const BIN_URL = 'https://api.jsonbin.io/v3/b';
 const DELETED_KEY = 'memo-card:deleted';
 

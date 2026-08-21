@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import DiaryView from '../../memo-card/components/DiaryView.jsx';
 ---
 
-<BaseLayout title="日记">
+<BaseLayout title="随笔">
   <!-- 写/看子页面不再设密码门：入口页 /diary 登录一次后全程畅通 -->
   <div class="min-h-[80vh]">
     <DiaryView client:only="react" />
