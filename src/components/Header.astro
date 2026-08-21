@@ -87,19 +87,33 @@ const currentPath = Astro.url.pathname;
 </header>
 
 <script is:inline data-astro-rerun>
-  // Theme toggle
-  const themeToggle = document.getElementById('theme-toggle');
-  themeToggle?.addEventListener('click', () => {
-    const nextDark = !document.documentElement.classList.contains('dark');
-    document.documentElement.classList.toggle('dark', nextDark);
-    document.documentElement.classList.toggle('light', !nextDark);
-    localStorage.setItem('theme', nextDark ? 'dark' : 'light');
-  });
+  // 用 astro:page-load（每次导航后必然触发，含初始加载）绑定按钮事件，
+  // 比单独依赖 data-astro-rerun 更可靠——SPA 跳转后新页面的按钮也能绑上。
+  // 元素级 __bound 标记防止同一元素重复绑定。
+  function bindHeader() {
+    // Theme toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle && !themeToggle.__bound) {
+      themeToggle.__bound = true;
+      themeToggle.addEventListener('click', () => {
+        const nextDark = !document.documentElement.classList.contains('dark');
+        document.documentElement.classList.toggle('dark', nextDark);
+        document.documentElement.classList.toggle('light', !nextDark);
+        localStorage.setItem('theme', nextDark ? 'dark' : 'light');
+      });
+    }
 
-  // Mobile menu toggle
-  const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-  const mobileMenu = document.getElementById('mobile-menu');
-  mobileMenuToggle?.addEventListener('click', () => {
-    mobileMenu?.classList.toggle('hidden');
-  });
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenuToggle && !mobileMenuToggle.__bound) {
+      mobileMenuToggle.__bound = true;
+      mobileMenuToggle.addEventListener('click', () => {
+        mobileMenu?.classList.toggle('hidden');
+      });
+    }
+  }
+
+  document.addEventListener('astro:page-load', bindHeader);
+  bindHeader();
 </script>

@@ -70,48 +70,53 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       <MusicPlayer />
     </div>
     <script is:inline data-astro-rerun>
-      // This script re-runs on every View Transition navigation (data-astro-rerun),
-      // because the body (including the progress bar element) is swapped on
-      // navigation. Guards below keep listeners from being registered twice.
+      // 用 astro:page-load（每次导航后必然触发，含初始加载）统一绑定，
+      // 比单独依赖 data-astro-rerun 更可靠。window 级监听器用全局标记防重复，
+      // 页面级元素（进度条 / reveal）在每次导航后重新收集。
 
-      // Listen for system theme changes (only when user hasn't chosen explicitly)
-      if (!window.__themeListenerBound) {
-        window.__themeListenerBound = true;
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-          if (!localStorage.getItem('theme')) {
-            document.documentElement.classList.toggle('dark', e.matches);
-            document.documentElement.classList.toggle('light', !e.matches);
-          }
+      function onPageLoad() {
+        // Listen for system theme changes (only when user hasn't chosen explicitly)
+        if (!window.__themeListenerBound) {
+          window.__themeListenerBound = true;
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) {
+              document.documentElement.classList.toggle('dark', e.matches);
+              document.documentElement.classList.toggle('light', !e.matches);
+            }
+          });
+        }
+
+        // Reading progress bar
+        if (!window.__progressBound) {
+          window.__progressBound = true;
+          window.addEventListener('scroll', () => {
+            const progressBar = document.getElementById('reading-progress');
+            if (!progressBar) return;
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            progressBar.style.width = progress + '%';
+          }, { passive: true });
+        }
+
+        // 滚动显现（单例 observer，每次导航重新收集元素）
+        if (!window.__revealObserver) {
+          window.__revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                window.__revealObserver.unobserve(entry.target);
+              }
+            });
+          }, { threshold: 0.08 });
+        }
+        document.querySelectorAll('.reveal:not(.is-visible)').forEach(el => {
+          window.__revealObserver.observe(el);
         });
       }
 
-      // Reading progress bar
-      if (!window.__progressBound) {
-        window.__progressBound = true;
-        window.addEventListener('scroll', () => {
-          const progressBar = document.getElementById('reading-progress');
-          if (!progressBar) return;
-          const scrollTop = window.scrollY;
-          const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-          const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-          progressBar.style.width = progress + '%';
-        }, { passive: true });
-      }
-
-      // 滚动显现（单例 observer，每次导航重新收集元素）
-      if (!window.__revealObserver) {
-        window.__revealObserver = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('is-visible');
-              window.__revealObserver.unobserve(entry.target);
-            }
-          });
-        }, { threshold: 0.08 });
-      }
-      document.querySelectorAll('.reveal:not(.is-visible)').forEach(el => {
-        window.__revealObserver.observe(el);
-      });
+      document.addEventListener('astro:page-load', onPageLoad);
+      onPageLoad();
     </script>
   </body>
 </html>
