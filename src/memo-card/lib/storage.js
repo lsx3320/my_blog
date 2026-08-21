@@ -94,15 +94,23 @@ export async function cloudSync(localList) {
   const deleted = getDeletedIds();
   const cloud = await cloudGet();
   const cleaned = cloud.filter((x) => x && x.id && x.id !== '_init' && !deleted.has(x.id));
-  const seen = new Set(deleted);
-  const merged = [];
+
+  // 合并去重：同 id 冲突时取「更新时间 / 创建时间」较新的版本
+  // （本设备刚编辑过的记录 updatedAt 最新 → 编辑内容胜出，不会被云端旧数据覆盖）
+  const byId = new Map();
   [...cleaned, ...(localList || [])].forEach((x) => {
-    if (x && x.id && !seen.has(x.id)) {
-      seen.add(x.id);
-      merged.push(x);
+    if (!x || !x.id || deleted.has(x.id)) return;
+    const cur = byId.get(x.id);
+    if (!cur) {
+      byId.set(x.id, x);
+      return;
     }
+    const curT = cur.updatedAt || cur.createdAt || 0;
+    const newT = x.updatedAt || x.createdAt || 0;
+    if (newT >= curT) byId.set(x.id, x);
   });
-  merged.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+  const merged = [...byId.values()].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   const capped = merged.slice(0, 50);
   await cloudPut(capped);
   return capped;
