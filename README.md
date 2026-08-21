@@ -1,7 +1,7 @@
 # 后生仔的博客
 
 个人博客（刊物概念：封面 / 目录 / 版面 / 图录 / 画册 / 编者按），记录技术探索与生活感悟。
-基于 **Astro 6** 构建，静态输出，部署在 **Cloudflare Pages**（域名 `lushixiao.ccwu.cc`）。
+基于 **Astro 6** 构建，静态输出，部署在 **Cloudflare Pages**（域名 `lushixiao.cn`）。
 
 ## 视觉与字体
 
@@ -88,7 +88,7 @@ Cloudflare Pages（静态，无需 wrangler 配置）：
 
 - Build command: `npm run build`
 - Output directory: `dist`
-- 自定义域名：`lushixiao.ccwu.cc`（`public/0d96f56d4e5ba3e58d1b0d5fb03c1e73.txt` 为域名验证文件，勿删）
+- 自定义域名：`lushixiao.cn`（`public/0d96f56d4e5ba3e58d1b0d5fb03c1e73.txt` 为域名验证文件，勿删）
 
 ### 环境变量
 

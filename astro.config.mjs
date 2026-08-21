@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
 
 export default defineConfig({
-  site: 'https://lushixiao.ccwu.cc',
+  site: 'https://lushixiao.cn',
   output: 'static',
   integrations: [react(), sitemap()],
   markdown: {
