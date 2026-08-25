@@ -88,8 +88,14 @@ export const onRequestGet = async ({
       }),
     });
     const gqlJson = (await gql.json()) as {
+      errors?: { message: string }[];
       data?: { viewer?: { zones?: { httpRequests1dGroups?: { dimensions: { date: string }; sum: { requests: number; bytes: number }; uniq: { uniques: number } }[] }[] } };
     };
+    // 诊断：GraphQL 报错（多为权限不足）原样带回
+    if (gqlJson?.errors?.length) {
+      payload.error = payload.error ? payload.error + '；' : '';
+      payload.error += '统计: ' + gqlJson.errors.map((e) => e.message).join(' / ').slice(0, 300);
+    }
     const groups = gqlJson?.data?.viewer?.zones?.[0]?.httpRequests1dGroups || [];
     const days = groups.map((g) => ({
       date: g.dimensions.date.slice(5), // MM-DD
@@ -120,6 +126,7 @@ export const onRequestGet = async ({
     );
     const depJson = (await dep.json()) as {
       success?: boolean;
+      errors?: { message?: string }[];
       result?: {
         id: string;
         url: string;
@@ -128,7 +135,16 @@ export const onRequestGet = async ({
         source?: { config?: Record<string, unknown> };
       }[];
     };
-    const list = depJson.result || [];
+    // 诊断：Pages API 报错（多为项目名不对 / 权限不足）
+    if (depJson?.errors?.length) {
+      payload.error = payload.error ? payload.error + '；' : '';
+      payload.error += '部署: ' + depJson.errors.map((e) => e.message || '').join(' / ').slice(0, 300);
+    }
+    if (depJson && depJson.success === false) {
+      payload.error = payload.error ? payload.error + '；' : '';
+      payload.error += '部署接口失败（项目名 my-blog 可能不对）';
+    }
+    const list = depJson?.result || [];
     payload.deployments = list.map((d) => {
       const startT = d.build?.start_time ? new Date(d.build.start_time).getTime() : null;
       const endT = d.build?.end_time ? new Date(d.build.end_time).getTime() : null;
