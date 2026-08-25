@@ -12,10 +12,11 @@ const WA_SITE_TOKEN = 'f4d73c96a23447129d942007e81492d3';
 
 interface StatsPayload {
   analytics: {
-    days: { date: string; requests: number; visits: number; pageViews: number; uniques: number }[];
+    days: { date: string; requests: number; visits: number; pageViews: number; bytes: number; uniques: number }[];
     totalRequests: number;
     totalVisits: number;
     totalUniques: number;
+    totalBytes: number;
     avgDailyRequests: number;
   } | null;
   deployments: {
@@ -103,95 +104,79 @@ export const onRequestGet = async ({
     payload.error += '诊断: Account 可用节点=' + (analyticsNodes.join(',') || '无') + (introJson?.errors?.length ? '（intro错误:' + introJson.errors.map((e) => e.message).join('/') + '）' : '');
   } catch { /* ignore */ }
 
-  // Web Analytics 数据集名存在历史差异，逐个探测，第一个能查到数据的为准
-  const FIELD_NAMES = ['webAnalyticsAdaptiveGroups', 'rumAdaptiveGroups'];
-  const FIELD_SETS = [
-    'sum { requests visits pageViews }',
-    'sum { requests }',
-  ];
-  let gqlErrors = '';
-  let groups: {
-    dimensions: { date: string };
-    sum: { requests: number; visits: number; pageViews: number };
-    uniq: { uniques: number };
-  }[] = [];
-
-  for (const field of FIELD_NAMES) {
-    for (const sumSet of FIELD_SETS) {
-      const query = `
-        query($accountTag: String!, $start: String!, $end: String!) {
-          viewer {
-            accounts(filter: { accountTag: $accountTag }) {
-              ${field}(
-                limit: 31
-                filter: { date_geq: $start, date_leq: $end }
-                orderBy: [date_ASC]
-              ) {
-                dimensions { date }
-                ${sumSet}
-                uniq { uniques }
-              }
-            }
+  // ---------- 1. 访问统计（GraphQL httpRequestsAdaptiveGroups，近 30 天每日） ----------
+  // 用 adaptive 表（含 visits / edgeResponseBytes），zone 级查询（权限已通）
+  const end = new Date();
+  const start = new Date(Date.now() - 29 * 86400000);
+  const query = `
+    query($zoneTag: String!, $start: String!, $end: String!) {
+      viewer {
+        zones(filter: { zoneTag: $zoneTag }) {
+          httpRequestsAdaptiveGroups(
+            limit: 31
+            filter: { date_geq: $start, date_leq: $end }
+            orderBy: [date_ASC]
+          ) {
+            dimensions { date }
+            count
+            sum { visits edgeResponseBytes }
+            uniq { uniques }
           }
-        }`;
-      try {
-        const gql = await fetch('https://api.cloudflare.com/client/v4/graphql', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            query,
-            variables: { accountTag: accountId, start: fmtDate(start), end: fmtDate(end) },
-          }),
-        });
-        const gqlJson = (await gql.json()) as {
-          errors?: { message: string }[];
-          data?: {
-            viewer?: {
-              accounts?: { [key: string]: unknown }[];
-            };
-          };
-        };
-        const node = gqlJson?.data?.viewer?.accounts?.[0]?.[field] as
-          | { dimensions: { date: string }; sum: { requests: number; visits: number; pageViews: number }; uniq: { uniques: number } }[]
-          | undefined;
-        if (gqlJson?.errors?.length) {
-          gqlErrors += `${field}: ${gqlJson.errors.map((e) => e.message).join('/')}；`;
-          continue;
         }
-        if (node) {
-          groups = node;
-          payload.error = payload.error ? payload.error + '；' : '';
-          payload.error += `统计: 使用 ${field}（${sumSet.includes('visits') ? '完整指标' : '基础指标'}）`;
-          break;
-        }
-      } catch { /* 试下一个 */ }
-    }
-    if (groups.length) break;
-  }
+      }
+    }`;
 
   try {
-    if (!groups.length) {
+    const gql = await fetch('https://api.cloudflare.com/client/v4/graphql', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        query,
+        variables: { zoneTag: zoneId, start: fmtDate(start), end: fmtDate(end) },
+      }),
+    });
+    const gqlJson = (await gql.json()) as {
+      errors?: { message: string }[];
+      data?: {
+        viewer?: {
+          zones?: {
+            httpRequestsAdaptiveGroups?: {
+              dimensions: { date: string };
+              count: number;
+              sum: { visits: number; edgeResponseBytes: number };
+              uniq: { uniques: number };
+            }[];
+          }[];
+        };
+      };
+    };
+    if (gqlJson?.errors?.length) {
       payload.error = payload.error ? payload.error + '；' : '';
-      payload.error += '统计: 所有数据集均不可用：' + gqlErrors.slice(0, 300);
-    } else if (!groups.length) {
+      payload.error += '统计: ' + gqlJson.errors.map((e) => e.message).join(' / ').slice(0, 300);
+    }
+    const groups = gqlJson?.data?.viewer?.zones?.[0]?.httpRequestsAdaptiveGroups || [];
+    if (!gqlJson?.errors?.length && !groups.length) {
       payload.error = payload.error ? payload.error + '；' : '';
-      payload.error += '统计: Web Analytics 近 30 天暂无数据（Beacon 刚接入，需等流量产生）';
+      payload.error += '统计: 近 30 天暂无数据（刚接入或流量少）';
     }
     const days = groups.map((g) => ({
       date: String(g.dimensions.date).slice(5), // MM-DD
-      requests: g.sum.requests || 0,
+      requests: g.count || 0,
       visits: g.sum.visits || 0,
-      pageViews: g.sum.pageViews || 0,
+      pageViews: g.count || 0,
+      bytes: g.sum.edgeResponseBytes || 0,
       uniques: g.uniq.uniques || 0,
     }));
     const totalRequests = days.reduce((a, d) => a + d.requests, 0);
     const totalVisits = days.reduce((a, d) => a + d.visits, 0);
     const totalUniques = days.reduce((a, d) => a + d.uniques, 0);
+    const totalBytes = days.reduce((a, d) => a + d.bytes, 0);
     payload.analytics = {
       days,
       totalRequests,
       totalVisits,
       totalUniques,
+      totalBytes,
       avgDailyRequests: days.length ? Math.round(totalRequests / days.length) : 0,
     };
   } catch {
