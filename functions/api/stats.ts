@@ -7,12 +7,14 @@
 //   CF_ZONE_ID     lushixiao.cn 的 Zone ID（域名解析所在 zone）
 
 const CF_API = 'https://api.cloudflare.com/client/v4';
+// Cloudflare Web Analytics 站点 Token（Beacon 脚本里那个，公开值）
+const WA_SITE_TOKEN = 'f4d73c96a23447129d942007e81492d3';
 
 interface StatsPayload {
   analytics: {
-    days: { date: string; requests: number; bytes: number; uniques: number }[];
+    days: { date: string; requests: number; visits: number; pageViews: number; uniques: number }[];
     totalRequests: number;
-    totalBytes: number;
+    totalVisits: number;
     totalUniques: number;
     avgDailyRequests: number;
   } | null;
@@ -77,20 +79,21 @@ export const onRequestGet = async ({
     payload.error = 'Zone 验证请求失败';
   }
 
-  // ---------- 1. 访问统计（GraphQL，近 30 天每日） ----------
+  // ---------- 1. 访问统计（GraphQL Web Analytics，近 30 天每日） ----------
   const end = new Date();
   const start = new Date(Date.now() - 29 * 86400000);
+  const siteToken = env.CF_WA_SITE_TOKEN || WA_SITE_TOKEN;
   const query = `
-    query($zoneTag: String!, $start: String!, $end: String!) {
+    query($accountTag: String!, $siteToken: String!, $start: String!, $end: String!) {
       viewer {
-        zones(filter: { zoneTag: $zoneTag }) {
-          httpRequests1dGroups(
-            limit: 30
-            filter: { date_geq: $start, date_leq: $end }
+        accounts(filter: { accountTag: $accountTag }) {
+          webAnalyticsAdaptiveGroups(
+            limit: 31
+            filter: { date_geq: $start, date_leq: $end, siteToken: $siteToken }
             orderBy: [date_ASC]
           ) {
             dimensions { date }
-            sum { requests bytes }
+            sum { requests visits pageViews }
             uniq { uniques }
           }
         }
@@ -103,37 +106,47 @@ export const onRequestGet = async ({
       headers,
       body: JSON.stringify({
         query,
-        variables: { zoneTag: zoneId, start: fmtDate(start), end: fmtDate(end) },
+        variables: { accountTag: accountId, siteToken, start: fmtDate(start), end: fmtDate(end) },
       }),
     });
     const gqlJson = (await gql.json()) as {
       errors?: { message: string }[];
-      data?: { viewer?: { zones?: { httpRequests1dGroups?: { dimensions: { date: string }; sum: { requests: number; bytes: number }; uniq: { uniques: number } }[] }[] } };
+      data?: {
+        viewer?: {
+          accounts?: {
+            webAnalyticsAdaptiveGroups?: {
+              dimensions: { date: string };
+              sum: { requests: number; visits: number; pageViews: number };
+              uniq: { uniques: number };
+            }[];
+          }[];
+        };
+      };
     };
     // 诊断：GraphQL 报错（多为权限不足）原样带回
     if (gqlJson?.errors?.length) {
       payload.error = payload.error ? payload.error + '；' : '';
       payload.error += '统计: ' + gqlJson.errors.map((e) => e.message).join(' / ').slice(0, 300);
     }
-    // 诊断：zone 有数据但查询为空 → 提示数据源问题（Pages 流量可能不计入 httpRequests1dGroups）
-    const groups = gqlJson?.data?.viewer?.zones?.[0]?.httpRequests1dGroups || [];
+    const groups = gqlJson?.data?.viewer?.accounts?.[0]?.webAnalyticsAdaptiveGroups || [];
     if (!gqlJson?.errors?.length && !groups.length) {
       payload.error = payload.error ? payload.error + '；' : '';
-      payload.error += '统计: zone 正常但近 30 天无 HTTP 请求数据（Pages 流量可能不计入此数据源，可改用 Web Analytics）';
+      payload.error += '统计: Web Analytics 近 30 天暂无数据（Beacon 刚接入，需等流量产生）';
     }
     const days = groups.map((g) => ({
-      date: g.dimensions.date.slice(5), // MM-DD
+      date: String(g.dimensions.date).slice(5), // MM-DD
       requests: g.sum.requests,
-      bytes: g.sum.bytes,
+      visits: g.sum.visits,
+      pageViews: g.sum.pageViews,
       uniques: g.uniq.uniques,
     }));
     const totalRequests = days.reduce((a, d) => a + d.requests, 0);
-    const totalBytes = days.reduce((a, d) => a + d.bytes, 0);
+    const totalVisits = days.reduce((a, d) => a + d.visits, 0);
     const totalUniques = days.reduce((a, d) => a + d.uniques, 0);
     payload.analytics = {
       days,
       totalRequests,
-      totalBytes,
+      totalVisits,
       totalUniques,
       avgDailyRequests: days.length ? Math.round(totalRequests / days.length) : 0,
     };

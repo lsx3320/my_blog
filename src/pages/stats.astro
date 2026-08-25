@@ -74,7 +74,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     const cards = [
       { label: '总请求', value: fmtNum(a.totalRequests) },
       { label: '独立访客', value: fmtNum(a.totalUniques) },
-      { label: '总带宽', value: fmtBytes(a.totalBytes) },
+      { label: '访问次数', value: fmtNum(a.totalVisits) },
       { label: '日均请求', value: fmtNum(a.avgDailyRequests) },
     ];
     el.innerHTML = cards.map((c) =>
