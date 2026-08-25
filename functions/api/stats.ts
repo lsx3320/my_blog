@@ -84,8 +84,26 @@ export const onRequestGet = async ({
   const start = new Date(Date.now() - 29 * 86400000);
   const siteToken = env.CF_WA_SITE_TOKEN || WA_SITE_TOKEN;
 
-  // Web Analytics 数据集名存在历史差异（webAnalyticsAdaptiveGroups / rumAdaptiveGroups），
-  // 逐个探测，第一个能查到数据的为准
+  // 诊断：introspection 列出 token 实际能访问的 Account 数据节点
+  try {
+    const intro = await fetch('https://api.cloudflare.com/client/v4/graphql', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        query: '{ __type(name: "Account") { fields { name } } }',
+      }),
+    });
+    const introJson = (await intro.json()) as {
+      data?: { __type?: { fields?: { name: string }[] } };
+      errors?: { message: string }[];
+    };
+    const names = (introJson?.data?.__type?.fields || []).map((f) => f.name);
+    const analyticsNodes = names.filter((n) => /adaptivegroups|analytics|rum|httprequest/i.test(n));
+    payload.error = payload.error ? payload.error + '；' : '';
+    payload.error += '诊断: Account 可用节点=' + (analyticsNodes.join(',') || '无') + (introJson?.errors?.length ? '（intro错误:' + introJson.errors.map((e) => e.message).join('/') + '）' : '');
+  } catch { /* ignore */ }
+
+  // Web Analytics 数据集名存在历史差异，逐个探测，第一个能查到数据的为准
   const FIELD_NAMES = ['webAnalyticsAdaptiveGroups', 'rumAdaptiveGroups'];
   const FIELD_SETS = [
     'sum { requests visits pageViews }',
