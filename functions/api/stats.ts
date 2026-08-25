@@ -84,12 +84,12 @@ export const onRequestGet = async ({
   const start = new Date(Date.now() - 29 * 86400000);
   const siteToken = env.CF_WA_SITE_TOKEN || WA_SITE_TOKEN;
   const query = `
-    query($accountTag: String!, $siteToken: String!, $start: String!, $end: String!) {
+    query($accountTag: String!, $start: String!, $end: String!) {
       viewer {
         accounts(filter: { accountTag: $accountTag }) {
           webAnalyticsAdaptiveGroups(
             limit: 31
-            filter: { date_geq: $start, date_leq: $end, siteToken: $siteToken }
+            filter: { date_geq: $start, date_leq: $end }
             orderBy: [date_ASC]
           ) {
             dimensions { date }
@@ -106,7 +106,7 @@ export const onRequestGet = async ({
       headers,
       body: JSON.stringify({
         query,
-        variables: { accountTag: accountId, siteToken, start: fmtDate(start), end: fmtDate(end) },
+        variables: { accountTag: accountId, start: fmtDate(start), end: fmtDate(end) },
       }),
     });
     const gqlJson = (await gql.json()) as {
@@ -123,10 +123,10 @@ export const onRequestGet = async ({
         };
       };
     };
-    // 诊断：GraphQL 报错（多为权限不足）原样带回
-    if (gqlJson?.errors?.length) {
+    // 诊断：完整带回 GraphQL 原始响应（定位 unknown field / 权限裁剪）
+    if (gqlJson?.errors?.length || !gqlJson?.data?.viewer?.accounts?.[0]?.webAnalyticsAdaptiveGroups) {
       payload.error = payload.error ? payload.error + '；' : '';
-      payload.error += '统计: ' + gqlJson.errors.map((e) => e.message).join(' / ').slice(0, 300);
+      payload.error += '统计诊断: ' + JSON.stringify(gqlJson).slice(0, 500);
     }
     const groups = gqlJson?.data?.viewer?.accounts?.[0]?.webAnalyticsAdaptiveGroups || [];
     if (!gqlJson?.errors?.length && !groups.length) {
