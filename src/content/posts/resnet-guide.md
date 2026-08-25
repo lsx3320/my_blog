@@ -105,10 +105,10 @@ ResNet 学习的是：
 ![残差块结构图](/posts/resnet/residual_block.svg)
 
 ```python
-# 传统网络
+## 传统网络
 output = layer(x)
 
-# ResNet
+## ResNet
 output = layer(x) + x  # 直接把输入加回来
 ```
 
@@ -308,10 +308,10 @@ ResNet 的跳跃连接思想被广泛应用：
 ```python
 import torchvision.models as models
 
-# 加载预训练 ResNet-50
+## 加载预训练 ResNet-50
 model = models.resnet50(pretrained=True)
 
-# 用它提取特征
+## 用它提取特征
 features = model(image)
 ```
 

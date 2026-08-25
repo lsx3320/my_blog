@@ -72,7 +72,7 @@ export default function DiaryView() {
         <article className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.06)] p-8 md:p-12">
           <header className="mb-10">
             <div className="flex items-center gap-3 text-xs text-[#8a8a8e] mb-5">
-              <time>{item.date}</time>
+              <time>{item.date?.slice(0, 4)}</time>
               {item.mood && (
                 <>
                   <span className="w-px h-3 bg-[#e5e5ea]" aria-hidden="true"></span>

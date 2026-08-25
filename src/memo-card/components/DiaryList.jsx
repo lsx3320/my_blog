@@ -99,7 +99,7 @@ export default function DiaryList() {
               className="group relative block bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.06)] p-6 hover:shadow-[0_2px_6px_rgba(0,0,0,0.06),0_12px_32px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 transition-all"
             >
               <div className="flex items-baseline justify-between mb-1.5">
-                <span className="text-xs text-[#8a8a8e]">{it.date}</span>
+                <span className="text-xs text-[#8a8a8e]">{it.date?.slice(0, 4)}</span>
                 {it.mood && <span className="text-[11px] text-[#b08a3e]">{it.mood}</span>}
               </div>
               <h2 className="font-serif font-semibold text-lg text-[#1c1c1e] group-hover:text-[#0a84ff] transition-colors mb-1 truncate">
