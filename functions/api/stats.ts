@@ -58,6 +58,25 @@ export const onRequestGet = async ({
 
   const payload: StatsPayload = { analytics: null, deployments: [] };
 
+  // ---------- 0. 诊断：验证 Zone ID 与账号 ----------
+  try {
+    const zoneCheck = await fetch(`${CF_API}/zones/${zoneId}`, { headers });
+    const zoneJson = (await zoneCheck.json()) as {
+      success?: boolean;
+      errors?: { message?: string }[];
+      result?: { name?: string };
+    };
+    if (zoneCheck.status === 401 || zoneCheck.status === 403) {
+      payload.error = `Zone 接口认证失败（${zoneCheck.status}）：token 权限或账号信息有问题`;
+    } else if (zoneCheck.ok && zoneJson?.result?.name) {
+      payload.error = `Zone 验证通过：${zoneJson.result.name}`;
+    } else {
+      payload.error = `Zone ID 可能不对（HTTP ${zoneCheck.status}）：${(zoneJson?.errors?.[0]?.message || '').slice(0, 200)}`;
+    }
+  } catch {
+    payload.error = 'Zone 验证请求失败';
+  }
+
   // ---------- 1. 访问统计（GraphQL，近 30 天每日） ----------
   const end = new Date();
   const start = new Date(Date.now() - 29 * 86400000);
