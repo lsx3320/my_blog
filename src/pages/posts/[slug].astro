@@ -199,7 +199,6 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
 
 <style>
   .article-content {
-    counter-reset: chapter;
     font-family: var(--font-serif);
     font-size: 1.125rem;
     line-height: 1.9;
@@ -218,6 +217,8 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
     color: var(--color-primary);
   }
 
+  /* 章节标题：编号由文章正文手写（一、二、三…），不做 CSS 自动编号，
+     避免与手写编号重复（如"一、一、xxx"） */
   .article-content :global(h2) {
     font-family: var(--font-display);
     font-size: 1.625rem;
@@ -227,14 +228,6 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
     padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--color-border);
     letter-spacing: -0.01em;
-    counter-increment: chapter;
-  }
-
-  /* 章节自动编号：一、二、三…… */
-  .article-content :global(h2)::before {
-    content: counter(chapter, cjk-ideographic) '、';
-    color: var(--color-primary);
-    font-weight: 600;
   }
 
   .article-content :global(h3) {
