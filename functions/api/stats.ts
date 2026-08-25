@@ -155,7 +155,10 @@ export const onRequestGet = async ({
         id: string;
         url: string;
         created_on: string;
+        environment?: string;
         build?: { status?: string; start_time?: string; end_time?: string; commit_message?: string };
+        deployment_trigger?: { metadata?: { commit_message?: string; commit_hash?: string } };
+        latest_stage?: { name?: string; started_on?: string; ended_on?: string };
         source?: { config?: Record<string, unknown> };
       }[];
     };
@@ -167,14 +170,17 @@ export const onRequestGet = async ({
     }
     const list = depJson?.result || [];
     payload.deployments = list.map((d) => {
-      const startT = d.build?.start_time ? new Date(d.build.start_time).getTime() : null;
-      const endT = d.build?.end_time ? new Date(d.build.end_time).getTime() : null;
+      const b = d.build || {};
+      const meta = d.deployment_trigger?.metadata || {};
+      const stage = d.latest_stage || {};
+      const startT = b.start_time || stage.started_on ? new Date(b.start_time || stage.started_on || '').getTime() : null;
+      const endT = b.end_time || stage.ended_on ? new Date(b.end_time || stage.ended_on || '').getTime() : null;
       return {
         id: d.id,
         url: d.url,
         createdOn: d.created_on,
-        status: d.build?.status || 'unknown',
-        commitMessage: d.build?.commit_message || '',
+        status: b.status || (stage.name === 'deploy' ? 'success' : stage.name || 'unknown'),
+        commitMessage: b.commit_message || meta.commit_message || '',
         buildTimeMs: startT && endT ? endT - startT : null,
       };
     });
