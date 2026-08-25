@@ -1,0 +1,167 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="数据">
+  <div class="min-h-[80vh] bg-[#f2f2f7] border-b border-[#e5e5ea]">
+    <div class="max-w-3xl mx-auto px-5 py-12">
+      <header class="mb-8">
+        <h1 class="font-serif font-semibold text-[28px] text-[#1c1c1e] tracking-tight">数据看板</h1>
+        <p class="text-xs text-[#8a8a8e] mt-1.5">Cloudflare 访问统计与部署记录</p>
+      </header>
+
+      <div id="stats-loading" class="text-center py-20 text-sm text-[#8a8a8e]">加载中…</div>
+
+      <div id="stats-error" class="hidden text-center py-16">
+        <p id="stats-error-text" class="text-sm text-[#ff3b30] mb-6"></p>
+        <a href="/" class="px-5 py-2.5 rounded-full bg-[#0a84ff] text-white text-sm font-medium hover:opacity-90 transition-opacity">返回首页</a>
+      </div>
+
+      <div id="stats-content" class="hidden">
+        <!-- 汇总 -->
+        <div id="stats-summary" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10"></div>
+
+        <!-- 近 30 天请求 -->
+        <section class="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.06)] p-6 mb-8">
+          <h2 class="font-serif font-semibold text-lg text-[#1c1c1e] mb-4">近 30 天请求量</h2>
+          <div id="stats-chart"></div>
+        </section>
+
+        <!-- 部署记录 -->
+        <section class="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.06)] p-6">
+          <h2 class="font-serif font-semibold text-lg text-[#1c1c1e] mb-4">最近部署</h2>
+          <div id="stats-deployments" class="divide-y divide-[#f0f0f2]"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script is:inline data-astro-rerun>
+  const loading = document.getElementById('stats-loading');
+  const errorBox = document.getElementById('stats-error');
+  const errorText = document.getElementById('stats-error-text');
+  const content = document.getElementById('stats-content');
+
+  function esc(s) {
+    const div = document.createElement('div');
+    div.textContent = s == null ? '' : String(s);
+    return div.innerHTML;
+  }
+
+  function fmtBytes(b) {
+    if (!b) return '0 B';
+    const g = b / 1073741824;
+    if (g >= 1) return g.toFixed(2) + ' GB';
+    const m = b / 1048576;
+    if (m >= 1) return m.toFixed(1) + ' MB';
+    return Math.round(b / 1024) + ' KB';
+  }
+
+  function fmtNum(n) {
+    return Number(n || 0).toLocaleString('zh-CN');
+  }
+
+  function fmtTime(iso) {
+    const d = new Date(iso);
+    return d.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+  }
+
+  // 汇总卡
+  function renderSummary(a) {
+    const el = document.getElementById('stats-summary');
+    if (!el) return;
+    const cards = [
+      { label: '总请求', value: fmtNum(a.totalRequests) },
+      { label: '独立访客', value: fmtNum(a.totalUniques) },
+      { label: '总带宽', value: fmtBytes(a.totalBytes) },
+      { label: '日均请求', value: fmtNum(a.avgDailyRequests) },
+    ];
+    el.innerHTML = cards.map((c) =>
+      '<div class="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.06)] p-5 text-center">' +
+        '<div class="font-serif font-semibold text-2xl text-[#1c1c1e] mb-1">' + c.value + '</div>' +
+        '<div class="text-xs text-[#8a8a8e]">' + c.label + '</div>' +
+      '</div>'
+    ).join('');
+  }
+
+  // 30 天柱状图（SVG）
+  function renderChart(days) {
+    const el = document.getElementById('stats-chart');
+    if (!el) return;
+    const W = 700, H = 220, PAD = 24, BOTTOM = 30;
+    const max = Math.max(...days.map((d) => d.requests), 1);
+    const bw = (W - PAD * 2) / days.length;
+    let bars = '';
+    let labels = '';
+    days.forEach((d, i) => {
+      const h = Math.max(2, (d.requests / max) * (H - PAD - BOTTOM));
+      const x = PAD + i * bw;
+      const y = H - BOTTOM - h;
+      bars += `<rect x="${(x + bw * 0.15).toFixed(1)}" y="${y.toFixed(1)}" width="${(bw * 0.7).toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="${d.requests > 0 ? '#0a84ff' : '#e5e5ea'}" opacity="${d.requests > 0 ? 0.85 : 1}"><title>${d.date} · ${fmtNum(d.requests)} 请求</title></rect>`;
+      if (i % 5 === 0) {
+        labels += `<text x="${(x + bw / 2).toFixed(1)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="#8a8a8e">${esc(d.date)}</text>`;
+      }
+    });
+    el.innerHTML =
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" class="w-full h-auto">' +
+        '<line x1="' + PAD + '" y1="' + (H - BOTTOM) + '" x2="' + (W - PAD) + '" y2="' + (H - BOTTOM) + '" stroke="#e5e5ea" stroke-width="1"/>' +
+        bars + labels +
+      '</svg>';
+  }
+
+  // 部署列表
+  function renderDeployments(list) {
+    const el = document.getElementById('stats-deployments');
+    if (!el) return;
+    if (!list.length) {
+      el.innerHTML = '<p class="py-6 text-sm text-[#8a8a8e] text-center">暂无部署记录</p>';
+      return;
+    }
+    el.innerHTML = list.map((d) => {
+      const ok = d.status === 'success';
+      const badge = ok
+        ? '<span class="text-[#34c759]">成功</span>'
+        : d.status === 'failure'
+        ? '<span class="text-[#ff3b30]">失败</span>'
+        : '<span class="text-[#ff9f0a]">进行中</span>';
+      const time = d.buildTimeMs != null ? (d.buildTimeMs / 1000).toFixed(1) + 's' : '—';
+      return (
+        '<div class="py-3.5 flex items-center justify-between gap-4">' +
+          '<div class="min-w-0">' +
+            '<div class="text-sm text-[#1c1c1e] font-medium truncate">' + esc(d.commitMessage || '（无提交信息）') + '</div>' +
+            '<div class="text-xs text-[#8a8a8e] mt-0.5">' + fmtTime(d.createdOn) + ' · 构建 ' + time + '</div>' +
+          '</div>' +
+          '<div class="shrink-0 text-sm">' + badge + '</div>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  async function load() {
+    try {
+      const res = await fetch('/api/stats');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '加载失败');
+      loading.classList.add('hidden');
+      content.classList.remove('hidden');
+      if (data.analytics) {
+        renderSummary(data.analytics);
+        renderChart(data.analytics.days);
+      }
+      renderDeployments(data.deployments || []);
+      if (data.error) {
+        const warn = document.createElement('p');
+        warn.className = 'text-xs text-[#ff9f0a] mb-4';
+        warn.textContent = '部分数据获取失败：' + data.error;
+        content.prepend(warn);
+      }
+    } catch (e) {
+      loading.classList.add('hidden');
+      errorBox.classList.remove('hidden');
+      errorText.textContent = '加载失败：' + e.message;
+    }
+  }
+
+  load();
+</script>
