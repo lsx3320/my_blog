@@ -32,8 +32,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:url" content={canonicalURL.href} />
     <link rel="canonical" href={canonicalURL.href} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <!-- Cloudflare Web Analytics -->
-    <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "f4d73c96a23447129d942007e81492d3"}'></script>
     <title>{title} | 卢仕潇的博客</title>
     <ClientRouter />
     <script>
