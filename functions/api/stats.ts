@@ -115,7 +115,12 @@ export const onRequestGet = async ({
       payload.error = payload.error ? payload.error + '；' : '';
       payload.error += '统计: ' + gqlJson.errors.map((e) => e.message).join(' / ').slice(0, 300);
     }
+    // 诊断：zone 有数据但查询为空 → 提示数据源问题（Pages 流量可能不计入 httpRequests1dGroups）
     const groups = gqlJson?.data?.viewer?.zones?.[0]?.httpRequests1dGroups || [];
+    if (!gqlJson?.errors?.length && !groups.length) {
+      payload.error = payload.error ? payload.error + '；' : '';
+      payload.error += '统计: zone 正常但近 30 天无 HTTP 请求数据（Pages 流量可能不计入此数据源，可改用 Web Analytics）';
+    }
     const days = groups.map((g) => ({
       date: g.dimensions.date.slice(5), // MM-DD
       requests: g.sum.requests,
@@ -154,14 +159,11 @@ export const onRequestGet = async ({
         source?: { config?: Record<string, unknown> };
       }[];
     };
-    // 诊断：Pages API 报错（多为项目名不对 / 权限不足）
+    // 诊断：Pages API 报错（区分 401 权限 / 404 项目名或账号）
+    payload.error = payload.error ? payload.error + '；' : '';
+    payload.error += `部署接口 HTTP ${dep.status}`;
     if (depJson?.errors?.length) {
-      payload.error = payload.error ? payload.error + '；' : '';
-      payload.error += '部署: ' + depJson.errors.map((e) => e.message || '').join(' / ').slice(0, 300);
-    }
-    if (depJson && depJson.success === false) {
-      payload.error = payload.error ? payload.error + '；' : '';
-      payload.error += '部署接口失败（项目名 my-blog 可能不对）';
+      payload.error += ' - ' + depJson.errors.map((e) => e.message || '').join(' / ').slice(0, 200);
     }
     const list = depJson?.result || [];
     payload.deployments = list.map((d) => {
