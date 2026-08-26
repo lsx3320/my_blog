@@ -58,7 +58,7 @@ const moments = allMoments.sort((a, b) => {
             {moment.data.images && moment.data.images.length > 0 && (
               <div class="mb-6">
                 {moment.data.images.length === 1 ? (
-                  <div class="max-w-[320px] overflow-hidden cursor-pointer border border-[var(--color-border)]">
+                  <div class="max-w-[320px] overflow-hidden rounded-lg cursor-pointer">
                     <img src={moment.data.images[0]} alt={moment.data.location || '动态图片'} class="moment-img w-full h-auto hover:opacity-90 transition-opacity" loading="lazy" decoding="async" />
                   </div>
                 ) : (
@@ -68,7 +68,7 @@ const moments = allMoments.sort((a, b) => {
                     'grid-cols-3'
                   }`}>
                     {moment.data.images.map((img: string) => (
-                      <div class="aspect-square overflow-hidden cursor-pointer border border-[var(--color-border)]">
+                      <div class="aspect-square overflow-hidden rounded-lg cursor-pointer">
                         <img src={img} alt={moment.data.location || '动态图片'} class="moment-img w-full h-full object-cover hover:opacity-90 transition-opacity" loading="lazy" decoding="async" />
                       </div>
                     ))}
@@ -110,13 +110,12 @@ const moments = allMoments.sort((a, b) => {
 </BaseLayout>
 
 <script is:inline data-astro-rerun>
-  // Lightbox
-  const lightbox = document.getElementById('lightbox');
-  const lightboxImg = document.getElementById('lightbox-img');
-  const lightboxClose = document.getElementById('lightbox-close');
-
+  // Lightbox 打开/关闭
   function openLightbox(src) {
+    const lightboxImg = document.getElementById('lightbox-img');
+    if (!lightboxImg) return;
     lightboxImg.src = src;
+    const lightbox = document.getElementById('lightbox');
     lightbox?.classList.remove('opacity-0', 'pointer-events-none');
     lightboxImg.classList.remove('scale-90');
     lightboxImg.classList.add('scale-100');
@@ -124,44 +123,61 @@ const moments = allMoments.sort((a, b) => {
   }
 
   function closeLightbox() {
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
     lightbox?.classList.add('opacity-0', 'pointer-events-none');
-    lightboxImg.classList.remove('scale-100');
-    lightboxImg.classList.add('scale-90');
+    lightboxImg?.classList.remove('scale-100');
+    lightboxImg?.classList.add('scale-90');
     document.body.style.overflow = '';
   }
 
-  document.querySelectorAll('.moment-img').forEach(img => {
-    img.addEventListener('click', () => openLightbox(img.src));
-  });
-
-  lightbox?.addEventListener('click', (e) => {
-    if (e.target === lightbox) closeLightbox();
-  });
-  lightboxClose?.addEventListener('click', closeLightbox);
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeLightbox();
-  });
-
-  // 点赞
-  document.querySelectorAll('.like-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const countEl = btn.querySelector('.like-count');
-      const heartSvg = btn.querySelector('svg');
-      let count = parseInt(countEl.textContent || '0');
-
-      if (btn.classList.contains('liked')) {
-        count--;
-        btn.classList.remove('liked');
-      } else {
-        count++;
-        btn.classList.add('liked');
-        heartSvg.classList.add('scale-125');
-        setTimeout(() => heartSvg.classList.remove('scale-125'), 200);
-      }
-
-      countEl.textContent = String(count);
+  // 绑定当前页面的图片点击与点赞（astro:page-load 每次导航后都会执行，
+  // 保证 SPA 跳转后新页面的图片灯箱 / 点赞依然可用）
+  function bindMoments() {
+    document.querySelectorAll('.moment-img').forEach(img => {
+      if (img.__bound) return;
+      img.__bound = true;
+      img.addEventListener('click', () => openLightbox(img.src));
     });
-  });
+
+    document.querySelectorAll('.like-btn').forEach(btn => {
+      if (btn.__bound) return;
+      btn.__bound = true;
+      btn.addEventListener('click', () => {
+        const countEl = btn.querySelector('.like-count');
+        const heartSvg = btn.querySelector('svg');
+        let count = parseInt(countEl.textContent || '0');
+
+        if (btn.classList.contains('liked')) {
+          count--;
+          btn.classList.remove('liked');
+        } else {
+          count++;
+          btn.classList.add('liked');
+          heartSvg.classList.add('scale-125');
+          setTimeout(() => heartSvg.classList.remove('scale-125'), 200);
+        }
+
+        countEl.textContent = String(count);
+      });
+    });
+  }
+
+  // 关闭操作用 document 事件委托（不受 SPA 导航元素替换影响），全局单例防重复
+  if (!window.__momentsGlobalBound) {
+    window.__momentsGlobalBound = true;
+    document.addEventListener('click', (e) => {
+      const t = e.target;
+      if (t && t.id === 'lightbox') closeLightbox();
+      if (t && t.closest && t.closest('#lightbox-close')) closeLightbox();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLightbox();
+    });
+  }
+
+  document.addEventListener('astro:page-load', bindMoments);
+  bindMoments();
 </script>
 
 <style>
