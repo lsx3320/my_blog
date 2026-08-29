@@ -73,7 +73,7 @@ export default function DiaryList() {
               点击右上角<span className="font-semibold text-[#0a84ff]">蓝色加号</span>可以留言保存哦～
             </p>
             <p>
-              整个留言功能是个黑盒，我并不清楚你的身份，所以说<span className="font-semibold text-[#c2503a]">大胆写吧</span>——生活的不愉快、想喷的人和事都可以，也可以喷我（但是能看到这条留言，咱们都是哥们儿，轻点儿喷）。
+              整个留言功能是个黑盒，我并不清楚你的身份，所以说<span className="font-semibold text-[#c2503a]">大胆写吧</span>——生活的不愉快、想喷的人和事都可以。路还长，有点怕，但没办法，你我都是大人了。
             </p>
             <p className="font-semibold text-[#1c1c1e]">
               最后，祝你生活愉快。
