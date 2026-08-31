@@ -3,11 +3,8 @@ import { useEffect, useState } from 'react';
 import '@fontsource/noto-serif-tibetan/tibetan-400.css';
 import { loadHistory, saveHistory, cloudSync, cloudRemove } from '../lib/storage.js';
 
-// 私密锁卡片：只有输入密码才能看
+// 私密锁记录的密码（防君子）
 const LOCK_PASSWORD = '688886';
-const LOCK_TITLE = '纯粹的生命力卡片';
-const LOCK_HINT = '沾因果文章勿看';
-const LOCK_CONTENT = `（正文内容待补充——把内容发我，我填入此处。）`;
 
 export default function DiaryList() {
   const [items, setItems] = useState([]);
@@ -15,8 +12,9 @@ export default function DiaryList() {
   const [lockPass, setLockPass] = useState('');
   const [lockError, setLockError] = useState(false);
   const [lockShake, setLockShake] = useState(false);
-  const [lockOpen, setLockOpen] = useState(false);      // 密码输入弹窗
-  const [lockUnlocked, setLockUnlocked] = useState(false); // 正文弹窗
+  const [lockOpen, setLockOpen] = useState(false);    // 密码输入弹窗
+  const [lockItem, setLockItem] = useState(null);     // 正在查看的锁记录
+  const [lockView, setLockView] = useState(null);     // 密码通过后显示正文
 
   useEffect(() => {
     cloudSync(loadHistory())
@@ -47,24 +45,34 @@ export default function DiaryList() {
     } catch { /* ignore */ }
   };
 
-  // 锁卡片：打开密码输入弹窗
-  const openLock = () => {
+  // 点击锁记录：打开密码输入弹窗
+  const openLock = (item) => {
+    setLockItem(item);
     setLockPass('');
     setLockError(false);
     setLockOpen(true);
   };
 
-  // 校验密码：正确 → 正文弹窗；错误 → 提示 + 清空
+  // 校验密码：正确 → 显示正文；错误 → 提示 + 清空
   const checkLock = () => {
     if (lockPass === LOCK_PASSWORD) {
       setLockError(false);
       setLockOpen(false);
-      setLockUnlocked(true);
+      setLockView(lockItem);
     } else {
       setLockError(true);
       setLockShake(true);
       setTimeout(() => setLockShake(false), 500);
       setLockPass('');
+    }
+  };
+
+  // 点击记录：锁记录 → 密码；普通记录 → 详情页
+  const openItem = (it) => {
+    if (it.locked) {
+      openLock(it);
+    } else {
+      window.location.href = `/diary/view?id=${it.id}`;
     }
   };
 
@@ -123,46 +131,37 @@ export default function DiaryList() {
           <p className="mt-4 text-right text-xs text-[#8a8a8e]">—— 后生仔</p>
         </section>
 
-        {/* 记录列表：第一张是私密锁卡片，其余为随笔记录 */}
+        {/* 记录列表：与普通随笔统一排列，锁记录点击需密码 */}
         <div className="space-y-3">
-          {/* 私密锁卡片（列表第一张） */}
-          <button
-            onClick={openLock}
-            className="w-full text-left bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.06)] p-6 hover:shadow-[0_2px_6px_rgba(0,0,0,0.06),0_12px_32px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 transition-all flex items-center gap-4"
-          >
-            <span className="w-11 h-11 shrink-0 rounded-full bg-[#1c1c1e] flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </span>
-            <span className="min-w-0">
-              <span className="block font-serif font-semibold text-lg text-[#1c1c1e]">{LOCK_TITLE}</span>
-              <span className="block text-xs text-[#8a8a8e] mt-0.5">{LOCK_HINT}</span>
-            </span>
-            <svg className="w-4 h-4 ml-auto text-[#c7c7cc] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-
           {items.map((it) => (
-            <a
+            <div
               key={it.id}
-              href={`/diary/view?id=${it.id}`}
-              className="group relative block bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.06)] p-6 hover:shadow-[0_2px_6px_rgba(0,0,0,0.06),0_12px_32px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 transition-all"
+              role="button"
+              tabIndex={0}
+              onClick={() => openItem(it)}
+              onKeyDown={(e) => e.key === 'Enter' && openItem(it)}
+              className="group relative block bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.06)] p-6 hover:shadow-[0_2px_6px_rgba(0,0,0,0.06),0_12px_32px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 transition-all cursor-pointer"
             >
               <div className="flex items-baseline justify-between mb-1.5">
                 <span className="text-xs text-[#8a8a8e]">{it.date?.slice(0, 4)}</span>
                 {it.mood && <span className="text-[11px] text-[#b08a3e]">{it.mood}</span>}
               </div>
-              <h2 className="font-serif font-semibold text-lg text-[#1c1c1e] group-hover:text-[#0a84ff] transition-colors mb-1 truncate">
+              <h2 className="font-serif font-semibold text-lg text-[#1c1c1e] group-hover:text-[#0a84ff] transition-colors mb-1 truncate flex items-center gap-2">
+                {it.locked && (
+                  <svg className="w-4 h-4 shrink-0 text-[#8a8a8e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                )}
                 {it.title || '（无题）'}
               </h2>
-              <p className="text-sm text-[#6b6b70] leading-relaxed line-clamp-2 whitespace-pre-wrap">{it.content}</p>
+              <p className="text-sm text-[#6b6b70] leading-relaxed line-clamp-2 whitespace-pre-wrap">
+                {it.locked ? '沾因果文章勿看' : it.content}
+              </p>
               <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                 <span
                   role="button"
                   tabIndex={0}
-                  onClick={(e) => { e.preventDefault(); window.location.href = `/diary/write?edit=${it.id}`; }}
+                  onClick={(e) => { e.stopPropagation(); window.location.href = `/diary/write?edit=${it.id}`; }}
                   className="w-7 h-7 rounded-full bg-[#f2f2f7] hover:bg-[#e5e5ea] flex items-center justify-center text-[#8a8a8e] hover:text-[#0a84ff] transition-colors"
                   aria-label="编辑"
                 >
@@ -173,7 +172,7 @@ export default function DiaryList() {
                 <span
                   role="button"
                   tabIndex={0}
-                  onClick={(e) => del(e, it.id)}
+                  onClick={(e) => { e.stopPropagation(); del(e, it.id); }}
                   className="w-7 h-7 rounded-full bg-[#f2f2f7] hover:bg-[#ffe5e5] flex items-center justify-center text-[#8a8a8e] hover:text-[#ff3b30] transition-colors"
                   aria-label="删除"
                 >
@@ -182,7 +181,7 @@ export default function DiaryList() {
                   </svg>
                 </span>
               </div>
-            </a>
+            </div>
           ))}
 
           {items.length === 0 && (
@@ -238,18 +237,18 @@ export default function DiaryList() {
         </div>
       )}
 
-      {/* 锁卡片：正文弹窗 */}
-      {lockUnlocked && (
+      {/* 锁记录：正文弹窗 */}
+      {lockView && (
         <div
           className="fixed inset-0 z-[95] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
-          onClick={() => setLockUnlocked(false)}
+          onClick={() => setLockView(null)}
         >
           <div
             className="w-full max-w-lg max-h-[85vh] overflow-y-auto bg-white rounded-2xl shadow-xl p-8 relative"
             onClick={(e) => e.stopPropagation()}
           >
             <button
-              onClick={() => setLockUnlocked(false)}
+              onClick={() => setLockView(null)}
               className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#f2f2f7] hover:bg-[#e5e5ea] flex items-center justify-center text-[#8a8a8e] transition-colors"
               aria-label="关闭"
             >
@@ -257,8 +256,13 @@ export default function DiaryList() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <h3 className="font-serif font-bold text-2xl text-[#1c1c1e] mb-5 pr-8">{LOCK_TITLE}</h3>
-            <div className="font-serif text-[16px] text-[#3a3a3c] leading-[1.9] whitespace-pre-wrap">{LOCK_CONTENT}</div>
+            <div className="flex items-center gap-2 mb-5 pr-8">
+              <svg className="w-4 h-4 text-[#8a8a8e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <h3 className="font-serif font-bold text-2xl text-[#1c1c1e]">{lockView.title || '（无题）'}</h3>
+            </div>
+            <div className="font-serif text-[16px] text-[#3a3a3c] leading-[1.9] whitespace-pre-wrap">{lockView.content}</div>
           </div>
         </div>
       )}
