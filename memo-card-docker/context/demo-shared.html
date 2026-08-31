@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>跨浏览器云共享 Demo · 便签卡片</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #f2f2f7;
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+  .wrap { width: min(480px, 100%); }
+  h1 { font-size: 24px; margin-bottom: 4px; }
+  .sub { color: #8a8a8e; font-size: 13px; margin-bottom: 20px; }
+  .status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #34c759; margin-bottom: 16px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #34c759; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 50% { opacity: .4; } }
+  .input-row { display: flex; gap: 8px; margin-bottom: 20px; }
+  .input-row input {
+    flex: 1; border: 1px solid #e5e5ea; border-radius: 12px; padding: 12px 14px;
+    font-size: 15px; outline: none; background: #fff;
+  }
+  .input-row input:focus { border-color: #0a84ff; }
+  .input-row button {
+    border: none; background: #0a84ff; color: #fff; border-radius: 12px;
+    padding: 0 22px; font-size: 15px; cursor: pointer;
+  }
+  .input-row button:disabled { opacity: .5; }
+  .list { display: flex; flex-direction: column; gap: 10px; }
+  .item {
+    background: #fff; border-radius: 14px; padding: 14px 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 8px 20px rgba(0,0,0,.04);
+  }
+  .item-text { font-size: 15px; line-height: 1.6; }
+  .item-time { font-size: 11px; color: #8a8a8e; margin-top: 6px; }
+  .empty { text-align: center; color: #8a8a8e; font-size: 14px; padding: 40px 0; }
+  .hint {
+    margin-top: 24px; background: #fff; border-radius: 14px; padding: 16px;
+    font-size: 12px; color: #8a8a8e; line-height: 1.8;
+  }
+  .hint b { color: #1c1c1e; }
+  .err { color: #ff3b30; font-size: 12px; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>☁️ 跨浏览器共享留言板</h1>
+  <p class="sub">同一个 bin（jsonbin.io）· 不同浏览器/设备数据共享</p>
+  <div class="status"><span class="dot"></span><span id="status">正在连接…</span></div>
+  <div id="err" class="err"></div>
+  <div class="input-row">
+    <input id="msg" placeholder="写一句话，其他浏览器也能看到…" maxlength="200" />
+    <button id="addBtn">发送</button>
+  </div>
+  <div class="list" id="list"><div class="empty">加载中…</div></div>
+  <div class="hint">
+    <b>怎么测跨浏览器共享：</b><br>
+    ① 在这个页面发几条消息<br>
+    ② 打开另一个浏览器（或本浏览器无痕窗口）访问<u>同一网址</u><br>
+    ③ 你会看到和这边<b>完全一样</b>的消息 —— 因为它们存在同一个云端 bin<br><br>
+    <b>技术：</b>页面读写 <code>jsonbin.io</code> 固定 bin（id: 6a7c53b4…），所有浏览器共用。
+  </div>
+</div>
+
+<script>
+const KEY = '$2a$10$Iyqn3eO8f2SOtdwE9A9k1uY7MIXfb5k1Z7pYYkWZW9lYtxc1bJlbi';
+const BIN_ID = '6a7c53b4da38895dfeda048a';
+
+const $ = (id) => document.getElementById(id);
+const statusEl = $('status'), errEl = $('err'), listEl = $('list');
+
+async function load() {
+  const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+    headers: { 'X-Master-Key': KEY },
+  });
+  if (!r.ok) throw new Error(`读取失败 ${r.status}`);
+  const j = await r.json();
+  return Array.isArray(j.record) ? j.record : [];
+}
+
+async function save(data) {
+  const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-Master-Key': KEY },
+    body: JSON.stringify(data),
+  });
+  if (!r.ok) throw new Error(`写入失败 ${r.status}`);
+}
+
+function render(list) {
+  if (!list.length) {
+    listEl.innerHTML = '<div class="empty">还没有消息，发第一条吧 ✍️</div>';
+    return;
+  }
+  listEl.innerHTML = list.map((m) => `
+    <div class="item">
+      <div class="item-text"></div>
+      <div class="item-time"></div>
+    </div>
+  `).join('');
+  // 文本用 textContent 防注入
+  listEl.querySelectorAll('.item').forEach((el, i) => {
+    el.querySelector('.item-text').textContent = list[i].text;
+    el.querySelector('.item-time').textContent = list[i].time || '';
+  });
+}
+
+async function refresh() {
+  statusEl.textContent = '同步中…';
+  try {
+    const list = await load();
+    render(list);
+    statusEl.textContent = `已连接 · ${list.length} 条共享消息`;
+    errEl.textContent = '';
+  } catch (e) {
+    statusEl.style.color = '#ff3b30';
+    statusEl.textContent = '连接失败';
+    errEl.textContent = e.message;
+  }
+}
+
+async function add() {
+  const input = $('msg');
+  const text = input.value.trim();
+  if (!text) return;
+  const btn = $('addBtn');
+  btn.disabled = true;
+  try {
+    const list = await load();
+    list.unshift({ id: Date.now().toString(36), text, time: new Date().toLocaleString('zh-CN') });
+    await save(list);
+    input.value = '';
+    render(list);
+    statusEl.textContent = `已发送 · ${list.length} 条共享消息`;
+  } catch (e) {
+    errEl.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+$('addBtn').addEventListener('click', add);
+$('msg').addEventListener('keydown', (e) => e.key === 'Enter' && add());
+refresh();
+// 每 5 秒自动刷新，方便看到另一浏览器的消息
+setInterval(refresh, 5000);
+</script>
+</body>
+</html>

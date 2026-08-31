@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1" />
+    <meta name="theme-color" content="#f2f2f7" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>便签卡片 · 记录你的句子</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      // 开发模式（Vite）加载源码；部署环境（静态托管无 Vite）加载失败 → 立即跳转构建产物 dist/
+      try {
+        await import('/src/main.jsx');
+      } catch (e) {
+        if (window.location.pathname.indexOf('/dist/') === -1) {
+          window.location.replace(window.location.origin + '/dist/index.html');
+        }
+      }
+    </script>
+  </body>
+</html>

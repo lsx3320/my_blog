@@ -1,0 +1,16 @@
+services:
+  memo-card:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: memo-card
+    ports:
+      - "8010:8010"
+    environment:
+      - PORT=8010
+      # 云同步（jsonbin.io）：key/bin 只存服务端，绝不进入前端 bundle
+      # 从 .env 读取（见同目录 .env.example）；未配置时云同步走前端直连降级
+      - JSONBIN_MASTER_KEY=${JSONBIN_MASTER_KEY:-}
+      - JSONBIN_BIN=${JSONBIN_BIN:-}
+      # - DEEPSEEK_API_KEY=sk-xxx   # 可选：AI 整理代理的 key（有后端时 key 零暴露）
+    restart: unless-stopped
