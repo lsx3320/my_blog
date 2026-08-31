@@ -1,8 +1,0 @@
-node_modules
-dist
-.git
-*.log
-docs
-demo-shared.html
-web
-.env
