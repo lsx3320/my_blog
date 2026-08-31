@@ -95,9 +95,8 @@ export async function cloudSync(localList) {
   const cloud = await cloudGet();
   const cleaned = cloud.filter((x) => x && x.id && x.id !== '_init' && !deleted.has(x.id));
 
-  // 合并去重：同 id 冲突时——本设备**编辑过**的记录（updatedAt 较新）胜出；
-  // 未编辑（无 updatedAt）的记录以**云端为准**（避免本地旧缓存覆盖云端的
-  // 字段更新，如 locked 上锁标记、内容修改）
+  // 合并去重：同 id 冲突时取「更新时间 / 创建时间」较新的版本
+  // （本设备刚编辑过的记录 updatedAt 最新 → 编辑内容胜出，不会被云端旧数据覆盖）
   const byId = new Map();
   [...cleaned, ...(localList || [])].forEach((x) => {
     if (!x || !x.id || deleted.has(x.id)) return;
@@ -106,9 +105,9 @@ export async function cloudSync(localList) {
       byId.set(x.id, x);
       return;
     }
-    const curT = cur.updatedAt || 0;
-    const newT = x.updatedAt || 0;
-    if (newT > curT) byId.set(x.id, x);
+    const curT = cur.updatedAt || cur.createdAt || 0;
+    const newT = x.updatedAt || x.createdAt || 0;
+    if (newT >= curT) byId.set(x.id, x);
   });
 
   const merged = [...byId.values()].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));

@@ -87,7 +87,7 @@ export default function DiaryView() {
           </header>
 
           <div className="font-serif text-[17px] md:text-lg text-[#1c1c1e] leading-[1.95] whitespace-pre-wrap">
-            {item.locked ? '此记录已加密，请从列表页验证密码后查看。' : item.content}
+            {item.content}
           </div>
 
           <div className="mt-16 text-center">
