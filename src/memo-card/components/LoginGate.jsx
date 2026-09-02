@@ -2,7 +2,7 @@
 import { useState } from 'react';
 
 const PASSWORD = '20020423'; // 我的生日
-const KEY = 'diary_unlocked';
+const DEFAULT_KEY = 'diary_unlocked';
 
 const SHAKE_CSS = `
 @keyframes diary-shake {
@@ -14,16 +14,16 @@ const SHAKE_CSS = `
 .diary-shake { animation: diary-shake 0.4s ease; }
 `;
 
-export default function LoginGate() {
+export default function LoginGate({ title = '私人随笔', subtitle = '我的生日（8 位数字）', storageKey = DEFAULT_KEY }) {
   const [pass, setPass] = useState('');
   const [error, setError] = useState(false);
   const [shake, setShake] = useState(false);
   // 初始：已登录过（localStorage）则遮罩隐藏
   const [hidden, setHidden] = useState(() => {
     try {
-      if (localStorage.getItem(KEY) === '1') return true;
-      if (sessionStorage.getItem(KEY) === '1') {
-        localStorage.setItem(KEY, '1');
+      if (localStorage.getItem(storageKey) === '1') return true;
+      if (sessionStorage.getItem(storageKey) === '1') {
+        localStorage.setItem(storageKey, '1');
         return true;
       }
     } catch { /* ignore */ }
@@ -32,7 +32,7 @@ export default function LoginGate() {
 
   const submit = () => {
     if (pass === PASSWORD) {
-      try { localStorage.setItem(KEY, '1'); } catch { /* ignore */ }
+      try { localStorage.setItem(storageKey, '1'); } catch { /* ignore */ }
       setError(false);
       setHidden(true); // 揭开遮罩，下方内容始终已就绪
     } else {
@@ -53,8 +53,8 @@ export default function LoginGate() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
         </div>
-        <h2 className="font-display font-semibold text-xl text-[#1c1c1e] mb-1">私人随笔</h2>
-        <p className="text-sm text-[#8a8a8e] mb-7">我的生日（8 位数字）</p>
+        <h2 className="font-display font-semibold text-xl text-[#1c1c1e] mb-1">{title}</h2>
+        <p className="text-sm text-[#8a8a8e] mb-7">{subtitle}</p>
         <input
           type="password"
           inputMode="numeric"
