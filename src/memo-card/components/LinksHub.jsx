@@ -6,6 +6,7 @@ const BIN_URL = 'https://api.jsonbin.io/v3/b';
 const MASTER_KEY = '$2a$10$Iyqn3eO8f2SOtdwE9A9k1uY7MIXfb5k1Z7pYYkWZW9lYtxc1bJlbi';
 const LOCAL_KEY = 'links:local';
 const API_KEY_STORE = 'links:apikey';
+const DIARY_KEY_STORE = 'memo-card:apikey'; // 随笔页同款 key，回退复用
 const TAGS = ['网站', 'GitHub', '插件', 'MCP', 'Skill', '模型'];
 
 function fmtTime(ts) {
@@ -30,7 +31,9 @@ export default function LinksHub() {
   const [apiKeyOpen, setApiKeyOpen] = useState(false);
 
   useEffect(() => {
-    try { setAiKey(localStorage.getItem(API_KEY_STORE) || ''); } catch { /* ignore */ }
+    try {
+      setAiKey(localStorage.getItem(API_KEY_STORE) || localStorage.getItem(DIARY_KEY_STORE) || '');
+    } catch { /* ignore */ }
     loadCloud();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -282,7 +285,7 @@ export default function LinksHub() {
             <div className="flex justify-end gap-2">
               <button onClick={() => setApiKeyOpen(false)} className="px-4 py-2 rounded-full border border-[#e5e5ea] text-sm text-[#5a5a5e] hover:bg-[#f2f2f7] transition-colors">取消</button>
               <button
-                onClick={() => { try { localStorage.setItem(API_KEY_STORE, aiKey.trim()); } catch { /* ignore */ } setApiKeyOpen(false); }}
+                onClick={() => { try { localStorage.setItem(API_KEY_STORE, aiKey.trim()); localStorage.setItem(DIARY_KEY_STORE, aiKey.trim()); } catch { /* ignore */ } setApiKeyOpen(false); }}
                 className="px-5 py-2 rounded-full bg-[#0a84ff] text-white text-sm font-medium hover:opacity-90 transition-opacity"
               >
                 保存
