@@ -23,6 +23,7 @@ export default function LinksHub() {
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
+  const [note, setNote] = useState('');
   const [tags, setTags] = useState(['网站']);
   const [aiKey, setAiKey] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
@@ -82,22 +83,26 @@ export default function LinksHub() {
     setErr('');
     try {
       const prompt =
-        '你是网站识别助手。请识别以下网址对应的网站，用中文回答，严格输出两行（不要多余文字）：\n' +
-        '名称：<网站名称或域名含义>\n简介：<一句话 25 字内概括它是什么/用来干什么>\n' +
-        '网址：' + trimmed;
+        '你是网站识别助手。请识别以下网址对应的网站，用中文回答，严格按格式输出三行（不要多余文字、不要客套）：\n' +
+        '名称：<网站名称或域名含义，15 字内>\n' +
+        '简介：<它是什么 + 主要用途，30 字内，一句话>\n' +
+        '亮点：<核心功能/特色/适合谁用/技术栈中挑 2-3 个最有价值的点，40 字内，顿号分隔>\n' +
+        '要求：只输出真实确定的信息，不确定的就不写；网址：' + trimmed;
       const r = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-        body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'user', content: prompt }], temperature: 0.3, max_tokens: 200 }),
+        body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'user', content: prompt }], temperature: 0.3, max_tokens: 300 }),
       });
       if (!r.ok) throw new Error('AI 请求失败 ' + r.status);
       const data = await r.json();
       const text = data?.choices?.[0]?.message?.content || '';
       const nameM = text.match(/名称[:：]\s*(.+)/);
       const descM = text.match(/简介[:：]\s*(.+)/);
+      const noteM = text.match(/亮点[:：]\s*(.+)/);
       if (nameM) setTitle(nameM[1].trim().slice(0, 40));
       if (descM) setDesc(descM[1].trim().slice(0, 100));
       else if (text.trim()) setDesc(text.trim().slice(0, 100));
+      if (noteM) setNote(noteM[1].trim().slice(0, 120));
     } catch (e) {
       setErr(e.message || 'AI 识别失败');
     } finally {
@@ -116,6 +121,7 @@ export default function LinksHub() {
       url: u,
       title: title.trim() || hostOf(u),
       desc: desc.trim(),
+      note: note.trim(),
       tags: tags.length ? tags : ['网站'],
       createdAt: Date.now(),
     };
@@ -128,7 +134,7 @@ export default function LinksHub() {
       setErr('云端保存失败（已存本地）：' + e.message);
     } finally {
       setSaving(false);
-      setUrl(''); setTitle(''); setDesc(''); setTags(['网站']);
+      setUrl(''); setTitle(''); setDesc(''); setNote(''); setTags(['网站']);
     }
   }
 
@@ -199,7 +205,13 @@ export default function LinksHub() {
             onChange={(e) => setDesc(e.target.value)}
             placeholder="一句话简介（点「AI 识别」自动生成，或手写）"
             rows={2}
-            className="w-full font-serif text-sm text-[#3a3a3c] placeholder:text-[#c7c7cc] focus:outline-none mb-4 resize-none"
+            className="w-full font-serif text-sm text-[#3a3a3c] placeholder:text-[#c7c7cc] focus:outline-none mb-3 resize-none"
+          />
+          <input
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="亮点：核心功能 / 适合谁用 / 技术栈（AI 识别自动填，可手改）"
+            className="w-full font-serif text-sm text-[#6b6b70] placeholder:text-[#c7c7cc] focus:outline-none mb-4"
           />
           {err && <p className="text-xs text-[#ff3b30] mb-3">{err}</p>}
           <div className="flex items-center justify-between">
@@ -245,6 +257,11 @@ export default function LinksHub() {
                     {it.url}
                   </a>
                   {it.desc && <p className="text-sm text-[#6b6b70] mt-1.5 leading-relaxed">{it.desc}</p>}
+                  {it.note && (
+                    <p className="text-xs text-[#98989d] mt-1 leading-relaxed">
+                      <span className="text-[#b0893e] font-medium">亮点</span> · {it.note}
+                    </p>
+                  )}
                   <div className="text-[11px] text-[#c7c7cc] mt-2">{fmtTime(it.createdAt)}</div>
                 </div>
                 <button
