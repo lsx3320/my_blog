@@ -18,6 +18,56 @@ function hostOf(url) {
   try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return url; }
 }
 
+const FETCH_TIMEOUT = 12000;
+function withTimeout(promise, ms) {
+  return Promise.race([promise, new Promise((_, rej) => setTimeout(() => rej(new Error('超时')), ms))]);
+}
+function htmlToText(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// 抓页面真实内容：GitHub 走 API + README，普通网页走 Jina Reader，再兜底公共代理
+async function fetchContext(u) {
+  const gh = u.match(/^https?:\/\/github\.com\/([\w.-]+)\/([\w.-]+)/i);
+  if (gh) {
+    const [, owner, repoRaw] = gh;
+    const repo = repoRaw.replace(/\.git$/, '');
+    try {
+      const info = await withTimeout(fetch(`https://api.github.com/repos/${owner}/${repo}`).then((r) => r.json()), FETCH_TIMEOUT);
+      if (info && !info.message) {
+        let ctx = `GitHub 仓库 ${owner}/${repo}\n描述: ${info.description || '无'}\n主语言: ${info.language || '未知'}\nStar: ${info.stargazers_count}\nTopics: ${(info.topics || []).join('、')}\n`;
+        for (const name of ['README.md', 'readme.md', 'README_zh.md', 'README.zh-CN.md']) {
+          try {
+            const md = await withTimeout(fetch(`https://raw.githubusercontent.com/${owner}/${repo}/HEAD/${name}`).then((r) => { if (!r.ok) throw new Error(); return r.text(); }), FETCH_TIMEOUT);
+            ctx += `\nREADME 摘录:\n${md.slice(0, 6000)}`;
+            break;
+          } catch { /* 试下一个文件名 */ }
+        }
+        return { source: 'GitHub API', text: ctx.slice(0, 7000) };
+      }
+    } catch { /* 限流或超时，走通用抓取 */ }
+  }
+  try {
+    const text = await withTimeout(fetch(`https://r.jina.ai/${u}`).then((r) => r.text()), FETCH_TIMEOUT);
+    if (text && text.length > 50) return { source: 'Jina Reader', text: text.slice(0, 6000) };
+  } catch { /* 下一个 */ }
+  try {
+    const text = await withTimeout(fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`).then((r) => r.text()), FETCH_TIMEOUT);
+    const clean = htmlToText(text);
+    if (clean.length > 50) return { source: '代理抓取', text: clean.slice(0, 6000) };
+  } catch { /* 放弃 */ }
+  return null;
+}
+
 export default function LinksHub() {
   const [items, setItems] = useState([]);
   const [url, setUrl] = useState('');
@@ -27,6 +77,7 @@ export default function LinksHub() {
   const [tags, setTags] = useState(['网站']);
   const [aiKey, setAiKey] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiStage, setAiStage] = useState(''); // 'fetch' | 'ai' | ''
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
   const [apiKeyOpen, setApiKeyOpen] = useState(false);
@@ -73,25 +124,42 @@ export default function LinksHub() {
     setTags((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
   }
 
-  // AI 识别：根据网址让 DeepSeek 概括网站
+  // AI 识别：先抓页面真实内容，再让 DeepSeek 概括
   async function aiDescribe() {
     const trimmed = url.trim();
     if (!trimmed) { setErr('先输入网址'); return; }
     const key = aiKey;
     if (!key) { setErr('请先设置 DeepSeek API key（右上角 ⚙️）'); setApiKeyOpen(true); return; }
     setAiLoading(true);
+    setAiStage('fetch');
     setErr('');
     try {
-      const prompt =
-        '你是网站识别助手。请识别以下网址对应的网站，用中文回答，严格按格式输出三行（不要多余文字、不要客套）：\n' +
-        '名称：<网站名称或域名含义，15 字内>\n' +
-        '简介：<它是什么 + 主要用途，30 字内，一句话>\n' +
-        '亮点：<核心功能/特色/适合谁用/技术栈中挑 2-3 个最有价值的点，40 字内，顿号分隔>\n' +
-        '要求：只输出真实确定的信息，不确定的就不写；网址：' + trimmed;
+      const fetched = await fetchContext(trimmed);
+      setAiStage('ai');
+      const page = fetched ? fetched.text : null;
+      const source = fetched ? fetched.source : '';
+      let prompt;
+      if (page) {
+        prompt =
+          '你是网站分析助手。以下是网址对应的真实页面内容，请基于抓取内容概括（不许编造没出现的功能），用中文严格按格式输出四行，不要多余文字和客套：\n' +
+          '名称：<网站/项目名，15 字内>\n' +
+          '简介：<它是什么 + 主要用途，30 字内一句话>\n' +
+          '亮点：<从页面内容挑 2-4 个最核心最有价值的功能/特色/适用场景/技术栈，顿号分隔，45 字内>\n' +
+          '分类：<从 网站/GitHub/插件/MCP/Skill/模型 里选 1-3 个最贴切的>\n' +
+          (source === 'GitHub API' ? '（这是 GitHub 仓库，分类通常含 GitHub）\n' : '') +
+          '网址：' + trimmed + '\n\n页面内容：\n' + page;
+      } else {
+        prompt =
+          '你是网站识别助手。只根据网址本身（域名、路径、仓库名）推断，用中文严格按格式输出三行，不要多余文字：\n' +
+          '名称：<网站名或域名含义，15 字内>\n' +
+          '简介：<它是什么 + 主要用途，30 字内一句话>\n' +
+          '亮点：<由网址可推断的用途/场景/技术栈，顿号分隔，30 字内>\n' +
+          '只输出确定的信息，不确定的不写。网址：' + trimmed;
+      }
       const r = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-        body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'user', content: prompt }], temperature: 0.3, max_tokens: 300 }),
+        body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'user', content: prompt }], temperature: 0.3, max_tokens: 400 }),
       });
       if (!r.ok) throw new Error('AI 请求失败 ' + r.status);
       const data = await r.json();
@@ -99,14 +167,20 @@ export default function LinksHub() {
       const nameM = text.match(/名称[:：]\s*(.+)/);
       const descM = text.match(/简介[:：]\s*(.+)/);
       const noteM = text.match(/亮点[:：]\s*(.+)/);
+      const catM = text.match(/分类[:：]\s*(.+)/);
       if (nameM) setTitle(nameM[1].trim().slice(0, 40));
       if (descM) setDesc(descM[1].trim().slice(0, 100));
       else if (text.trim()) setDesc(text.trim().slice(0, 100));
       if (noteM) setNote(noteM[1].trim().slice(0, 120));
+      if (catM && page) {
+        const valid = catM[1].split(/[、,，\s]+/).map((s) => s.trim()).filter((s) => TAGS.includes(s)).slice(0, 3);
+        if (valid.length) setTags(valid);
+      }
     } catch (e) {
       setErr(e.message || 'AI 识别失败');
     } finally {
       setAiLoading(false);
+      setAiStage('');
     }
   }
 
@@ -222,7 +296,7 @@ export default function LinksHub() {
                 disabled={aiLoading || !url.trim()}
                 className="px-4 py-2 rounded-full bg-[#f2f2f7] text-sm text-[#1c1c1e] font-medium hover:bg-[#e5e5ea] transition-colors disabled:opacity-40"
               >
-                {aiLoading ? '识别中…' : 'AI 识别'}
+                {aiLoading ? (aiStage === 'fetch' ? '抓取页面…' : 'AI 分析…') : 'AI 识别'}
               </button>
               <button
                 onClick={save}
