@@ -68,7 +68,7 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
       <h1 class="font-display font-bold text-3xl md:text-4xl lg:text-5xl leading-tight mb-6 tracking-tight">
         {post.data.title}
       </h1>
-      <p class="font-sans text-xs text-[var(--color-muted-foreground)] mb-6">文 / 后生仔</p>
+      <p class="font-sans text-xs text-[var(--color-muted-foreground)] mb-6">{post.data.byline}</p>
       <p class="text-lg text-[var(--color-muted-foreground)] max-w-2xl mx-auto leading-relaxed">
         {post.data.description}
       </p>
