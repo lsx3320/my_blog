@@ -1,13 +1,14 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
-import { ArrowUpRight, ArrowRight, MapPin, Code2, Camera, BookOpen, MoveDown } from 'lucide-astro';
+import { ArrowUpRight, ArrowRight, Mountain, Code2, Camera, BookOpen, MoveDown } from 'lucide-astro';
 import { timelineEvents } from '../data/timeline';
 const posts = (await getCollection('posts')).filter(post => !post.data.draft).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 const recentPosts = posts.slice(0, 4);
 const technicalPosts = ['transformer-guide', 'resnet-guide', 'agent-guide'].map(id => posts.find(post => post.id === id)).filter(Boolean);
 const selectedMemories = [timelineEvents[1], timelineEvents[2], timelineEvents[5]];
 const lake = '/gallery/ppyq/slmh/f709402f3861a10eb4749ede2e8127dd.webp';
+const cover = '/gallery/mountain-blessing.webp';
 const photos = [
   { src: lake, title: '赛里木湖', note: '新疆 · 路上的风景', href: '/gallery#travel' },
   { src: '/gallery/故宫.webp', title: '故宫', note: '北京 · 一眼千年', href: '/gallery#memories' },
@@ -15,16 +16,16 @@ const photos = [
 ];
 const formatDate = (date: Date) => date.toISOString().slice(0, 10).replaceAll('-', '.');
 ---
-<BaseLayout title="首页" image={lake}>
+<BaseLayout title="首页" image={cover}>
   <section class="journal-cover" aria-labelledby="cover-title">
-    <img class="cover-image" src={lake} alt="赛里木湖的蓝色湖水、雪山与湖畔" width="1706" height="1279" loading="eager" fetchpriority="high" decoding="async" />
+    <img class="cover-image" src={cover} alt="蓝天、云雾与山景之间，横幅上写着：迷茫漂泊的众生安住于大圆满吧" width="1058" height="1286" loading="eager" fetchpriority="high" decoding="async" />
     <div class="cover-shade"></div>
     <div class="page-wrap cover-inner">
-      <div class="cover-top"><span>LU SHIXIAO / PERSONAL JOURNAL</span><span class="cover-place"><MapPin size={14} /> 新疆 · 赛里木湖</span></div>
+      <div class="cover-top"><span>LU SHIXIAO / PERSONAL JOURNAL</span><a class="cover-place" href={cover} target="_blank" rel="noopener noreferrer" title="查看完整封面照片"><Mountain size={14} /> 云山之间 <ArrowUpRight size={14} /></a></div>
       <div class="cover-copy">
         <p class="cover-intro">你好，我是卢仕潇。</p>
         <h1 id="cover-title">后生仔<span class="cover-dot">。</span></h1>
-        <p class="cover-description">以代码观世界，以迭代修人生。<br />写一点技术，也记下生活经过的样子。</p>
+        <p class="cover-description">以代码观世界，以迭代修人生。<span class="cover-secondary">写一点技术，也记下生活经过的样子。</span></p>
       </div>
       <div class="cover-bottom"><a href="#latest">翻开最近的记录 <MoveDown size={16} /></a><span class="cover-handwriting">Life, in progress.</span><a href="/gallery">我的相册 <ArrowUpRight size={16} /></a></div>
     </div>
@@ -71,18 +72,19 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10).replaceAll('-
   </section>
 </BaseLayout>
 <style>
-  .journal-cover { position: relative; height: min(550px, 62svh); min-height: 310px; overflow: hidden; color: white; background: #366e87; }
-  .cover-image { position: absolute; width: 100%; height: 100%; object-fit: cover; object-position: center 5%; }
+  .journal-cover { position: relative; height: min(660px, 72svh); min-height: 350px; overflow: hidden; color: white; background: #366e87; }
+  .cover-image { position: absolute; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; }
   .cover-shade { position: absolute; inset: 0; background: rgb(8 29 35 / .27); }
-  .cover-inner { position: relative; height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding-block: 26px; }
+  .cover-inner { position: relative; height: 100%; display: flex; flex-direction: column; padding-block: 26px; }
   .cover-top { display: flex; justify-content: space-between; gap: 20px; font-size: 11px; }
   .cover-place { display: flex; align-items: center; gap: 7px; }
-  .cover-copy { padding-bottom: 5px; text-shadow: 0 2px 14px rgb(0 26 42 / .35); }
+  .cover-copy { margin-top: 20px; text-shadow: 0 2px 14px rgb(0 26 42 / .35); }
   .cover-intro { font-size: 15px; margin-bottom: 9px; }
-  .cover-copy h1 { font-family: 'Songti SC', 'STSong', serif; font-weight: 600; font-size: 90px; line-height: 1.2; }
+  .cover-copy h1 { font-family: 'Songti SC', 'STSong', serif; font-weight: 600; font-size: 64px; line-height: 1.2; }
   .cover-dot { color: #f3b6a3; }
-  .cover-description { margin-top: 22px; font-size: 16px; line-height: 1.9; }
-  .cover-bottom { display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 12px; }
+  .cover-description { margin-top: 12px; font-size: 14px; line-height: 1.9; }
+  .cover-secondary { display: block; }
+  .cover-bottom { display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 12px; margin-top: auto; }
   .cover-bottom a { display: flex; gap: 12px; align-items: center; }
   .cover-bottom a:hover { text-decoration: underline; text-underline-offset: 5px; }
   .cover-handwriting { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-size: 23px; }
@@ -138,9 +140,10 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10).replaceAll('-
     .cover-top { font-size: 9px; }
     .cover-top > span:first-child { max-width: 140px; }
     .cover-place { align-items: start; }
-    .cover-copy h1 { font-size: 62px; }
+    .cover-copy h1 { font-size: 54px; }
     .cover-intro { font-size: 13px; }
-    .cover-description { font-size: 14px; margin-top: 16px; }
+    .cover-description { font-size: 13px; margin-top: 12px; }
+    .cover-secondary { display: none; }
     .cover-handwriting { display: none; }
     .intro-inner > p { font-size: 13px; }
     .intro-links { gap: 22px; font-size: 11px; }
@@ -155,4 +158,5 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10).replaceAll('-
     .memory-grid { grid-template-columns: 1fr; gap: 28px; }
   }
   @media (max-width: 380px) { .journal-sidebar { grid-template-columns: 1fr; } .intro-links { gap: 15px; } .cover-copy h1 { font-size: 54px; } }
+  @media (max-height: 800px) { .cover-copy { margin-top: 8px; } .cover-secondary { display: none; } }
 </style>

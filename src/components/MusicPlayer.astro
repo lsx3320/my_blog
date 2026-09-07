@@ -2,7 +2,7 @@
 import { Music2, Pause } from 'lucide-astro';
 ---
 <div class="music-player">
-  <audio id="background-audio" preload="none" loop src="/bgm.mp3"></audio>
+  <audio id="background-audio" preload="metadata" loop src="/bgm.mp3"></audio>
   <button id="music-toggle" aria-label="播放背景音乐" aria-pressed="false" title="播放背景音乐">
     <Music2 id="music-play-icon" size={18} /><Pause id="music-pause-icon" size={18} class="hidden" />
   </button>
@@ -17,6 +17,37 @@ import { Music2, Pause } from 'lucide-astro';
   const audio = document.querySelector<HTMLAudioElement>('#background-audio')!;
   const button = document.querySelector<HTMLButtonElement>('#music-toggle')!;
   const feedback = document.querySelector<HTMLElement>('#music-feedback')!;
+  const player = button.closest('.music-player')!;
+  const KEY_POS = '__bgm_pos';
+  const KEY_STATE = '__bgm_playing';
+  const KEY_PAUSED = '__bgm_user_paused';
+  const readSession = (key: string) => {
+    try { return sessionStorage.getItem(key); } catch { return null; }
+  };
+  const savedPosition = Number(readSession(KEY_POS));
+  let pendingPosition = Number.isFinite(savedPosition) && savedPosition > 0 ? savedPosition : 0;
+  const savedPause = readSession(KEY_PAUSED);
+  let userPaused = savedPause === '1' || (savedPause === null && readSession(KEY_STATE) === '0' && pendingPosition > 0);
+  let playPending = false;
+  let retryListening = false;
+  let autoplayTimer: ReturnType<typeof setTimeout> | undefined;
+  let lastSavedAt = 0;
+  const gestureEvents = ['click', 'touchend', 'keydown'] as const;
+
+  const saveSession = () => {
+    try {
+      sessionStorage.setItem(KEY_POS, String(pendingPosition || audio.currentTime));
+      sessionStorage.setItem(KEY_STATE, audio.paused ? '0' : '1');
+      sessionStorage.setItem(KEY_PAUSED, userPaused ? '1' : '0');
+    } catch { /* Playback still works when browser storage is unavailable. */ }
+  };
+  const restorePosition = () => {
+    if (!pendingPosition || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
+    try {
+      audio.currentTime = pendingPosition % audio.duration;
+      pendingPosition = 0;
+    } catch { /* Retry when media metadata becomes available. */ }
+  };
   const sync = () => {
     const playing = !audio.paused;
     const label = playing ? '暂停背景音乐' : '播放背景音乐';
@@ -26,16 +57,86 @@ import { Music2, Pause } from 'lucide-astro';
     document.getElementById('music-play-icon')?.classList.toggle('hidden', playing);
     document.getElementById('music-pause-icon')?.classList.toggle('hidden', !playing);
   };
-  button.addEventListener('click', async () => {
-    if (!audio.paused) { audio.pause(); return; }
-    button.disabled = true;
+
+  const stopGestureRetry = () => {
+    for (const name of gestureEvents) document.removeEventListener(name, retryPlayback);
+    retryListening = false;
+  };
+  const waitForGesture = () => {
+    if (retryListening || userPaused) return;
+    for (const name of gestureEvents) document.addEventListener(name, retryPlayback, { passive: true });
+    retryListening = true;
+  };
+  async function playMusic() {
+    if (userPaused || playPending || !audio.paused) return;
+    playPending = true;
+    button.setAttribute('aria-busy', 'true');
     feedback.textContent = '';
-    try { await audio.play(); } catch {
-      feedback.textContent = '音乐暂时无法播放，请稍后重试。';
-      button.title = '播放失败，点击重试';
-    } finally { button.disabled = false; }
+    try {
+      restorePosition();
+      await audio.play();
+      if (userPaused) {
+        audio.pause();
+        return;
+      }
+      stopGestureRetry();
+      feedback.textContent = '背景音乐正在播放。';
+    } catch (error) {
+      if (userPaused) return;
+      if (error instanceof DOMException && error.name === 'NotAllowedError') {
+        waitForGesture();
+      } else {
+        feedback.textContent = '音乐暂时无法播放，请稍后重试。';
+        button.title = '播放失败，点击重试';
+      }
+    } finally {
+      playPending = false;
+      button.removeAttribute('aria-busy');
+      saveSession();
+    }
+  }
+  function retryPlayback(event: Event) {
+    // The music button owns its toggle so a pause cannot trigger autoplay.
+    if (event.target instanceof Node && player.contains(event.target)) return;
+    if (userPaused) { stopGestureRetry(); return; }
+    void playMusic();
+  }
+  button.addEventListener('click', () => {
+    clearTimeout(autoplayTimer);
+    if (!audio.paused || playPending) {
+      userPaused = true;
+      stopGestureRetry();
+      audio.pause();
+      feedback.textContent = '背景音乐已暂停。';
+      sync();
+      saveSession();
+      return;
+    }
+    userPaused = false;
+    void playMusic();
   });
-  audio.addEventListener('play', sync);
-  audio.addEventListener('pause', sync);
-  audio.addEventListener('error', () => { feedback.textContent = '音乐暂时无法加载，请稍后重试。'; });
+  audio.addEventListener('loadedmetadata', restorePosition);
+  audio.addEventListener('play', () => {
+    sync();
+    saveSession();
+  });
+  audio.addEventListener('pause', () => {
+    sync();
+    saveSession();
+  });
+  audio.addEventListener('timeupdate', () => {
+    if (Date.now() - lastSavedAt < 1000) return;
+    lastSavedAt = Date.now();
+    saveSession();
+  });
+  audio.addEventListener('error', () => {
+    sync();
+    feedback.textContent = '音乐暂时无法加载，请稍后重试。';
+    button.title = '加载失败，点击重试';
+  });
+  document.addEventListener('astro:page-load', sync);
+  window.addEventListener('pagehide', saveSession);
+  restorePosition();
+  sync();
+  if (!userPaused) autoplayTimer = setTimeout(() => { void playMusic(); }, 3000);
 </script>
