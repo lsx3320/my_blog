@@ -1,120 +1,97 @@
 ---
+import { Search, Sun, Moon, Menu, X, ArrowUpRight } from 'lucide-astro';
 const navItems = [
-  { label: '首页', href: '/' },
-  { label: '文章', href: '/posts' },
-  { label: '朋友圈', href: '/moments' },
-  { label: '相册', href: '/gallery' },
-  { label: '随笔', href: '/diary' },
-  { label: '中转', href: '/links' },
-  { label: '关于', href: '/about' },
+  { label: '首页', href: '/' }, { label: '文章', href: '/posts' },
+  { label: '朋友圈', href: '/moments' }, { label: '相册', href: '/gallery' },
+  { label: '随笔', href: '/diary' }, { label: '中转', href: '/links' }, { label: '关于', href: '/about' },
 ];
-
-const currentPath = Astro.url.pathname;
+const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isActive = (href: string) => currentPath === href || (href !== '/' && currentPath.startsWith(href + '/'));
 ---
-
-<header class="sticky top-0 z-50 bg-[var(--color-background)] border-b border-[var(--color-border)]">
-  <nav class="max-w-6xl mx-auto px-6 py-3.5 flex items-center justify-between">
-    <a href="/" class="flex items-baseline gap-2.5">
-      <span class="font-display font-bold text-xl tracking-tight">后生仔</span>
-    </a>
-
-    <!-- Desktop nav -->
-    <ul class="hidden md:flex items-center gap-7 font-sans text-[13px] tracking-wide">
-      {navItems.map(item => (
-        <li>
-          <a
-            href={item.href}
-            class:list={[
-              'transition-colors',
-              currentPath === item.href || currentPath.startsWith(item.href + '/')
-                ? 'text-[var(--color-primary)]'
-                : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
-            ]}
-          >
-            {item.label}
-          </a>
-        </li>
-      ))}
-    </ul>
-
-    <div class="flex items-center gap-1 font-sans">
-      <!-- Theme toggle -->
-      <button
-        id="theme-toggle"
-        class="p-2 rounded hover:bg-[var(--color-muted)] transition-colors text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
-        aria-label="切换主题"
-      >
-        <svg class="w-5 h-5 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-        </svg>
-        <svg class="w-5 h-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-        </svg>
-      </button>
-
-      <!-- Mobile menu button -->
-      <button
-        id="mobile-menu-toggle"
-        class="md:hidden p-2 rounded hover:bg-[var(--color-muted)] transition-colors text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
-        aria-label="打开菜单"
-      >
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
-    </div>
-  </nav>
-
-  <!-- Mobile menu -->
-  <div id="mobile-menu" class="hidden md:hidden border-t border-[var(--color-border)] font-sans">
-    <ul class="px-6 py-4 space-y-1">
-      {navItems.map(item => (
-        <li>
-          <a
-            href={item.href}
-            class:list={[
-              'block py-2 text-sm tracking-wide transition-colors',
-              currentPath === item.href || currentPath.startsWith(item.href + '/')
-                ? 'text-[var(--color-primary)]'
-                : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
-            ]}
-          >
-            {item.label}
-          </a>
-        </li>
-      ))}
-    </ul>
-  </div>
+<header class="site-header">
+  <site-navigation>
+    <nav class="page-wrap header-inner" aria-label="主导航">
+      <a href="/" class="wordmark" aria-label="后生仔，首页">
+        <span class="wordmark-stamp" aria-hidden="true">潇</span>
+        <span>后生仔<small>卢仕潇的数字手记</small></span>
+      </a>
+      <ul class="desktop-nav">
+        {navItems.map(item => <li><a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}</a></li>)}
+      </ul>
+      <div class="header-actions">
+        <a href="/posts#search" class="icon-button" aria-label="搜索文章" title="搜索文章"><Search /></a>
+        <button id="theme-toggle" class="icon-button" aria-label="切换主题" title="切换主题"><Moon class="dark:hidden" /><Sun class="hidden dark:block" /></button>
+        <button id="mobile-menu-toggle" class="icon-button menu-toggle" aria-label="打开菜单" aria-expanded="false" aria-controls="mobile-menu" title="打开菜单"><Menu class="menu-open-icon" /><X class="menu-close-icon" /></button>
+      </div>
+    </nav>
+    <nav id="mobile-menu" class="mobile-nav" aria-label="移动端导航" hidden>
+      <ul class="page-wrap">
+        {navItems.map(item => <li><a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}<ArrowUpRight size={16} /></a></li>)}
+      </ul>
+    </nav>
+  </site-navigation>
 </header>
-
-<script is:inline data-astro-rerun>
-  // 用 astro:page-load（每次导航后必然触发，含初始加载）绑定按钮事件，
-  // 比单独依赖 data-astro-rerun 更可靠——SPA 跳转后新页面的按钮也能绑上。
-  // 元素级 __bound 标记防止同一元素重复绑定。
-  function bindHeader() {
-    // Theme toggle
-    const themeToggle = document.getElementById('theme-toggle');
-    if (themeToggle && !themeToggle.__bound) {
-      themeToggle.__bound = true;
-      themeToggle.addEventListener('click', () => {
-        const nextDark = !document.documentElement.classList.contains('dark');
-        document.documentElement.classList.toggle('dark', nextDark);
-        document.documentElement.classList.toggle('light', !nextDark);
-        localStorage.setItem('theme', nextDark ? 'dark' : 'light');
-      });
-    }
-
-    // Mobile menu toggle
-    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
-    if (mobileMenuToggle && !mobileMenuToggle.__bound) {
-      mobileMenuToggle.__bound = true;
-      mobileMenuToggle.addEventListener('click', () => {
-        mobileMenu?.classList.toggle('hidden');
-      });
+<style>
+  .site-header { position: sticky; top: 0; z-index: 50; background: var(--color-background); border-bottom: 1px solid var(--color-border); }
+  site-navigation { display: block; }
+  .header-inner { min-height: 80px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+  .wordmark { display: flex; align-items: center; gap: 12px; flex-shrink: 0; font-size: 20px; font-weight: 650; line-height: 1.3; }
+  .wordmark-stamp { width: 35px; height: 39px; display: grid; place-items: center; border: 1px solid var(--color-primary); color: var(--color-primary); font-family: var(--font-serif); font-size: 24px; border-radius: 3px; }
+  .wordmark small { display: block; font-size: 10px; font-weight: 400; color: var(--color-muted-foreground); margin-top: 4px; }
+  .desktop-nav { display: flex; gap: 27px; font-size: 13px; align-self: stretch; align-items: stretch; }
+  .desktop-nav li { display: flex; }
+  .desktop-nav a { display: flex; align-items: center; position: relative; color: var(--color-muted-foreground); }
+  .desktop-nav a:hover, a[aria-current="page"] { color: var(--color-primary); }
+  .desktop-nav a[aria-current="page"]::after { content: ''; position: absolute; bottom: 19px; left: 0; right: 0; height: 2px; background: var(--color-primary); }
+  .header-actions { display: flex; gap: 2px; }
+  .menu-toggle { display: none; }
+  .mobile-nav { border-top: 1px solid var(--color-border); padding-block: 12px 20px; }
+  .mobile-nav a { display: flex; justify-content: space-between; align-items: center; padding: 12px 4px; font-size: 15px; }
+  .mobile-nav li + li { border-top: 1px solid var(--color-border); }
+  .menu-close-icon, [aria-expanded="true"] .menu-open-icon { display: none; }
+  [aria-expanded="true"] .menu-close-icon { display: block; }
+  @media (max-width: 980px) { .desktop-nav { gap: 18px; } .wordmark small { display: none; } }
+  @media (max-width: 800px) { .desktop-nav { display: none; } .menu-toggle { display: inline-flex; } .header-inner { min-height: 68px; gap: 10px; } .wordmark { font-size: 18px; gap: 9px; } }
+  @media (min-width: 801px) { .mobile-nav { display: none; } }
+  @media (max-width: 380px) { .header-actions .icon-button { width: 36px; } }
+</style>
+<script>
+  class SiteNavigation extends HTMLElement {
+    connectedCallback() {
+      const toggle = this.querySelector<HTMLButtonElement>('#mobile-menu-toggle')!;
+      const menu = this.querySelector<HTMLElement>('#mobile-menu')!;
+      const themeButton = this.querySelector<HTMLButtonElement>('#theme-toggle')!;
+      const setMenu = (open: boolean) => {
+        menu.hidden = !open;
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.setAttribute('aria-label', open ? '关闭菜单' : '打开菜单');
+        toggle.title = open ? '关闭菜单' : '打开菜单';
+      };
+      const syncLabel = () => {
+        const label = document.documentElement.classList.contains('dark') ? '切换到浅色主题' : '切换到深色主题';
+        themeButton.setAttribute('aria-label', label);
+        themeButton.title = label;
+      };
+      toggle.onclick = () => setMenu(Boolean(menu.hidden));
+      this.onkeydown = (event) => {
+        if (event.key === 'Escape' && !menu.hidden) { setMenu(false); toggle.focus(); }
+      };
+      menu.onclick = (event) => { if ((event.target as Element).closest('a')) setMenu(false); };
+      themeButton.onclick = () => {
+        const dark = !document.documentElement.classList.contains('dark');
+        document.documentElement.classList.toggle('dark', dark);
+        document.documentElement.classList.toggle('light', !dark);
+        try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch {}
+        syncLabel();
+      };
+      syncLabel();
     }
   }
-
-  document.addEventListener('astro:page-load', bindHeader);
-  bindHeader();
+  if (!customElements.get('site-navigation')) customElements.define('site-navigation', SiteNavigation);
+  document.addEventListener('astro:page-load', () => {
+    const button = document.getElementById('theme-toggle');
+    const label = document.documentElement.classList.contains('dark') ? '切换到浅色主题' : '切换到深色主题';
+    button?.setAttribute('aria-label', label);
+    button?.setAttribute('title', label);
+  });
 </script>

@@ -2,10 +2,23 @@
 import { useEffect, useState } from 'react';
 import '@fontsource/noto-serif-tibetan/tibetan-400.css';
 import { loadHistory, saveHistory, cloudSync, cloudRemove } from '../lib/storage.js';
+import { exportBackup } from '../lib/safe-sync.js';
 
 export default function DiaryList() {
   const [items, setItems] = useState([]);
   const [state, setState] = useState('同步中…');
+  const [busy, setBusy] = useState(false);
+
+  const syncNow = async () => {
+    setBusy(true);
+    try {
+      const merged = await cloudSync(loadHistory(), { write: true });
+      saveHistory(merged);
+      setItems(merged);
+      setState('已同步');
+    } catch (error) { setState('同步失败，原数据保留：' + error.message); }
+    finally { setBusy(false); }
+  };
 
   useEffect(() => {
     cloudSync(loadHistory())
@@ -27,7 +40,8 @@ export default function DiaryList() {
     const next = loadHistory().filter((x) => x.id !== id);
     saveHistory(next);
     setItems(next);
-    await cloudRemove(id).catch(() => {});
+    try { await cloudRemove(id); }
+    catch { setState('删除尚未同步，请点击同步重试'); return; }
     // 云端删除后同步一次，刷新本地为云端权威结果
     try {
       const merged = await cloudSync(next);
@@ -55,6 +69,10 @@ export default function DiaryList() {
             </svg>
           </a>
         </header>
+        <div className="flex gap-5 mb-6 text-sm text-[#28614f]">
+          <button type="button" disabled={busy} onClick={syncNow}>{busy ? '同步中…' : '同步数据'}</button>
+          <button type="button" onClick={() => exportBackup('diary', { diary: loadHistory() })}>导出随笔备份</button>
+        </div>
 
         {/* 个性公告 */}
         <section className="relative bg-white rounded-2xl border border-[#e5e5ea] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.06)] p-7 md:p-9 mb-8 overflow-hidden">

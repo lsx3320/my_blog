@@ -5,7 +5,7 @@ import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
-  return posts.map(post => ({
+  return posts.filter(post => !post.data.draft).map(post => ({
     params: { slug: post.id },
   }));
 }
@@ -39,8 +39,8 @@ const prevPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentInde
 const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
 ---
 
-<BaseLayout title={post.data.title} description={post.data.description}>
-  <article class="max-w-3xl mx-auto px-6 pt-10 pb-16">
+<BaseLayout title={post.data.title} description={post.data.description} image={post.data.image} article>
+  <article class="article-shell page-wrap pt-10 pb-16">
     <!-- 运行页眉 -->
     <div class="flex items-center justify-between font-sans text-xs text-[var(--color-muted-foreground)] mb-2">
       <span>后生仔 · {post.data.category}</span>
@@ -57,7 +57,7 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
     </a>
 
     <!-- Article header -->
-    <header class="mb-14 text-center">
+    <header class="article-heading mb-14 text-center">
       <div class="flex items-center justify-center gap-3 font-sans text-xs text-[var(--color-muted-foreground)] mb-5">
         <time datetime={post.data.pubDate.toISOString()}>{formattedDate}</time>
         <span class="w-px h-3 bg-[var(--color-border)]" aria-hidden="true"></span>
@@ -112,11 +112,11 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
     )}
 
     <!-- Article content with TOC -->
-    <div class="flex gap-12">
+    <div class:list={['reading-layout', tocHeadings.length > 0 && 'has-toc']}>
       <!-- TOC sidebar for desktop -->
       {tocHeadings.length > 0 && (
-        <aside class="hidden lg:block w-56 shrink-0">
-          <div class="sticky top-28">
+        <aside class="article-toc hidden lg:block">
+          <div class="sticky top-28 toc-scroll">
             <div class="pl-4 border-l border-[var(--color-border)]">
               <h2 class="text-xs font-semibold text-[var(--color-muted-foreground)] uppercase tracking-widest mb-4">
                 目录
@@ -151,7 +151,7 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
     </div>
 
     <!-- Share & actions -->
-    <div class="mt-12 pt-8 border-t border-[var(--color-border)]">
+    <div class="article-end mt-12 pt-8 border-t border-[var(--color-border)]">
       <div class="flex items-center justify-between">
         <a href="/posts" class="inline-flex items-center gap-2 text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-colors group">
           <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -161,18 +161,19 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
         </a>
         <div class="flex items-center gap-3">
           <button
-            onclick="navigator.clipboard.writeText(window.location.href).then(() => this.textContent = '已复制')"
+            id="copy-article-link"
             class="px-4 py-2 text-sm border border-[var(--color-border)] rounded-md text-[var(--color-muted-foreground)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors"
           >
             复制链接
           </button>
+          <span id="copy-link-status" class="sr-only" role="status"></span>
         </div>
       </div>
     </div>
 
     <!-- Prev/Next navigation -->
     {(prevPost || nextPost) && (
-      <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="article-end mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
         {prevPost && (
           <a href={`/posts/${prevPost.id}`} class="group p-5 bg-[var(--color-card)] border border-[var(--color-border)] rounded-md hover:border-[var(--color-primary)] transition-colors">
             <div class="text-xs text-[var(--color-muted-foreground)] mb-2">上一篇</div>
@@ -198,6 +199,19 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
 </BaseLayout>
 
 <style>
+  .article-shell { max-width: 1160px; }
+  .article-heading { max-width: 800px; margin-inline: auto; }
+  .article-heading h1 { font-size: 38px; line-height: 1.5; }
+  .reading-layout { max-width: 740px; margin-inline: auto; }
+  .article-end { max-width: 800px; margin-inline: auto; }
+  .toc-scroll { max-height: calc(100vh - 145px); overflow-y: auto; padding-right: 10px; }
+  @media (min-width: 1024px) {
+    .reading-layout.has-toc { display: grid; grid-template-columns: 210px minmax(0, 740px); gap: 50px; max-width: none; }
+  }
+  @media (max-width: 700px) {
+    .article-heading h1 { font-size: 27px; }
+    .article-shell .article-content { font-size: 16px; }
+  }
   .article-content {
     font-family: var(--font-serif);
     font-size: 1.125rem;
@@ -205,17 +219,7 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
     color: var(--color-foreground);
   }
 
-  /* 首字下沉：正文第一段首字朱砂衬线大字 */
-  .article-content > p:first-of-type::first-letter {
-    font-family: var(--font-display);
-    font-size: 3em;
-    font-weight: 600;
-    line-height: 1;
-    float: left;
-    margin-right: 0.12em;
-    margin-top: 0.08em;
-    color: var(--color-primary);
-  }
+  #copy-article-link { min-width: 128px; }
 
   /* 章节标题：编号由文章正文手写（一、二、三…），不做 CSS 自动编号，
      避免与手写编号重复（如"一、一、xxx"） */
@@ -227,7 +231,7 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
     margin-bottom: 1.25rem;
     padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--color-border);
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
   }
 
   .article-content :global(h3) {
@@ -354,6 +358,8 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
 
   .article-content :global(table) {
     width: 100%;
+    display: block;
+    overflow-x: auto;
     margin: 1.5rem 0;
     border-collapse: collapse;
   }
@@ -371,34 +377,39 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
   }
 </style>
 
-<script is:inline data-astro-rerun>
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
-      if (target) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    });
-  });
-
-  // Highlight current TOC item on scroll
-  const headings = document.querySelectorAll('.article-content h2, .article-content h3');
-  const tocLinks = document.querySelectorAll('aside nav a, details nav a');
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const id = entry.target.id;
-        tocLinks.forEach(link => {
-          link.classList.toggle('text-[var(--color-primary)]', link.getAttribute('href') === `#${id}`);
-          link.classList.toggle('font-medium', link.getAttribute('href') === `#${id}`);
+<script>
+  let tocObserver: IntersectionObserver | undefined;
+  function bindArticle() {
+    tocObserver?.disconnect();
+    const headings = document.querySelectorAll('.article-content h2, .article-content h3');
+    const links = document.querySelectorAll<HTMLAnchorElement>('.article-toc nav a, article details nav a');
+    if (headings.length) {
+      tocObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          links.forEach(link => {
+            const current = link.hash === '#' + entry.target.id;
+            link.classList.toggle('text-[var(--color-primary)]', current);
+            link.classList.toggle('font-medium', current);
+            if (current) link.setAttribute('aria-current', 'location'); else link.removeAttribute('aria-current');
+          });
         });
+      }, { rootMargin: '-100px 0px -60% 0px' });
+      headings.forEach(heading => tocObserver!.observe(heading));
+    }
+    const copy = document.querySelector<HTMLButtonElement>('#copy-article-link');
+    if (copy) copy.onclick = async () => {
+      const status = document.getElementById('copy-link-status');
+      try {
+        await navigator.clipboard.writeText(location.href);
+        copy.textContent = '已复制';
+        if (status) status.textContent = '文章链接已复制';
+      } catch {
+        copy.textContent = '复制失败，重试';
+        if (status) status.textContent = '无法复制，请复制浏览器地址栏中的链接。';
       }
-    });
-  }, { rootMargin: '-20% 0px -80% 0px' });
-
-  headings.forEach(heading => {
-    if (heading.id) observer.observe(heading);
-  });
+    };
+  }
+  document.addEventListener('astro:page-load', bindArticle);
+  document.addEventListener('astro:before-swap', () => tocObserver?.disconnect());
 </script>

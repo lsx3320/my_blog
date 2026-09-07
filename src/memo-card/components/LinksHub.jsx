@@ -1,5 +1,6 @@
 // 网站中转：随时存入网址 + AI 一键识别简介 + 分类管理
 import { useEffect, useState } from 'react';
+import { backupRecords, mergeRecords, withDataLock, exportBackup } from '../lib/safe-sync.js';
 
 const BIN = '6a988ba0da38895dfe312450';
 const BIN_URL = 'https://api.jsonbin.io/v3/b';
@@ -90,33 +91,50 @@ export default function LinksHub() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function loadLocal() { try { return JSON.parse(localStorage.getItem(LOCAL_KEY)) || []; } catch { return []; } }
-  function saveLocal(list) { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(list)); } catch { /* ignore */ } }
+  function loadLocal() { try { const value = JSON.parse(localStorage.getItem(LOCAL_KEY)); return Array.isArray(value) ? value : []; } catch { return []; } }
+  function saveLocal(list) {
+    backupRecords(LOCAL_KEY, loadLocal());
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(list));
+  }
+  function deletedIds() {
+    try { const ids = JSON.parse(localStorage.getItem('links:deleted') || '[]'); return new Set(Array.isArray(ids) ? ids : []); } catch { return new Set(); }
+  }
   async function cloudGet() {
     const r = await fetch(`${BIN_URL}/${BIN}/latest`, { headers: { 'X-Master-Key': MASTER_KEY } });
     if (!r.ok) throw new Error('云端读取失败');
     const j = await r.json();
-    return Array.isArray(j.record?.links) ? j.record.links : [];
+    if (!j.record || !Array.isArray(j.record.links)) throw new Error('云端数据格式异常，已停止同步以保护原数据');
+    return j.record;
   }
   async function cloudPut(list) {
-    const r = await fetch(`${BIN_URL}/${BIN}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
-      body: JSON.stringify({ links: list }),
+    return withDataLock('links:sync', async () => {
+      const record = await cloudGet();
+      backupRecords('links:cloud', record);
+      const deleted = new Set([...deletedIds(), ...(Array.isArray(record.deletedIds) ? record.deletedIds : [])]);
+      const merged = mergeRecords(record.links, mergeRecords(list, loadLocal()), deleted);
+      const r = await fetch(`${BIN_URL}/${BIN}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
+        body: JSON.stringify({ ...record, links: merged, deletedIds: [...deleted] }),
+      });
+      if (!r.ok) throw new Error('云端写入失败');
+      localStorage.setItem('links:deleted', JSON.stringify([...deleted]));
+      saveLocal(merged);
+      return merged;
     });
-    if (!r.ok) throw new Error('云端写入失败');
   }
   async function loadCloud() {
     try {
-      const cloud = await cloudGet();
-      // 合并去重（id 唯一），云端优先 + 本地补充
-      const byId = new Map();
-      [...cloud, ...loadLocal()].forEach((x) => { if (x && x.id) byId.set(x.id, x); });
-      const merged = [...byId.values()].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      const record = await cloudGet();
+      const deleted = new Set([...deletedIds(), ...(Array.isArray(record.deletedIds) ? record.deletedIds : [])]);
+      const merged = mergeRecords(record.links, loadLocal(), deleted);
+      backupRecords('links:cloud', record);
+      localStorage.setItem('links:deleted', JSON.stringify([...deleted]));
       saveLocal(merged);
       setItems(merged);
-    } catch {
+    } catch (error) {
       setItems(loadLocal());
+      setErr('云端读取失败，显示本地记录：' + error.message);
     }
   }
 
@@ -199,25 +217,42 @@ export default function LinksHub() {
       tags: tags.length ? tags : ['网站'],
       createdAt: Date.now(),
     };
-    const next = [item, ...items];
-    setItems(next);
-    saveLocal(next);
+    const next = mergeRecords([item, ...items], loadLocal(), deletedIds());
+    let localSaved = false;
     try {
-      await cloudPut(next);
+      saveLocal(next);
+      localSaved = true;
+      setItems(next);
+      setItems(await cloudPut(next));
     } catch (e) {
-      setErr('云端保存失败（已存本地）：' + e.message);
+      setErr((localSaved ? '云端保存失败（已存本地）：' : '本地保存失败，请保留输入内容并导出已有数据：') + e.message);
     } finally {
       setSaving(false);
-      setUrl(''); setTitle(''); setDesc(''); setNote(''); setTags(['网站']);
+      if (localSaved) { setUrl(''); setTitle(''); setDesc(''); setNote(''); setTags(['网站']); }
     }
   }
 
   async function remove(id) {
     if (!window.confirm('删除这条？')) return;
-    const next = items.filter((x) => x.id !== id);
-    setItems(next);
-    saveLocal(next);
-    try { await cloudPut(next); } catch { /* ignore */ }
+    setSaving(true);
+    try {
+      const deleted = deletedIds();
+      deleted.add(id);
+      localStorage.setItem('links:deleted', JSON.stringify([...deleted]));
+      const next = mergeRecords(items, loadLocal(), deleted);
+      saveLocal(next);
+      setItems(next);
+      setItems(await cloudPut(next));
+    } catch (error) { setErr('删除尚未同步，原数据备份已保留：' + error.message); }
+    finally { setSaving(false); }
+  }
+
+  async function syncNow() {
+    setSaving(true);
+    setErr('');
+    try { setItems(await cloudPut(loadLocal())); }
+    catch (error) { setErr('同步失败，原数据保留：' + error.message); }
+    finally { setSaving(false); }
   }
 
   const tagColor = (t) => {
@@ -228,6 +263,10 @@ export default function LinksHub() {
   return (
     <div className="min-h-screen bg-[#f2f2f7]">
       <div className="max-w-3xl mx-auto px-5 py-12">
+        <div className="flex gap-5 mb-6 text-sm text-[#28614f]">
+          <button type="button" disabled={saving} onClick={syncNow}>{saving ? '同步中…' : '同步数据'}</button>
+          <button type="button" onClick={() => exportBackup('links', { links: loadLocal() })}>导出中转备份</button>
+        </div>
         {/* 头部 */}
         <div className="flex items-end justify-between mb-8">
           <div>

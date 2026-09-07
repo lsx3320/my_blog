@@ -1,90 +1,123 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
-
-const posts = (await getCollection('posts'))
-  .filter(post => !post.data.draft)
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-
+import { Search, X, ArrowUpRight } from 'lucide-astro';
+const posts = (await getCollection('posts')).filter(post => !post.data.draft).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 const categories = [...new Set(posts.map(post => post.data.category))];
-
-const fmtDate = (d: Date) =>
-  d.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit' }).replace('/', '.');
 ---
-
-<BaseLayout title="目录">
-  <section class="max-w-4xl mx-auto px-6 py-16 md:py-20">
-    <div class="flex items-baseline justify-between mb-3">
-      <h1 class="font-display font-bold text-4xl md:text-5xl tracking-tight">文章</h1>
-      <p class="tag text-[var(--color-muted-foreground)]">共 {posts.length} 篇 · 2026</p>
-    </div>
-    <p class="text-[var(--color-muted-foreground)] font-serif mb-12">
-      记录技术探索与生活感悟的文字空间
-    </p>
-
-    <!-- 分类索引 -->
-    <div class="flex flex-wrap gap-x-6 gap-y-2 mb-8 font-sans text-[13px]">
-      <button class="category-filter text-[var(--color-primary)]" data-category="all">全部</button>
-      {categories.map(cat => (
-        <button
-          class="category-filter text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors"
-          data-category={cat}
-        >
-          {cat}
-        </button>
-      ))}
-    </div>
-
-    <!-- 文章索引 -->
-    <ol class="border-t border-[var(--color-border)]">
-      {posts.map((post, i) => (
-        <li class="post-item border-b border-[var(--color-border)] reveal" style={`transition-delay: ${Math.min(i, 8) * 40}ms`} data-category={post.data.category}>
-          <a
-            href={`/posts/${post.id}`}
-            class="flex items-baseline gap-4 md:gap-6 py-5 px-2 -mx-2 group hover:bg-[var(--color-muted)]/60 transition-colors"
-          >
-            <span class="font-display font-semibold text-[var(--color-primary)] tabular-nums w-10 shrink-0">
-              {String(i + 1).padStart(3, '0')}
-            </span>
-            <h2 class="flex-1 min-w-0 font-display font-semibold text-lg md:text-xl leading-snug group-hover:text-[var(--color-primary)] transition-colors line-clamp-1">
-              {post.data.title}
-            </h2>
-            <span class="hidden sm:block font-sans text-xs text-[var(--color-muted-foreground)] shrink-0">
-              {post.data.category} · {fmtDate(post.data.pubDate)}
-            </span>
-          </a>
-        </li>
-      ))}
-    </ol>
-
-    {posts.length === 0 && (
-      <div class="text-center py-20">
-        <p class="text-[var(--color-muted-foreground)]">暂无文章</p>
+<BaseLayout title="文章" description="卢仕潇的文章归档：AI 技术、社会思考、生活随笔与商业洞察。">
+  <div class="page-wrap archive">
+    <header class="page-heading"><span class="eyebrow">THE NOTEBOOK</span><h1>文字里的我</h1><p>技术的来龙去脉，生活的所见所想。</p></header>
+    <post-archive>
+      <form id="search" class="search-form" role="search" action="/posts" method="get">
+        <label for="post-search" class="sr-only">搜索文章</label><Search size={20} />
+        <input id="post-search" name="q" type="search" placeholder="搜索标题、摘要或标签" autocomplete="off" />
+        <button class="icon-button" id="clear-search" type="button" title="清除搜索" aria-label="清除搜索" hidden><X /></button>
+      </form>
+      <div class="archive-toolbar">
+        <div class="category-filters" role="group" aria-label="文章分类">
+          <button type="button" data-category="all" aria-pressed="true">全部 <span>{posts.length}</span></button>
+          {categories.map(category => <button type="button" data-category={category} aria-pressed="false">{category} <span>{posts.filter(post => post.data.category === category).length}</span></button>)}
+        </div>
+        <p id="result-count" role="status" aria-live="polite">{posts.length} 篇文章</p>
       </div>
-    )}
-  </section>
+      <ol class="archive-list">
+        {posts.map(post => <li class="post-item" data-category={post.data.category} data-search={[post.data.title, post.data.description, ...post.data.tags].join(' ').toLocaleLowerCase()}>
+          <a href={'/posts/' + post.id}>
+            <time datetime={post.data.pubDate.toISOString()}>{post.data.pubDate.toISOString().slice(0,10).replaceAll('-', '.')}</time>
+            <div class="post-summary">
+              <div class="post-category">{post.data.category}<span>约 {Math.max(1, Math.ceil((post.body?.length || 0) / 500))} 分钟</span></div>
+              <h2>{post.data.title}</h2><p>{post.data.description}</p>
+              <div class="post-tags">{post.data.tags.slice(0,3).map(tag => <span>#{tag}</span>)}</div>
+            </div><ArrowUpRight class="post-arrow" size={21} />
+          </a>
+        </li>)}
+      </ol>
+      <div id="empty-results" class="empty-results" hidden><Search size={28} /><h2>没有找到相关文章</h2><p>换个关键词，或查看全部文章。</p><button id="reset-filters" type="button" class="text-link">查看全部文章</button></div>
+    </post-archive>
+  </div>
 </BaseLayout>
-
-<script is:inline data-astro-rerun>
-  // 分类索引
-  const filterButtons = document.querySelectorAll('.category-filter');
-  const postItems = document.querySelectorAll('.post-item');
-
-  filterButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const category = button.getAttribute('data-category');
-
-      filterButtons.forEach(btn => {
-        btn.classList.remove('text-[var(--color-primary)]');
-        btn.classList.add('text-[var(--color-muted-foreground)]');
-      });
-      button.classList.remove('text-[var(--color-muted-foreground)]');
-      button.classList.add('text-[var(--color-primary)]');
-
-      postItems.forEach(item => {
-        item.style.display =
-          category === 'all' || item.getAttribute('data-category') === category ? '' : 'none';
-      });
-    });
-  });
+<style>
+  .archive { max-width: 1060px; }
+  post-archive { display: block; }
+  .search-form { display: flex; align-items: center; gap: 14px; border: 1px solid var(--color-border); background: var(--color-card); border-radius: 6px; padding: 6px 14px; color: var(--color-muted-foreground); min-height: 56px; }
+  .search-form:focus-within { border-color: var(--color-primary); box-shadow: 0 0 0 2px var(--color-primary-light); }
+  .search-form input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--color-foreground); font-size: 15px; height: 42px; }
+  input::-webkit-search-cancel-button { display: none; }
+  .archive-toolbar { display: flex; justify-content: space-between; align-items: start; gap: 20px; margin-top: 28px; border-bottom: 1px solid var(--color-border); }
+  .category-filters { display: flex; gap: 22px; flex-wrap: wrap; }
+  .category-filters button { font-size: 13px; color: var(--color-muted-foreground); padding-bottom: 15px; border-bottom: 2px solid transparent; }
+  .category-filters button span { margin-left: 4px; font-size: 10px; }
+  .category-filters button[aria-pressed="true"] { border-color: var(--color-primary); color: var(--color-primary); font-weight: 600; }
+  #result-count { flex-shrink: 0; font-size: 12px; color: var(--color-muted-foreground); padding-top: 2px; }
+  .post-item { border-bottom: 1px solid var(--color-border); }
+  .post-item > a { display: grid; grid-template-columns: 110px minmax(0,1fr) 24px; align-items: start; gap: 25px; padding-block: 30px; }
+  time { font-size: 11px; color: var(--color-muted-foreground); font-family: var(--font-mono); padding-top: 3px; }
+  .post-category { font-size: 11px; color: var(--color-primary); display: flex; gap: 15px; }
+  .post-category span { color: var(--color-muted-foreground); }
+  .post-summary h2 { font-size: 21px; margin-block: 9px; line-height: 1.55; }
+  .post-summary p { font-size: 13px; color: var(--color-muted-foreground); line-height: 1.9; }
+  .post-tags { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; color: var(--color-muted-foreground); font-size: 11px; }
+  .post-arrow { color: var(--color-primary); margin-top: 31px; }
+  .post-item a:hover h2 { color: var(--color-primary); }
+  .empty-results { text-align: center; padding-block: 72px; }
+  .empty-results svg { margin: 0 auto 18px; color: var(--color-muted-foreground); }
+  .empty-results h2 { font-size: 20px; }
+  .empty-results p { color: var(--color-muted-foreground); font-size: 14px; margin-block: 12px 18px; }
+  @media (max-width: 700px) {
+    .archive-toolbar { flex-direction: column; gap: 6px; }
+    .category-filters { gap: 12px 20px; }
+    .category-filters button { padding-bottom: 10px; }
+    #result-count { padding-block: 8px 12px; }
+    .post-item > a { grid-template-columns: minmax(0,1fr) 20px; gap: 10px; padding-block: 24px; }
+    .post-item time { grid-column: 1/-1; }
+    .post-summary h2 { font-size: 19px; }
+    .post-arrow { margin-top: 28px; }
+  }
+</style>
+<script>
+  class PostArchive extends HTMLElement {
+    private controller?: AbortController;
+    connectedCallback() {
+      this.controller?.abort();
+      this.controller = new AbortController();
+      const { signal } = this.controller;
+      const input = this.querySelector<HTMLInputElement>('#post-search')!;
+      const buttons = Array.from(this.querySelectorAll<HTMLButtonElement>('[data-category]:not(.post-item)'));
+      const items = Array.from(this.querySelectorAll<HTMLElement>('.post-item'));
+      const clear = this.querySelector<HTMLButtonElement>('#clear-search')!;
+      const params = new URLSearchParams(location.search);
+      const requestedCategory = params.get('category');
+      let category = buttons.some(button => button.dataset.category === requestedCategory) ? requestedCategory! : 'all';
+      input.value = params.get('q') || '';
+      const update = (writeUrl = true) => {
+        const query = input.value.trim().toLocaleLowerCase();
+        let count = 0;
+        items.forEach(item => {
+          const matches = (category === 'all' || item.dataset.category === category) && query.split(/\s+/).every(term => (item.dataset.search || '').includes(term));
+          item.hidden = !matches;
+          if (matches) count++;
+        });
+        buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.category === category)));
+        clear.hidden = input.value.length === 0;
+        this.querySelector<HTMLElement>('#empty-results')!.hidden = count !== 0;
+        this.querySelector<HTMLElement>('#result-count')!.textContent = count + ' 篇文章';
+        if (writeUrl) {
+          const url = new URL(location.href);
+          if (query) url.searchParams.set('q', input.value.trim()); else url.searchParams.delete('q');
+          if (category !== 'all') url.searchParams.set('category', category); else url.searchParams.delete('category');
+          history.replaceState(history.state, '', url);
+        }
+      };
+      input.addEventListener('input', () => update(), { signal });
+      this.querySelector('form')!.addEventListener('submit', event => { event.preventDefault(); update(); }, { signal });
+      buttons.forEach(button => button.addEventListener('click', () => { category = button.dataset.category!; update(); }, { signal }));
+      clear.addEventListener('click', () => { input.value = ''; update(); input.focus(); }, { signal });
+      this.querySelector('#reset-filters')!.addEventListener('click', () => { input.value = ''; category = 'all'; update(); input.focus(); }, { signal });
+      update(false);
+      if (location.hash === '#search') requestAnimationFrame(() => input.focus({ preventScroll: true }));
+    }
+    disconnectedCallback() { this.controller?.abort(); }
+  }
+  if (!customElements.get('post-archive')) customElements.define('post-archive', PostArchive);
 </script>

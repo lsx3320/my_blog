@@ -1,131 +1,109 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-
-const photos = [
-  // 人物
-  { id: 1, title: '坤坤', category: '人物', src: '/gallery/ikun.webp' },
-  { id: 2, title: 'KennyS', category: '人物', src: '/gallery/KennyS.webp' },
-  { id: 3, title: '4F', category: '人物', src: '/gallery/4F.webp' },
-  { id: 4, title: 'yc', category: '人物', src: '/gallery/yc.webp' },
-  { id: 5, title: '拐子', category: '人物', src: '/gallery/拐子.webp' },
-  { id: 6, title: '老爹精神', category: '人物', src: '/gallery/老爹精神.webp' },
-  // 合影
-  { id: 7, title: '合照', category: '合影', src: '/gallery/合照.webp' },
-  { id: 8, title: '情歌', category: '合影', src: '/gallery/情歌.webp' },
-  { id: 9, title: '三姊妹', category: '合影', src: '/gallery/三姊妹.webp' },
-  { id: 10, title: '来财和妹妹', category: '合影', src: '/gallery/来财和妹妹.webp' },
-  // 回忆
-  { id: 11, title: '爷爷年轻照', category: '回忆', src: '/gallery/爷爷年轻照.webp' },
-  { id: 12, title: '故宫', category: '回忆', src: '/gallery/故宫.webp' },
-];
-
-// 相册章节（保留原顺序）
-const chapterOrder = ['人物', '合影', '回忆'];
-const chapters = chapterOrder
-  .map(cat => ({ cat, items: photos.filter(p => p.category === cat) }))
-  .filter(ch => ch.items.length > 0);
+import { photos, photoChapters } from '../data/photos';
+import { ArrowUpRight, ArrowLeft, ArrowRight, X } from 'lucide-astro';
 ---
-
-<BaseLayout title="画册">
-  <section class="max-w-5xl mx-auto px-6 py-16 md:py-20">
-    <div class="flex items-baseline justify-between mb-3">
-      <h1 class="font-display font-bold text-4xl md:text-5xl tracking-tight">相册</h1>
-      <p class="tag text-[var(--color-muted-foreground)]">用镜头记录美好的瞬间</p>
-    </div>
-    <p class="text-[var(--color-muted-foreground)] font-serif mb-14">
-      一些照片，和一些记得住的日子。
-    </p>
-
-    <!-- 分节相册 -->
-    <div class="space-y-20">
-      {chapters.map(chapter => (
-        <section>
-          <div class="flex items-center gap-4 mb-8">
-            <h2 class="font-display font-bold text-2xl tracking-tight">{chapter.cat}</h2>
-            <div class="h-px flex-1 bg-[var(--color-border)]"></div>
-            <span class="tag text-[var(--color-muted-foreground)]">{chapter.items.length} 张</span>
-          </div>
-
-          <div class="columns-1 sm:columns-2 md:columns-3 gap-4 space-y-4" id="photo-grid">
-            {chapter.items.map(photo => (
-              <div
-                class="photo-item break-inside-avoid group cursor-pointer"
-                data-src={photo.src}
-                data-title={photo.title}
-              >
-                <div class="relative overflow-hidden border border-[var(--color-border)] bg-[var(--color-muted)]">
-                  <img
-                    src={photo.src}
-                    alt={photo.title}
-                    class="w-full h-auto object-cover group-hover:opacity-80 transition-opacity duration-300"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <!-- 图注：编号 + 标题 -->
-                  <div class="absolute inset-x-0 bottom-0 flex items-center justify-between px-3 py-2 bg-[var(--color-foreground)]/85 text-[var(--color-background)] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <span class="font-sans text-xs">{String(photo.id).padStart(2, '0')} · {photo.title}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      ))}
-    </div>
-  </section>
-
-  <!-- Lightbox -->
-  <div
-    id="lightbox"
-    class="fixed inset-0 z-50 items-center justify-center bg-black/90 backdrop-blur-sm"
-    style="display: none;"
-  >
-    <button
-      id="lightbox-close"
-      class="absolute top-6 right-6 text-white/80 hover:text-white transition-colors"
-      aria-label="关闭"
-    >
-      <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    </button>
-    <img id="lightbox-img" src="" alt="" class="max-h-[90vh] max-w-[90vw] object-contain" />
-    <div id="lightbox-title" class="absolute bottom-8 left-1/2 -translate-x-1/2 text-white font-display text-xl"></div>
+<BaseLayout title="相册" description="卢仕潇的个人相册：路上的风景，熟悉的面孔，记得住的日子。">
+  <div class="page-wrap">
+    <header class="page-heading"><span class="eyebrow">THE PHOTO DIARY</span><h1>光影里，都是生活</h1><p>一些照片，和一些记得住的日子。</p></header>
+    <nav class="chapter-nav" aria-label="相册分类">{photoChapters.map(chapter => <a href={'#' + chapter.id}>{chapter.name}<span>{photos.filter(photo => photo.category === chapter.name).length}</span></a>)}</nav>
+    <photo-gallery>
+      {photoChapters.map(chapter => <section class="photo-chapter" id={chapter.id}>
+        <div class="section-heading"><h2>{chapter.name}</h2><span class="eyebrow">{photos.filter(photo => photo.category === chapter.name).length} 张照片</span></div>
+        <div class="photo-grid">{photos.filter(photo => photo.category === chapter.name).map(photo => <figure>
+          <a class="photo-item" href={photo.src} data-src={photo.src} data-title={photo.title} aria-label={'查看照片：' + photo.title}>
+            <img src={photo.src} alt={photo.title} loading="lazy" decoding="async" />
+            <figcaption><span>{photo.title}</span><ArrowUpRight size={16} /></figcaption>
+          </a>
+        </figure>)}</div>
+      </section>)}
+      <dialog id="lightbox" aria-label="照片浏览" aria-describedby="lightbox-title">
+        <div class="lightbox-toolbar"><span id="lightbox-counter"></span><button class="lightbox-button" id="lightbox-close" aria-label="关闭照片" title="关闭照片"><X /></button></div>
+        <div class="lightbox-stage">
+          <button class="lightbox-button" id="lightbox-prev" aria-label="上一张照片" title="上一张照片"><ArrowLeft /></button>
+          <img id="lightbox-img" alt="" />
+          <button class="lightbox-button" id="lightbox-next" aria-label="下一张照片" title="下一张照片"><ArrowRight /></button>
+        </div>
+        <p id="lightbox-title" aria-live="polite"></p>
+      </dialog>
+    </photo-gallery>
   </div>
 </BaseLayout>
-
-<script is:inline data-astro-rerun>
-  // Lightbox
-  const lightbox = document.getElementById('lightbox');
-  const lightboxImg = document.getElementById('lightbox-img');
-  const lightboxTitle = document.getElementById('lightbox-title');
-  const lightboxClose = document.getElementById('lightbox-close');
-
-  document.querySelectorAll('.photo-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const src = item.getAttribute('data-src');
-      const title = item.getAttribute('data-title');
-      if (lightboxImg && src) lightboxImg.src = src;
-      if (lightboxTitle && title) lightboxTitle.textContent = title;
-      if (lightbox) {
-        lightbox.style.display = 'flex';
-      }
-      document.body.style.overflow = 'hidden';
-    });
-  });
-
-  function closeLightbox() {
-    if (lightbox) {
-      lightbox.style.display = 'none';
-    }
-    document.body.style.overflow = '';
+<style>
+  photo-gallery { display: block; }
+  .chapter-nav { display: flex; gap: 32px; border-bottom: 1px solid var(--color-border); padding-bottom: 22px; font-size: 14px; }
+  .chapter-nav a { display: flex; gap: 9px; }
+  .chapter-nav span { color: var(--color-muted-foreground); font-size: 11px; }
+  .chapter-nav a:hover { color: var(--color-primary); }
+  .photo-chapter { padding-top: 42px; }
+  .photo-grid { columns: 3; column-gap: 24px; }
+  figure { break-inside: avoid; margin-bottom: 28px; }
+  .photo-item { display: block; }
+  .photo-item img { width: 100%; height: auto; border-radius: 4px; background: var(--color-muted); }
+  .photo-item:hover img { opacity: .9; }
+  figcaption { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding-top: 10px; font-size: 13px; }
+  figcaption svg { color: var(--color-primary); }
+  #travel .photo-grid { columns: 2; }
+  dialog { padding: 0; width: 100vw; height: 100dvh; max-width: none; max-height: none; background: #151c19; color: #f4f7f5; border: 0; margin: 0; }
+  dialog[open] { display: flex; flex-direction: column; }
+  dialog::backdrop { background: #151c19; }
+  .lightbox-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; flex-shrink: 0; }
+  #lightbox-counter { font-family: var(--font-mono); font-size: 12px; }
+  .lightbox-button { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; flex-shrink: 0; }
+  .lightbox-button:hover { background: #34423b; }
+  .lightbox-button:focus-visible { outline-color: white; }
+  .lightbox-stage { display: flex; flex: 1; min-height: 0; align-items: center; justify-content: space-between; gap: 16px; padding-inline: 24px; }
+  .lightbox-stage img { min-width: 0; max-width: calc(100% - 120px); height: 100%; object-fit: contain; }
+  #lightbox-title { text-align: center; padding: 20px; flex-shrink: 0; font-size: 15px; }
+  @media (max-width: 700px) {
+    .photo-grid { columns: 2; column-gap: 16px; }
+    #travel .photo-grid { columns: 1; }
+    .chapter-nav { gap: 24px; font-size: 13px; }
+    .lightbox-stage { gap: 3px; padding-inline: 3px; }
+    .lightbox-stage img { max-width: calc(100% - 90px); }
   }
-
-  lightboxClose?.addEventListener('click', closeLightbox);
-  lightbox?.addEventListener('click', (e) => {
-    if (e.target === lightbox) closeLightbox();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeLightbox();
-  });
+  @media (max-width: 380px) { .chapter-nav { gap: 18px; } }
+</style>
+<script>
+  class PhotoGallery extends HTMLElement {
+    private controller?: AbortController;
+    private previousOverflow = '';
+    connectedCallback() {
+      this.controller?.abort();
+      this.controller = new AbortController();
+      const { signal } = this.controller;
+      const items = Array.from(this.querySelectorAll<HTMLAnchorElement>('.photo-item'));
+      const dialog = this.querySelector<HTMLDialogElement>('#lightbox')!;
+      const image = this.querySelector<HTMLImageElement>('#lightbox-img')!;
+      let index = 0;
+      const show = (next: number) => {
+        index = (next + items.length) % items.length;
+        image.src = items[index].dataset.src!;
+        image.alt = items[index].dataset.title!;
+        this.querySelector('#lightbox-title')!.textContent = image.alt;
+        this.querySelector('#lightbox-counter')!.textContent = (index + 1) + ' / ' + items.length;
+      };
+      items.forEach((item, i) => item.addEventListener('click', event => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        show(i);
+        this.previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        dialog.showModal();
+      }, { signal }));
+      this.querySelector('#lightbox-close')!.addEventListener('click', () => dialog.close(), { signal });
+      this.querySelector('#lightbox-prev')!.addEventListener('click', () => show(index - 1), { signal });
+      this.querySelector('#lightbox-next')!.addEventListener('click', () => show(index + 1), { signal });
+      dialog.addEventListener('keydown', event => {
+        if (event.key === 'ArrowLeft') { event.preventDefault(); show(index - 1); }
+        if (event.key === 'ArrowRight') { event.preventDefault(); show(index + 1); }
+      }, { signal });
+      dialog.addEventListener('close', () => { document.body.style.overflow = this.previousOverflow; }, { signal });
+    }
+    disconnectedCallback() {
+      if (this.querySelector<HTMLDialogElement>('dialog')?.open) document.body.style.overflow = this.previousOverflow;
+      this.controller?.abort();
+    }
+  }
+  if (!customElements.get('photo-gallery')) customElements.define('photo-gallery', PhotoGallery);
 </script>

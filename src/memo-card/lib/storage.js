@@ -1,4 +1,5 @@
 // localStorage：草稿 + 历史卡片
+import { backupRecords, mergeRecords, withDataLock } from './safe-sync.js';
 const DRAFT_KEY = 'memo-card:draft';
 const HISTORY_KEY = 'memo-card:history';
 
@@ -26,16 +27,15 @@ export function loadHistory() {
 }
 
 export function saveHistory(list) {
-  try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
-  } catch { /* ignore */ }
+  if (!Array.isArray(list)) throw new Error('随笔格式异常，已停止保存');
+  backupRecords(HISTORY_KEY, loadHistory());
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
 }
 
 export function addHistory(item) {
   const list = loadHistory();
   list.unshift(item);
-  // 最多保留 50 条
-  saveHistory(list.slice(0, 50));
+  saveHistory(list);
   return list;
 }
 
@@ -65,7 +65,7 @@ function addDeletedId(id) {
   try {
     const set = getDeletedIds();
     set.add(id);
-    const arr = [...set].slice(-200); // 限长，防无限增长
+    const arr = [...set];
     localStorage.setItem(DELETED_KEY, JSON.stringify(arr));
   } catch { /* ignore */ }
 }
@@ -76,7 +76,8 @@ async function cloudGet() {
   });
   if (!r.ok) throw new Error(`云读取失败（${r.status}）`);
   const j = await r.json();
-  return Array.isArray(j.record) ? j.record : [];
+  if (!Array.isArray(j.record)) throw new Error('云端随笔格式异常，已停止同步以保护原数据');
+  return j.record;
 }
 
 async function cloudPut(data) {
@@ -88,9 +89,10 @@ async function cloudPut(data) {
   if (!r.ok) throw new Error(`云写入失败（${r.status}）`);
 }
 
-// 双向同步：拉取云端 → 与本地合并去重 → 存本地 → 上传合并结果
+// 默认只读；保存或手动同步显式传入 write，读失败时绝不覆盖云端。
 // 已删除的 id 在合并与上传时都被排除，删除永久生效（不会因刷新/并集竞态弹回）
-export async function cloudSync(localList) {
+export async function cloudSync(localList, { write = false } = {}) {
+  return withDataLock('memo-card:sync', async () => {
   const deleted = getDeletedIds();
   const cloud = await cloudGet();
   const cleaned = cloud.filter((x) => x && x.id && x.id !== '_init' && !deleted.has(x.id));
@@ -112,17 +114,20 @@ export async function cloudSync(localList) {
   });
 
   const merged = [...byId.values()].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  const capped = merged.slice(0, 50);
-  await cloudPut(capped);
-  return capped;
+  const latest = mergeRecords(merged, loadHistory(), deleted);
+  backupRecords('memo-card:cloud', cloud);
+  if (write) await cloudPut(latest);
+  return latest;
+  });
 }
 
 // 删除卡片：记录删除标记 + 从云端移除，双重保证删除永久生效
 export async function cloudRemove(id) {
   addDeletedId(id); // 标记已删除，cloudSync 会永远排除
-  try {
+  return withDataLock('memo-card:sync', async () => {
     const cloud = await cloudGet();
+    backupRecords('memo-card:cloud', cloud);
     const next = cloud.filter((x) => x && x.id !== id);
     await cloudPut(next);
-  } catch { /* 云端删除失败也不影响本地：deleted 标记会拦住弹回 */ }
+  });
 }

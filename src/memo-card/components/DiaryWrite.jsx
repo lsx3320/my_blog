@@ -1,6 +1,7 @@
 // 编辑页：新建（?edit 缺省）或编辑（?edit=id）；草稿自动保存；AI 整理
 import { useEffect, useRef, useState } from 'react';
-import { loadHistory, saveHistory, cloudSync, saveDraft, loadDraft } from '../lib/storage.js';
+import { loadHistory, saveHistory, cloudSync, saveDraft, loadDraft, getDeletedIds } from '../lib/storage.js';
+import { mergeRecords } from '../lib/safe-sync.js';
 import { formatWithAI, getApiKey, setApiKey } from '../api.js';
 import SettingsModal from './SettingsModal.jsx';
 
@@ -100,6 +101,11 @@ export default function DiaryWrite() {
 
     let next;
     if (isEdit) {
+      if (!synced.some(item => item.id === editId)) {
+        setError('尚未读取到原记录，请返回列表同步后再编辑；当前输入内容已保留。');
+        setSaving(false);
+        return;
+      }
       // 编辑：保留原 id / createdAt，更新内容与日期
       const now = Date.now();
       next = synced.map((x) =>
@@ -119,14 +125,17 @@ export default function DiaryWrite() {
       next = [item, ...synced];
     }
 
-    saveHistory(next);
+    let localSaved = false;
     try {
-      const merged = await cloudSync(next); // 合并云端（含其他设备新增），回写本地
+      next = mergeRecords(next, loadHistory(), getDeletedIds());
+      saveHistory(next);
+      localSaved = true;
+      const merged = await cloudSync(next, { write: true });
       saveHistory(merged);
       clearDraft();
       window.location.href = isEdit ? `/diary/view?id=${editId}` : '/diary';
     } catch (e) {
-      setError('云端保存失败（已存本地），可先返回查看：' + e.message);
+      setError((localSaved ? '云端保存失败（已存本地），可先返回查看：' : '本地保存失败，请保留输入内容并导出已有数据：') + e.message);
       setSaving(false);
     }
   };

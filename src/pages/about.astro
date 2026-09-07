@@ -1,15 +1,16 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { photos } from '../data/photos';
 
 // 网站数据统计（真实数据）
 const posts = (await getCollection('posts')).filter(p => !p.data.draft);
 const moments = await getCollection('moments');
 const stats = [
   { label: '文章', value: String(posts.length), icon: 'doc', suffix: '篇' },
-  { label: '相册', value: '12', icon: 'image', suffix: '张' },
+  { label: '相册', value: String(photos.length), icon: 'image', suffix: '张' },
   { label: '朋友圈', value: String(moments.length), icon: 'chat', suffix: '条' },
-  { label: '照片', value: '45', icon: 'camera', suffix: '张' },
+  { label: '照片', value: String(new Set([...photos.map(photo => photo.src), ...moments.flatMap(moment => moment.data.images || [])]).size), icon: 'camera', suffix: '张' },
 ];
 
 const socialLinks = [
@@ -137,6 +138,7 @@ const socialLinks = [
   </div>
 
   <script is:inline data-astro-rerun>
+    (() => {
     // 微信弹窗
     const wechatLink = document.querySelector('a[href="#wechat"]');
     const modal = document.getElementById('wechat-modal');
@@ -199,5 +201,6 @@ const socialLinks = [
         setTimeout(() => toast.remove(), 300);
       }, 2000);
     }
+    })();
   </script>
 </BaseLayout>
