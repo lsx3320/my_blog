@@ -1,0 +1,14 @@
+{
+  "slug": "agent-guide",
+  "title": "李飞飞团队的 Agent 智能体：让 AI 不只会\"看\"，还要会\"做\"",
+  "chars": 3578,
+  "hash": "efea89dc7f5a673d",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3",
+    "2.mp3",
+    "3.mp3"
+  ],
+  "generatedAt": "2026-09-08T22:13:46.509Z"
+}

@@ -1,0 +1,12 @@
+{
+  "slug": "da-bing-solo-motorcycle-travel",
+  "title": "冰哥摩旅要伙伴吗",
+  "chars": 1264,
+  "hash": "4cfd00db64651151",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3"
+  ],
+  "generatedAt": "2026-09-08T22:16:32.396Z"
+}

@@ -1,0 +1,14 @@
+{
+  "slug": "astro-guide",
+  "title": "摆脱原生家庭的道德枷锁",
+  "chars": 2887,
+  "hash": "225d327b87ce1e26",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3",
+    "2.mp3",
+    "3.mp3"
+  ],
+  "generatedAt": "2026-09-08T22:15:39.576Z"
+}
