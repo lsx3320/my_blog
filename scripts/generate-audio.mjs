@@ -10,6 +10,7 @@
  * 可选环境变量：
  *   MIMO_VOICE      音色：mimo_default / 冰糖 / 茉莉 / 苏打 / 白桦 / Mia / Chloe / Milo / Dean
  *   MIMO_MAX_CHARS  单次合成最大字符数（过长自动触发更小分片）
+ *   MIMO_CONCURRENCY  同时提交的请求数（默认 3，建议 1-6）
  *   MIMO_BASE_URL   手动指定接口地址
  */
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, rmSync } from 'node:fs';
@@ -23,6 +24,7 @@ const AUDIO_DIR = join(ROOT, 'public', 'audio');
 const MODEL = process.env.MIMO_MODEL || 'mimo-v2.5-tts';
 const VOICE = process.env.MIMO_VOICE || 'mimo_default';
 const MAX_CHARS = Math.max(200, Number(process.env.MIMO_MAX_CHARS) || 1500);
+const CONCURRENCY = Math.min(6, Math.max(1, Number(process.env.MIMO_CONCURRENCY) || 3));
 const MIN_CHARS = 60; // 少于这个字数的正文不值得合成
 
 const args = process.argv.slice(2);
@@ -59,6 +61,27 @@ const HOSTS = [
 ].filter(Boolean);
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** 简单并发池：最多 limit 个任务同时跑，结果按原顺序返回；有失败立即停止派发新任务 */
+async function mapPool(items, limit, worker) {
+  const results = new Array(items.length);
+  let cursor = 0;
+  let firstError = null;
+  async function loop() {
+    while (cursor < items.length) {
+      const idx = cursor++;
+      try {
+        results[idx] = await worker(items[idx], idx);
+      } catch (e) {
+        if (!firstError) firstError = e;
+        break;
+      }
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, () => loop()));
+  if (firstError) throw firstError;
+  return results;
+}
 
 async function synthChunk(text) {
   const payload = {
@@ -206,46 +229,41 @@ async function generatePost(file) {
   // 清掉旧文件，避免换过参数后残留多余分段
   for (const f of readdirSync(dir)) if (f.endsWith('.mp3') || f === 'meta.json') rmSync(join(dir, f), { force: true });
 
-  // 生成过程中实时测试最大分片，失败则缩小一半重来
+  // 并行合成：先整篇按句子切成段，然后最多 CONCURRENCY 条请求同时提交，全部成功再落盘
   let maxChars = MAX_CHARS;
-  let chunks = splitIntoChunks(text, maxChars);
-  const segments = [];
-  let fatal = null;
-  while (chunks.length) {
-    const textChunk = chunks.shift();
-    const label = chunks.length ? `  ${segments.length + 1}/${segments.length + 1 + chunks.length}` : `  ${segments.length + 1}`;
-    process.stdout.write(`  合成第${label}段（${textChunk.length} 字）…`);
+  const tStart = Date.now();
+  for (;;) {
+    const chunks = splitIntoChunks(text, maxChars);
+    let bufs;
     try {
-      const mp3 = await synthWithRetry(textChunk);
-      const file = join(dir, `${segments.length + 1}.mp3`);
-      writeFileSync(file, mp3);
-      segments.push(`${segments.length + 1}.mp3`);
-      process.stdout.write(` ${(mp3.length / 1024).toFixed(0)}KB\n`);
+      bufs = await mapPool(chunks, CONCURRENCY, async (piece, idx) => {
+        const t0 = Date.now();
+        const mp3 = await synthWithRetry(piece);
+        console.log(`  ✓ ${idx + 1}/${chunks.length} 段（${piece.length} 字 → ${(mp3.length / 1024).toFixed(0)}KB，${Math.round((Date.now() - t0) / 1000)}s）`);
+        return mp3;
+      });
     } catch (e) {
       const msg = String(e?.message || e);
-      if (!fatal && maxChars > 300 && /HTTP 400/.test(msg)) {
-        fatal = { msg, at: segments.length };
+      if (/HTTP 400/.test(msg) && maxChars > 300) {
         maxChars = Math.floor(maxChars / 2);
-        console.log(`\n  分片过长（${msg.slice(0, 120)}），改用 ${maxChars} 字分片重试本文`);
-        chunks = splitIntoChunks(text, maxChars);
-        segments.length = 0;
+        console.log(`  有分段请求被拒（${msg.slice(0, 100)}），改用每段 ≤${maxChars} 字重试本篇`);
         continue;
       }
-      console.error(`\n  合成失败: ${slug} → ${msg}`);
+      console.error(`  合成失败: ${slug} → ${msg.slice(0, 300)}`);
       failedPosts.push(slug);
       return;
     }
-    await sleep(400);
+    const segments = chunks.map((_, i) => `${i + 1}.mp3`);
+    bufs.forEach((buf, i) => writeFileSync(join(dir, segments[i]), buf));
+    const meta = {
+      slug, title, chars, hash, model: MODEL, voice: VOICE,
+      segments, generatedAt: new Date().toISOString(),
+    };
+    writeFileSync(metaPath, JSON.stringify(meta, null, 2));
+    const totalMB = bufs.reduce((s, b) => s + b.length, 0) / 1048576;
+    console.log(`  本篇完成：${segments.length} 段，共 ${totalMB.toFixed(2)}MB，耗时 ${Math.round((Date.now() - tStart) / 1000)}s`);
+    return;
   }
-  if (fatal && segments.length === 0 && chunks.length === 0) { /* handled above */ }
-
-  const meta = {
-    slug, title, chars, hash, model: MODEL, voice: VOICE,
-    segments, generatedAt: new Date().toISOString(),
-  };
-  writeFileSync(metaPath, JSON.stringify(meta, null, 2));
-  const totalKB = segments.reduce((s, f) => s + (existsSync(join(dir, f)) ? readFileSync(join(dir, f)).length : 0), 0) / 1024;
-  console.log(`  完成: ${segments.length} 段，共 ${(totalKB / 1024).toFixed(2)}MB，已写入 public/audio/${slug}/`);
 }
 
 const failedPosts = [];
