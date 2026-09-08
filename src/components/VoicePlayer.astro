@@ -1,0 +1,291 @@
+---
+/**
+ * 文章语音播报：文章页底部迷你播放条。
+ * sources: 按顺序播放的 MP3 地址（一篇长文可能被切成多段）
+ */
+interface Props {
+  sources: string[];
+  title: string;
+}
+const { sources, title } = Astro.props;
+const isSegmented = sources.length > 1;
+---
+
+<div class="vp-root">
+  <button id="vp-open" type="button" aria-pressed="false" aria-expanded="false" aria-controls="vp-panel">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="ico-24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86a1 1 0 0 0-1.5.86z"/></svg>
+    语音播报
+    <span class="vp-open-hint">AI 朗读全文</span>
+  </button>
+
+  <section id="vp-panel" class="vp-panel" role="region" aria-label="语音播报播放器" data-audio={JSON.stringify(sources)} hidden>
+    <div class="vp-head">
+      <div class="vp-title-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" class="ico-16 vp-wave"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10v4M7 7v10M11 4v16M15 7v10M19 10v4"/></svg>
+        <span class="vp-title" title={title}>{title}</span>
+      </div>
+      <button id="vp-close" type="button" aria-label="关闭语音播报" title="关闭">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" class="ico-16"><path stroke-linecap="round" stroke-width="2" d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <input id="vp-progress" class="vp-progress" type="range" min="0" max="1000" step="1" value="0" aria-label="播放进度" />
+    <div class="vp-meta">
+      <span id="vp-time-cur">0:00</span>
+      {isSegmented && <span id="vp-seg" class="vp-seg" aria-hidden="true"></span>}
+      <span id="vp-time-total">0:00</span>
+    </div>
+
+    <div class="vp-controls">
+      <button id="vp-speed" type="button" class="vp-speed" title="播放速度" aria-label="播放速度">1.0×</button>
+      <span class="vp-spacer" aria-hidden="true"></span>
+      <button id="vp-play" type="button" class="vp-play" aria-label="播放">
+        <svg id="vp-ico-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="ico-24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86a1 1 0 0 0-1.5.86z"/></svg>
+        <svg id="vp-ico-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="ico-24 hidden"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+      </button>
+      <span class="vp-spacer" aria-hidden="true"></span>
+      <button id="vp-stop" type="button" class="vp-stop" aria-label="停止并回到开头">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="ico-18"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>
+      </button>
+    </div>
+    <p id="vp-status" class="vp-status" role="status"></p>
+  </section>
+</div>
+
+<style>
+  .vp-root { display: flex; justify-content: center; margin-bottom: 2.5rem; }
+  #vp-open {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    padding: 0.65rem 1.4rem;
+    font-family: var(--font-sans); font-size: 0.9rem; color: var(--color-foreground);
+    background: var(--color-card); border: 1px solid var(--color-border);
+    border-radius: 999px; cursor: pointer;
+    transition: border-color .2s, color .2s, box-shadow .2s;
+    box-shadow: var(--shadow-sm, none);
+  }
+  #vp-open:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  #vp-open[aria-pressed="true"] { border-color: var(--color-primary); color: var(--color-primary); }
+  #vp-open .ico-24 { width: 18px; height: 18px; }
+  #vp-open .vp-open-hint { font-size: 0.72rem; color: var(--color-muted-foreground); }
+  #vp-open:hover .vp-open-hint { color: inherit; }
+
+  .vp-panel {
+    position: fixed; bottom: 24px; right: 84px; z-index: 60;
+    width: min(460px, calc(100vw - 140px));
+    padding: 0.9rem 1rem 0.8rem;
+    background: color-mix(in srgb, var(--color-card) 96%, transparent);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--color-border); border-radius: var(--radius-lg, 14px);
+    box-shadow: var(--shadow-md, 0 8px 30px rgba(0,0,0,.18));
+  }
+  .vp-head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+  .vp-title-wrap { display: flex; align-items: center; gap: 0.45rem; min-width: 0; flex: 1; }
+  .vp-wave { color: var(--color-primary); }
+  .vp-title {
+    font-family: var(--font-display); font-size: 0.85rem; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .vp-head button {
+    display: grid; place-items: center; width: 26px; height: 26px;
+    border: none; background: transparent; color: var(--color-muted-foreground); cursor: pointer;
+    border-radius: 50%;
+  }
+  .vp-head button:hover { color: var(--color-foreground); background: var(--color-muted); }
+
+  .vp-progress {
+    width: 100%; margin: 0.35rem 0 0.15rem; appearance: none; -webkit-appearance: none;
+    height: 4px; border-radius: 2px;
+    background: linear-gradient(to right, var(--color-primary) var(--vp-fill, 0%), var(--color-border) var(--vp-fill, 0%));
+    cursor: pointer; outline: none;
+  }
+  .vp-progress::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 13px; height: 13px; border-radius: 50%;
+    background: var(--color-primary); border: 2px solid var(--color-card);
+    box-shadow: 0 1px 4px rgba(0,0,0,.25);
+  }
+  .vp-progress::-moz-range-thumb {
+    width: 13px; height: 13px; border-radius: 50%;
+    background: var(--color-primary); border: 2px solid var(--color-card);
+  }
+  .vp-meta { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted-foreground); }
+  .vp-seg { color: var(--color-primary); }
+
+  .vp-controls { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.3rem; }
+  .vp-spacer { flex: 1; }
+  .vp-speed {
+    font-family: var(--font-sans); font-size: 0.78rem; color: var(--color-muted-foreground);
+    background: transparent; border: 1px solid var(--color-border); border-radius: 999px;
+    padding: 0.25rem 0.65rem; cursor: pointer;
+  }
+  .vp-speed:hover { color: var(--color-primary); border-color: var(--color-primary); }
+  .vp-play {
+    display: grid; place-items: center; width: 44px; height: 44px;
+    border-radius: 50%; border: none; cursor: pointer;
+    background: var(--color-primary); color: var(--color-background);
+    transition: transform .15s;
+  }
+  .vp-play:hover { transform: scale(1.06); }
+  .vp-stop {
+    display: grid; place-items: center; width: 34px; height: 34px;
+    border: 1px solid var(--color-border); border-radius: 50%;
+    background: transparent; color: var(--color-muted-foreground); cursor: pointer;
+  }
+  .vp-stop:hover { color: var(--color-foreground); border-color: var(--color-muted-foreground); }
+  .ico-24 { width: 20px; height: 20px; }
+  .ico-18 { width: 15px; height: 15px; }
+  .ico-16 { width: 15px; height: 15px; }
+  .vp-status { min-height: 1em; margin: 0.25rem 0 0; font-size: 0.72rem; color: var(--color-muted-foreground); text-align: center; }
+  @media (max-width: 560px) {
+    .vp-panel { right: 16px; width: calc(100vw - 32px); bottom: 74px; }
+  }
+</style>
+
+<script>
+  const panel = document.querySelector<HTMLElement>('#vp-panel')!;
+  const openBtn = document.querySelector<HTMLButtonElement>('#vp-open')!;
+  const closeBtn = document.querySelector<HTMLButtonElement>('#vp-close')!;
+  const playBtn = document.querySelector<HTMLButtonElement>('#vp-play')!;
+  const stopBtn = document.querySelector<HTMLButtonElement>('#vp-stop')!;
+  const speedBtn = document.querySelector<HTMLButtonElement>('#vp-speed')!;
+  const progress = document.querySelector<HTMLInputElement>('#vp-progress')!;
+  const curEl = document.querySelector<HTMLElement>('#vp-time-cur')!;
+  const totalEl = document.querySelector<HTMLElement>('#vp-time-total')!;
+  const segEl = document.querySelector<HTMLElement>('#vp-seg');
+  const statusEl = document.querySelector<HTMLElement>('#vp-status')!;
+  const icoPlay = document.querySelector<SVGElement>('#vp-ico-play')!;
+  const icoPause = document.querySelector<SVGElement>('#vp-ico-pause')!;
+
+  const urls: string[] = JSON.parse(panel.dataset.audio || '[]');
+  const totalSegments = urls.length;
+  let segIndex = 0;
+  let audio: HTMLAudioElement | null = null;
+  let open = false;
+
+  const fmt = (s: number) => {
+    if (!Number.isFinite(s) || s < 0) s = 0;
+    const m = Math.floor(s / 60);
+    return `${m}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+  };
+  const setPlayingUI = (playing: boolean) => {
+    icoPlay.classList.toggle('hidden', playing);
+    icoPause.classList.toggle('hidden', !playing);
+    playBtn.setAttribute('aria-label', playing ? '暂停' : '播放');
+    openBtn.setAttribute('aria-pressed', String(playing));
+  };
+  const renderSeg = () => {
+    if (segEl && totalSegments > 1) segEl.textContent = `${segIndex + 1} / ${totalSegments}`;
+  };
+  const syncProgress = () => {
+    if (!audio) return;
+    const d = audio.duration || 0;
+    const pct = d ? (audio.currentTime / d) * 1000 : 0;
+    progress.value = String(pct);
+    progress.style.setProperty('--vp-fill', `${(pct / 10).toFixed(2)}%`);
+    curEl.textContent = fmt(audio.currentTime);
+  };
+  const showStatus = (msg: string) => { statusEl.textContent = msg; };
+
+  function loadSegment(i: number) {
+    segIndex = i;
+    renderSeg();
+    if (!audio) {
+      audio = new Audio();
+      audio.preload = 'auto';
+      audio.addEventListener('timeupdate', syncProgress);
+      audio.addEventListener('loadedmetadata', () => {
+        totalEl.textContent = fmt(audio!.duration);
+        syncProgress();
+      });
+      audio.addEventListener('ended', () => {
+        if (segIndex + 1 < totalSegments) {
+          loadSegment(segIndex + 1);
+          audio!.play().catch(() => showStatus('自动续播失败，请手动点击播放'));
+        } else {
+          setPlayingUI(false);
+          syncProgress();
+          showStatus('播报完成');
+        }
+      });
+      audio.addEventListener('error', () => {
+        setPlayingUI(false);
+        showStatus('音频加载失败，可能尚未生成，请稍后再试');
+      });
+      audio.addEventListener('pause', () => setPlayingUI(false));
+      audio.addEventListener('play', () => setPlayingUI(true));
+    }
+    audio.src = urls[i];
+    audio.load();
+    audio.playbackRate = SPEEDS[speedIdx];
+  }
+
+  async function togglePlay() {
+    if (!open) return;
+    if (!audio) loadSegment(0);
+    showStatus('');
+    if (audio!.paused) {
+      try {
+        await audio!.play();
+      } catch {
+        showStatus('暂时无法播放，请点击一次页面后再试');
+      }
+    } else {
+      audio!.pause();
+    }
+  }
+
+  function openPanel() {
+    open = true;
+    panel.hidden = false;
+    openBtn.setAttribute('aria-expanded', 'true');
+    if (audio) {
+      showStatus('');
+      if (audio.paused) audio.play().catch(() => showStatus('请点击一次页面后再试'));
+    } else {
+      loadSegment(0);
+      audio!.play().catch(() => showStatus('请点击一次页面后再试'));
+    }
+    // 停掉全站背景音乐，避免同时出声
+    (document.querySelector('#background-audio') as HTMLAudioElement | null)?.pause();
+  }
+  function closePanel() {
+    audio?.pause();
+    open = false;
+    panel.hidden = true;
+    openBtn.setAttribute('aria-expanded', 'false');
+    setPlayingUI(false);
+    showStatus('');
+  }
+
+  const SPEEDS = [1, 1.25, 1.5, 0.75];
+  let speedIdx = 0;
+  function cycleSpeed() {
+    speedIdx = (speedIdx + 1) % SPEEDS.length;
+    const v = SPEEDS[speedIdx];
+    speedBtn.textContent = v.toFixed(1) + '×';
+    if (audio) audio.playbackRate = v;
+  }
+
+  openBtn.addEventListener('click', () => (open ? closePanel() : openPanel()));
+  closeBtn.addEventListener('click', closePanel);
+  playBtn.addEventListener('click', togglePlay);
+  stopBtn.addEventListener('click', () => {
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+      syncProgress();
+      setPlayingUI(false);
+    }
+  });
+  speedBtn.addEventListener('click', cycleSpeed);
+  progress.addEventListener('input', () => {
+    if (!audio || !audio.duration) return;
+    audio.currentTime = (Number(progress.value) / 1000) * audio.duration;
+    progress.style.setProperty('--vp-fill', `${(Number(progress.value) / 10).toFixed(2)}%`);
+    curEl.textContent = fmt(audio.currentTime);
+  });
+  // 页面切换/离开时停止
+  document.addEventListener('astro:before-swap', () => audio?.pause());
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) audio?.pause();
+  });
+</script>

@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import VoicePlayer from '../../components/VoicePlayer.astro';
+import fs from 'node:fs';
 import Comment from '../../components/Comment.astro';
 import { getCollection, render } from 'astro:content';
 
@@ -27,6 +29,19 @@ const formattedDate = post.data.pubDate.toLocaleDateString('zh-CN', {
 });
 
 const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
+
+// 语音播报：读取已生成的 MP3 分段（由 scripts/generate-audio.mjs 产出）
+let audioSources: string[] = [];
+try {
+  const audioDir = `public/audio/${slug}`;
+  if (fs.existsSync(audioDir)) {
+    audioSources = fs
+      .readdirSync(audioDir)
+      .filter(f => f.endsWith('.mp3'))
+      .sort((a, b) => Number(a.split('.')[0]) - Number(b.split('.')[0]))
+      .map(f => `/audio/${slug}/${f}`);
+  }
+} catch {}
 
 // Reading time
 const wordCount = post.body?.length || 0;
@@ -85,6 +100,8 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
         <div class="w-12 h-[2px] bg-[var(--color-primary)]" aria-hidden="true"></div>
       </div>
     </header>
+
+    {audioSources.length > 0 && <VoicePlayer sources={audioSources} title={post.data.title} />}
 
     <!-- TOC for mobile -->
     {tocHeadings.length > 0 && (
