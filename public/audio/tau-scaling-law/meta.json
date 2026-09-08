@@ -1,0 +1,14 @@
+{
+  "slug": "tau-scaling-law",
+  "title": "华为 Tau 定律：用大白话讲清楚这个和 AI、芯片都有关的新 Scaling Law",
+  "chars": 3064,
+  "hash": "c3cb77125fee6a9f",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3",
+    "2.mp3",
+    "3.mp3"
+  ],
+  "generatedAt": "2026-09-08T22:41:41.678Z"
+}

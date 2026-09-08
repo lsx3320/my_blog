@@ -1,0 +1,14 @@
+{
+  "slug": "dph-config-journey",
+  "title": "我的 DPH (DeepSeek Harness) 配置历程：从零搭建 AI 智能体工作流",
+  "chars": 3054,
+  "hash": "8f3496cbacaaac2c",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3",
+    "2.mp3",
+    "3.mp3"
+  ],
+  "generatedAt": "2026-09-08T22:35:56.003Z"
+}

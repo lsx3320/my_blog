@@ -1,0 +1,12 @@
+{
+  "slug": "mao-bi-shang-liang-shan",
+  "title": "怀念教员",
+  "chars": 405,
+  "hash": "36697991d8cb3263",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3"
+  ],
+  "generatedAt": "2026-09-08T22:39:35.132Z"
+}

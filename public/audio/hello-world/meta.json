@@ -1,0 +1,12 @@
+{
+  "slug": "hello-world",
+  "title": "《校园暴力零容忍》——无穷的远方，无数的人，都和我们相关",
+  "chars": 1408,
+  "hash": "cedf55fdc8b0b40e",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3"
+  ],
+  "generatedAt": "2026-09-08T22:38:33.630Z"
+}

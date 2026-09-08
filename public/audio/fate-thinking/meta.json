@@ -1,0 +1,13 @@
+{
+  "slug": "fate-thinking",
+  "title": "命运的思量",
+  "chars": 1551,
+  "hash": "f574e7d98fb91910",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3",
+    "2.mp3"
+  ],
+  "generatedAt": "2026-09-08T22:37:16.624Z"
+}

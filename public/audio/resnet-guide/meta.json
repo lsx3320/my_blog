@@ -1,0 +1,14 @@
+{
+  "slug": "resnet-guide",
+  "title": "ResNet 小白讲解：为什么网络越深反而越差？何恺明用一个\"抄近道\"解决了",
+  "chars": 3240,
+  "hash": "8dfe2822706703a4",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3",
+    "2.mp3",
+    "3.mp3"
+  ],
+  "generatedAt": "2026-09-08T22:40:17.230Z"
+}
