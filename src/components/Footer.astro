@@ -1,5 +1,5 @@
 ---
-import { ArrowUpRight, Github, Mail } from 'lucide-astro';
+import { ArrowUpRight, Github, Mail, Rss } from 'lucide-astro';
 const currentYear = new Date().getFullYear();
 ---
 <footer class="site-footer">
@@ -10,6 +10,7 @@ const currentYear = new Date().getFullYear();
       <div class="footer-contact">
         <a href="https://github.com/lsx3320" target="_blank" rel="noopener noreferrer"><Github size={17} /> GitHub <ArrowUpRight size={13} /></a>
         <a href="mailto:15527759825@163.com"><Mail size={17} /> 写封邮件</a>
+        <a href="/rss.xml"><Rss size={17} /> 订阅文章</a>
       </div>
     </div>
     <div class="footer-bottom"><span>&copy; {currentYear} 卢仕潇 · 于此间，留下一点痕迹。</span><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">鄂ICP备2024037507号</a></div>
