@@ -140,152 +140,171 @@ const isSegmented = sources.length > 1;
   }
 </style>
 
-<script>
-  const panel = document.querySelector<HTMLElement>('#vp-panel')!;
-  const openBtn = document.querySelector<HTMLButtonElement>('#vp-open')!;
-  const closeBtn = document.querySelector<HTMLButtonElement>('#vp-close')!;
-  const playBtn = document.querySelector<HTMLButtonElement>('#vp-play')!;
-  const stopBtn = document.querySelector<HTMLButtonElement>('#vp-stop')!;
-  const speedBtn = document.querySelector<HTMLButtonElement>('#vp-speed')!;
-  const progress = document.querySelector<HTMLInputElement>('#vp-progress')!;
-  const curEl = document.querySelector<HTMLElement>('#vp-time-cur')!;
-  const totalEl = document.querySelector<HTMLElement>('#vp-time-total')!;
-  const segEl = document.querySelector<HTMLElement>('#vp-seg');
-  const statusEl = document.querySelector<HTMLElement>('#vp-status')!;
-  const icoPlay = document.querySelector<SVGElement>('#vp-ico-play')!;
-  const icoPause = document.querySelector<SVGElement>('#vp-ico-pause')!;
 
-  const urls: string[] = JSON.parse(panel.dataset.audio || '[]');
-  const totalSegments = urls.length;
-  let segIndex = 0;
-  let audio: HTMLAudioElement | null = null;
-  let open = false;
+<script is:inline data-astro-rerun>
+  // 语音播报：用 astro:page-load + 元素级 __vpBound 标记实现 SPA 跳转后重新绑定。
+  // 每次站内导航后新 DOM 进入，__vpBound 标记随旧元素销毁，脚本重跑即可对新按钮绑事件。
+  (function () {
+    if (window.__vpGlobalsBound) return; // 同一页面生命周期内只注册一次全局监听
+    window.__vpGlobalsBound = true;
 
-  const fmt = (s: number) => {
-    if (!Number.isFinite(s) || s < 0) s = 0;
-    const m = Math.floor(s / 60);
-    return `${m}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
-  };
-  const setPlayingUI = (playing: boolean) => {
-    icoPlay.classList.toggle('hidden', playing);
-    icoPause.classList.toggle('hidden', !playing);
-    playBtn.setAttribute('aria-label', playing ? '暂停' : '播放');
-    openBtn.setAttribute('aria-pressed', String(playing));
-  };
-  const renderSeg = () => {
-    if (segEl && totalSegments > 1) segEl.textContent = `${segIndex + 1} / ${totalSegments}`;
-  };
-  const syncProgress = () => {
-    if (!audio) return;
-    const d = audio.duration || 0;
-    const pct = d ? (audio.currentTime / d) * 1000 : 0;
-    progress.value = String(pct);
-    progress.style.setProperty('--vp-fill', `${(pct / 10).toFixed(2)}%`);
-    curEl.textContent = fmt(audio.currentTime);
-  };
-  const showStatus = (msg: string) => { statusEl.textContent = msg; };
+    const SPEEDS = [1, 1.25, 1.5, 0.75];
+    let audio = null;
+    let segIndex = 0;
+    let speedIdx = 0;
+    let open = false;
 
-  function loadSegment(i: number) {
-    segIndex = i;
-    renderSeg();
-    if (!audio) {
-      audio = new Audio();
-      audio.preload = 'auto';
-      audio.addEventListener('timeupdate', syncProgress);
-      audio.addEventListener('loadedmetadata', () => {
-        totalEl.textContent = fmt(audio!.duration);
-        syncProgress();
-      });
-      audio.addEventListener('ended', () => {
-        if (segIndex + 1 < totalSegments) {
-          loadSegment(segIndex + 1);
-          audio!.play().catch(() => showStatus('自动续播失败，请手动点击播放'));
+    const fmt = (s) => {
+      if (!Number.isFinite(s) || s < 0) s = 0;
+      const m = Math.floor(s / 60);
+      return m + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+    };
+
+    function bindVoicePlayer() {
+      const root = document.querySelector('.vp-root');
+      if (!root || root.__vpBound) return; // 本页已绑定过（防重复）
+      const panel = document.getElementById('vp-panel');
+      const openBtn = document.getElementById('vp-open');
+      const closeBtn = document.getElementById('vp-close');
+      const playBtn = document.getElementById('vp-play');
+      const stopBtn = document.getElementById('vp-stop');
+      const speedBtn = document.getElementById('vp-speed');
+      const progress = document.getElementById('vp-progress');
+      const curEl = document.getElementById('vp-time-cur');
+      const totalEl = document.getElementById('vp-time-total');
+      const segEl = document.getElementById('vp-seg');
+      const statusEl = document.getElementById('vp-status');
+      const icoPlay = document.getElementById('vp-ico-play');
+      const icoPause = document.getElementById('vp-ico-pause');
+      if (!panel || !openBtn) return;
+      root.__vpBound = true;
+
+      let urls = [];
+      try { urls = JSON.parse(panel.dataset.audio || '[]'); } catch (e) { urls = []; }
+      const totalSegments = urls.length;
+      open = false;
+      segIndex = 0;
+
+      const setPlayingUI = (playing) => {
+        icoPlay.classList.toggle('hidden', playing);
+        icoPause.classList.toggle('hidden', !playing);
+        playBtn.setAttribute('aria-label', playing ? '暂停' : '播放');
+        openBtn.setAttribute('aria-pressed', String(playing));
+      };
+      const renderSeg = () => {
+        if (segEl && totalSegments > 1) segEl.textContent = (segIndex + 1) + ' / ' + totalSegments;
+      };
+      const syncProgress = () => {
+        if (!audio) return;
+        const d = audio.duration || 0;
+        const pct = d ? (audio.currentTime / d) * 1000 : 0;
+        progress.value = String(pct);
+        progress.style.setProperty('--vp-fill', (pct / 10).toFixed(2) + '%');
+        curEl.textContent = fmt(audio.currentTime);
+      };
+      const showStatus = (msg) => { statusEl.textContent = msg; };
+
+      function loadSegment(i) {
+        segIndex = i;
+        renderSeg();
+        if (!audio) {
+          audio = new Audio();
+          audio.preload = 'auto';
+          audio.addEventListener('timeupdate', syncProgress);
+          audio.addEventListener('loadedmetadata', () => {
+            totalEl.textContent = fmt(audio.duration);
+            syncProgress();
+          });
+          audio.addEventListener('ended', () => {
+            if (segIndex + 1 < totalSegments) {
+              loadSegment(segIndex + 1);
+              audio.play().catch(() => showStatus('自动续播失败，请手动点击播放'));
+            } else {
+              setPlayingUI(false);
+              syncProgress();
+              showStatus('播报完成');
+            }
+          });
+          audio.addEventListener('error', () => {
+            setPlayingUI(false);
+            showStatus('音频加载失败，可能尚未生成，请稍后再试');
+          });
+          audio.addEventListener('pause', () => setPlayingUI(false));
+          audio.addEventListener('play', () => setPlayingUI(true));
+        }
+        audio.src = urls[i];
+        audio.load();
+        audio.playbackRate = SPEEDS[speedIdx];
+      }
+
+      const togglePlay = () => {
+        if (!open) return;
+        if (!audio) loadSegment(0);
+        showStatus('');
+        if (audio.paused) {
+          audio.play().catch(() => showStatus('暂时无法播放，请点击一次页面后再试'));
         } else {
-          setPlayingUI(false);
+          audio.pause();
+        }
+      };
+
+      const openPanel = () => {
+        open = true;
+        panel.hidden = false;
+        openBtn.setAttribute('aria-expanded', 'true');
+        if (audio) {
+          showStatus('');
+          if (audio.paused) audio.play().catch(() => showStatus('请点击一次页面后再试'));
+        } else {
+          loadSegment(0);
+          audio.play().catch(() => showStatus('请点击一次页面后再试'));
+        }
+        // 停掉全站背景音乐，避免同时出声
+        const bgm = document.getElementById('background-audio');
+        if (bgm) bgm.pause();
+      };
+      const closePanel = () => {
+        if (audio) audio.pause();
+        open = false;
+        panel.hidden = true;
+        openBtn.setAttribute('aria-expanded', 'false');
+        setPlayingUI(false);
+        showStatus('');
+      };
+
+      openBtn.addEventListener('click', () => (open ? closePanel() : openPanel()));
+      closeBtn.addEventListener('click', closePanel);
+      playBtn.addEventListener('click', togglePlay);
+      stopBtn.addEventListener('click', () => {
+        if (audio) {
+          audio.pause();
+          audio.currentTime = 0;
           syncProgress();
-          showStatus('播报完成');
+          setPlayingUI(false);
         }
       });
-      audio.addEventListener('error', () => {
-        setPlayingUI(false);
-        showStatus('音频加载失败，可能尚未生成，请稍后再试');
+      speedBtn.addEventListener('click', () => {
+        speedIdx = (speedIdx + 1) % SPEEDS.length;
+        speedBtn.textContent = SPEEDS[speedIdx].toFixed(1) + '×';
+        if (audio) audio.playbackRate = SPEEDS[speedIdx];
       });
-      audio.addEventListener('pause', () => setPlayingUI(false));
-      audio.addEventListener('play', () => setPlayingUI(true));
+      progress.addEventListener('input', () => {
+        if (!audio || !audio.duration) return;
+        audio.currentTime = (Number(progress.value) / 1000) * audio.duration;
+        progress.style.setProperty('--vp-fill', (Number(progress.value) / 10).toFixed(2) + '%');
+        curEl.textContent = fmt(audio.currentTime);
+      });
     }
-    audio.src = urls[i];
-    audio.load();
-    audio.playbackRate = SPEEDS[speedIdx];
-  }
 
-  async function togglePlay() {
-    if (!open) return;
-    if (!audio) loadSegment(0);
-    showStatus('');
-    if (audio!.paused) {
-      try {
-        await audio!.play();
-      } catch {
-        showStatus('暂时无法播放，请点击一次页面后再试');
-      }
-    } else {
-      audio!.pause();
-    }
-  }
+    // 页面切换/离开时停止（只注册一次）
+    document.addEventListener('astro:before-swap', () => { if (audio) audio.pause(); });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && audio) audio.pause();
+    });
 
-  function openPanel() {
-    open = true;
-    panel.hidden = false;
-    openBtn.setAttribute('aria-expanded', 'true');
-    if (audio) {
-      showStatus('');
-      if (audio.paused) audio.play().catch(() => showStatus('请点击一次页面后再试'));
-    } else {
-      loadSegment(0);
-      audio!.play().catch(() => showStatus('请点击一次页面后再试'));
-    }
-    // 停掉全站背景音乐，避免同时出声
-    (document.querySelector('#background-audio') as HTMLAudioElement | null)?.pause();
-  }
-  function closePanel() {
-    audio?.pause();
-    open = false;
-    panel.hidden = true;
-    openBtn.setAttribute('aria-expanded', 'false');
-    setPlayingUI(false);
-    showStatus('');
-  }
-
-  const SPEEDS = [1, 1.25, 1.5, 0.75];
-  let speedIdx = 0;
-  function cycleSpeed() {
-    speedIdx = (speedIdx + 1) % SPEEDS.length;
-    const v = SPEEDS[speedIdx];
-    speedBtn.textContent = v.toFixed(1) + '×';
-    if (audio) audio.playbackRate = v;
-  }
-
-  openBtn.addEventListener('click', () => (open ? closePanel() : openPanel()));
-  closeBtn.addEventListener('click', closePanel);
-  playBtn.addEventListener('click', togglePlay);
-  stopBtn.addEventListener('click', () => {
-    if (audio) {
-      audio.pause();
-      audio.currentTime = 0;
-      syncProgress();
-      setPlayingUI(false);
-    }
-  });
-  speedBtn.addEventListener('click', cycleSpeed);
-  progress.addEventListener('input', () => {
-    if (!audio || !audio.duration) return;
-    audio.currentTime = (Number(progress.value) / 1000) * audio.duration;
-    progress.style.setProperty('--vp-fill', `${(Number(progress.value) / 10).toFixed(2)}%`);
-    curEl.textContent = fmt(audio.currentTime);
-  });
-  // 页面切换/离开时停止
-  document.addEventListener('astro:before-swap', () => audio?.pause());
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) audio?.pause();
-  });
+    // 每次导航（含首载）后重新绑定当前页的播放器
+    document.addEventListener('astro:page-load', bindVoicePlayer);
+    bindVoicePlayer();
+  })();
 </script>
+
