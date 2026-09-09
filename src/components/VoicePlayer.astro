@@ -162,7 +162,14 @@ const isSegmented = sources.length > 1;
 
     function bindVoicePlayer() {
       const root = document.querySelector('.vp-root');
-      if (!root || root.__vpBound) return; // 本页已绑定过（防重复）
+      if (!root) return;
+      // 进入新页面（或整页首载）：停掉并丢弃上一个页面的音频实例，
+      // 否则跨页共享的 audio 还指向旧文章的 src，点播放会播上一篇的内容。
+      if (audio) {
+        try { audio.pause(); } catch (e) { /* ignore */ }
+        audio = null;
+      }
+      if (root.__vpBound) return; // 本页已绑定过（防重复）
       const panel = document.getElementById('vp-panel');
       const openBtn = document.getElementById('vp-open');
       const closeBtn = document.getElementById('vp-close');
