@@ -67,7 +67,11 @@ import { Music2, Pause } from 'lucide-astro';
     for (const name of gestureEvents) document.addEventListener(name, retryPlayback, { passive: true });
     retryListening = true;
   };
+  // 文章语音播报状态由 VoicePlayer 维护：为真时背景音乐让位
+  const isVoicePlaying = () => Boolean((window as Window & { __voicePlaying?: boolean }).__voicePlaying);
   async function playMusic() {
+    // 文章语音播报进行中时让位，避免两者同时出声（语音结束会派发 voice:end 再恢复）
+    if (isVoicePlaying()) return;
     if (userPaused || playPending || !audio.paused) return;
     playPending = true;
     button.setAttribute('aria-busy', 'true');
@@ -98,9 +102,15 @@ import { Music2, Pause } from 'lucide-astro';
   function retryPlayback(event: Event) {
     // The music button owns its toggle so a pause cannot trigger autoplay.
     if (event.target instanceof Node && player.contains(event.target)) return;
+    if (isVoicePlaying()) return; // 语音播报中，别抢着起播
     if (userPaused) { stopGestureRetry(); return; }
     void playMusic();
   }
+  // 文章语音播报结束/暂停/离开时恢复背景音乐（用户手动暂停过则不恢复）
+  document.addEventListener('voice:end', () => {
+    if (userPaused || !audio.paused) return;
+    void playMusic();
+  });
   button.addEventListener('click', () => {
     clearTimeout(autoplayTimer);
     if (!audio.paused || playPending) {

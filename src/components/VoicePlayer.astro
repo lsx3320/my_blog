@@ -158,6 +158,18 @@ const isSegmented = sources.length > 1;
       return m + ':' + String(Math.floor(s % 60)).padStart(2, '0');
     };
 
+    // 与背景音乐互斥：语音播放时暂停 BGM 并挂起它的自动播放；
+    // 语音暂停/播完/离开页面后发出 voice:end，让 BGM 恢复（除非用户手动暂停过）。
+    function setVoiceActive(active) {
+      window.__voicePlaying = active;
+      const bgm = document.getElementById('background-audio');
+      if (active) {
+        if (bgm && !bgm.paused) bgm.pause();
+      } else {
+        document.dispatchEvent(new CustomEvent('voice:end'));
+      }
+    }
+
     function bindVoicePlayer() {
       const root = document.querySelector('.vp-root');
       if (!root) return;
@@ -230,14 +242,16 @@ const isSegmented = sources.length > 1;
               setPlayingUI(false);
               syncProgress();
               showStatus('播报完成');
+              setVoiceActive(false);
             }
           });
           audio.addEventListener('error', () => {
             setPlayingUI(false);
             showStatus('音频加载失败，可能尚未生成，请稍后再试');
+            setVoiceActive(false);
           });
           audio.addEventListener('pause', () => setPlayingUI(false));
-          audio.addEventListener('play', () => setPlayingUI(true));
+          audio.addEventListener('play', () => { setPlayingUI(true); setVoiceActive(true); });
         }
         audio.src = urls[i];
         audio.load();
@@ -249,9 +263,11 @@ const isSegmented = sources.length > 1;
         if (!audio) loadSegment(0);
         showStatus('');
         if (audio.paused) {
+          setVoiceActive(true); // 语音优先，挂起 BGM
           audio.play().catch(() => showStatus('暂时无法播放，请点击一次页面后再试'));
         } else {
           audio.pause();
+          setVoiceActive(false); // 交还 BGM
         }
       };
 
@@ -259,6 +275,7 @@ const isSegmented = sources.length > 1;
         open = true;
         panel.hidden = false;
         openBtn.setAttribute('aria-expanded', 'true');
+        setVoiceActive(true); // 先挂起 BGM，避免与语音同时出声
         if (audio) {
           showStatus('');
           if (audio.paused) audio.play().catch(() => showStatus('请点击一次页面后再试'));
@@ -266,9 +283,6 @@ const isSegmented = sources.length > 1;
           loadSegment(0);
           audio.play().catch(() => showStatus('请点击一次页面后再试'));
         }
-        // 停掉全站背景音乐，避免同时出声
-        const bgm = document.getElementById('background-audio');
-        if (bgm) bgm.pause();
       };
       const closePanel = () => {
         if (audio) audio.pause();
@@ -277,6 +291,7 @@ const isSegmented = sources.length > 1;
         openBtn.setAttribute('aria-expanded', 'false');
         setPlayingUI(false);
         showStatus('');
+        setVoiceActive(false); // 关闭后 BGM 恢复
       };
 
       openBtn.addEventListener('click', () => (open ? closePanel() : openPanel()));
@@ -289,6 +304,7 @@ const isSegmented = sources.length > 1;
           syncProgress();
           setPlayingUI(false);
         }
+        setVoiceActive(false); // 停止播报，BGM 恢复
       });
       speedBtn.addEventListener('click', () => {
         speedIdx = (speedIdx + 1) % SPEEDS.length;
@@ -303,10 +319,18 @@ const isSegmented = sources.length > 1;
       });
     }
 
-    // 页面切换/离开时停止（只注册一次）
-    document.addEventListener('astro:before-swap', () => { if (audio) audio.pause(); });
+    // 页面切换/离开时停止，并把 BGM 交还（只注册一次）
+    document.addEventListener('astro:before-swap', () => {
+      if (window.__voicePlaying) {
+        if (audio) audio.pause();
+        setVoiceActive(false);
+      }
+    });
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden && audio) audio.pause();
+      if (document.hidden && window.__voicePlaying) {
+        if (audio) audio.pause();
+        setVoiceActive(false);
+      }
     });
 
     // 每次导航（含首载）后重新绑定当前页的播放器
