@@ -1,0 +1,12 @@
+{
+  "slug": "guang-jiao-bu-pa-chuan-xie",
+  "title": "光脚的不怕穿鞋的",
+  "chars": 564,
+  "hash": "859076a07c85a51a",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3"
+  ],
+  "generatedAt": "2026-09-14T11:48:11.887Z"
+}
