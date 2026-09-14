@@ -25,3 +25,8 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 memo-card-docker/
+
+# headless browser temp profiles (playwright/puppeteer)
+.edge*/
+.chrome*/
+.playwright/

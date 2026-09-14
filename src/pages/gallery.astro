@@ -20,9 +20,9 @@ import { ArrowUpRight, ArrowLeft, ArrowRight, X } from 'lucide-astro';
       <dialog id="lightbox" aria-label="照片浏览" aria-describedby="lightbox-title">
         <div class="lightbox-toolbar"><span id="lightbox-counter"></span><button class="lightbox-button" id="lightbox-close" aria-label="关闭照片" title="关闭照片"><X /></button></div>
         <div class="lightbox-stage">
-          <button class="lightbox-button" id="lightbox-prev" aria-label="上一张照片" title="上一张照片"><ArrowLeft /></button>
-          <img id="lightbox-img" alt="" />
-          <button class="lightbox-button" id="lightbox-next" aria-label="下一张照片" title="下一张照片"><ArrowRight /></button>
+          <img id="lightbox-img" alt="" decoding="async" draggable="false" />
+          <button class="lightbox-button lightbox-arrow lightbox-prev" id="lightbox-prev" aria-label="上一张照片" title="上一张照片"><ArrowLeft /></button>
+          <button class="lightbox-button lightbox-arrow lightbox-next" id="lightbox-next" aria-label="下一张照片" title="下一张照片"><ArrowRight /></button>
         </div>
         <p id="lightbox-title" aria-live="polite"></p>
       </dialog>
@@ -44,23 +44,62 @@ import { ArrowUpRight, ArrowLeft, ArrowRight, X } from 'lucide-astro';
   figcaption { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding-top: 10px; font-size: 13px; }
   figcaption svg { color: var(--color-primary); }
   #travel .photo-grid { columns: 2; }
-  dialog { padding: 0; width: 100vw; height: 100dvh; max-width: none; max-height: none; background: #151c19; color: #f4f7f5; border: 0; margin: 0; }
+  /* 大图浏览：图片铺满可用区域，箭头与标题叠在图上，不再挤压图片宽度 */
+  dialog {
+    position: fixed; inset: 0;
+    padding: 0; width: 100vw; height: 100dvh; max-width: none; max-height: none;
+    background: #0e1311; color: #f4f7f5; border: 0; margin: 0; overflow: hidden;
+  }
   dialog[open] { display: flex; flex-direction: column; }
-  dialog::backdrop { background: #151c19; }
-  .lightbox-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; flex-shrink: 0; }
-  #lightbox-counter { font-family: var(--font-mono); font-size: 12px; }
-  .lightbox-button { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; flex-shrink: 0; }
+  dialog::backdrop { background: #0e1311; }
+  .lightbox-stage { position: relative; flex: 1; min-height: 0; }
+  /* 元素盒铺满舞台，照片用 contain 等比完整显示（不会被裁切，也不溢出容器） */
+  .lightbox-stage img {
+    position: absolute; inset: 0;
+    display: block; width: 100%; height: 100%;
+    object-fit: contain;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .lightbox-toolbar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 2;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px;
+    padding-top: calc(10px + env(safe-area-inset-top, 0px));
+    background: linear-gradient(to bottom, rgba(14,19,17,.72), rgba(14,19,17,0));
+    pointer-events: none;
+  }
+  .lightbox-toolbar > * { pointer-events: auto; }
+  #lightbox-counter { font-family: var(--font-mono); font-size: 12px; opacity: .85; }
+  #lightbox-title {
+    position: absolute; bottom: 0; left: 0; right: 0; z-index: 2; margin: 0;
+    padding: 22px 18px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    text-align: center; font-size: 15px;
+    background: linear-gradient(to top, rgba(14,19,17,.78), rgba(14,19,17,0));
+  }
+  .lightbox-button {
+    width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%;
+    flex-shrink: 0; color: inherit;
+  }
   .lightbox-button:hover { background: #34423b; }
   .lightbox-button:focus-visible { outline-color: white; }
-  .lightbox-stage { display: flex; flex: 1; min-height: 0; align-items: center; justify-content: space-between; gap: 16px; padding-inline: 24px; }
-  .lightbox-stage img { min-width: 0; max-width: calc(100% - 120px); height: 100%; object-fit: contain; }
-  #lightbox-title { text-align: center; padding: 20px; flex-shrink: 0; font-size: 15px; }
+  /* 箭头浮在图片两侧，不占图片宽度 */
+  .lightbox-arrow {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(20,28,25,.5);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    border: 1px solid rgba(244,247,245,.16);
+  }
+  .lightbox-arrow:hover { background: rgba(52,66,59,.85); }
+  .lightbox-prev { left: max(10px, env(safe-area-inset-left, 0px)); }
+  .lightbox-next { right: max(10px, env(safe-area-inset-right, 0px)); }
   @media (max-width: 700px) {
     .photo-grid { columns: 2; column-gap: 16px; }
     #travel .photo-grid { columns: 1; }
     .chapter-nav { gap: 24px; font-size: 13px; }
-    .lightbox-stage { gap: 3px; padding-inline: 3px; }
-    .lightbox-stage img { max-width: calc(100% - 90px); }
+    .lightbox-button { width: 40px; height: 40px; }
+    #lightbox-title { font-size: 14px; }
   }
   @media (max-width: 380px) { .chapter-nav { gap: 18px; } }
 </style>
@@ -76,12 +115,21 @@ import { ArrowUpRight, ArrowLeft, ArrowRight, X } from 'lucide-astro';
       const dialog = this.querySelector<HTMLDialogElement>('#lightbox')!;
       const image = this.querySelector<HTMLImageElement>('#lightbox-img')!;
       let index = 0;
+      // 预加载相邻图片，滑动/点箭头时不用等
+      const preload = (i: number) => {
+        const item = items[(i + items.length) % items.length];
+        if (!item) return;
+        const img = new Image();
+        img.src = item.dataset.src!;
+      };
       const show = (next: number) => {
         index = (next + items.length) % items.length;
         image.src = items[index].dataset.src!;
         image.alt = items[index].dataset.title!;
         this.querySelector('#lightbox-title')!.textContent = image.alt;
         this.querySelector('#lightbox-counter')!.textContent = (index + 1) + ' / ' + items.length;
+        preload(index + 1);
+        preload(index - 1);
       };
       items.forEach((item, i) => item.addEventListener('click', event => {
         if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -98,6 +146,20 @@ import { ArrowUpRight, ArrowLeft, ArrowRight, X } from 'lucide-astro';
         if (event.key === 'ArrowLeft') { event.preventDefault(); show(index - 1); }
         if (event.key === 'ArrowRight') { event.preventDefault(); show(index + 1); }
       }, { signal });
+      // 手机端左右滑动切换照片
+      let touchX = 0; let touchY = 0; let touching = false;
+      dialog.addEventListener('touchstart', event => {
+        const touch = event.changedTouches[0];
+        touchX = touch.clientX; touchY = touch.clientY; touching = true;
+      }, { signal, passive: true });
+      dialog.addEventListener('touchend', event => {
+        if (!touching) return;
+        touching = false;
+        const touch = event.changedTouches[0];
+        const dx = touch.clientX - touchX;
+        const dy = touch.clientY - touchY;
+        if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) show(index + (dx < 0 ? 1 : -1));
+      }, { signal, passive: true });
       dialog.addEventListener('close', () => { document.body.style.overflow = this.previousOverflow; }, { signal });
     }
     disconnectedCallback() {
