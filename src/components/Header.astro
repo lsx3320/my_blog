@@ -3,8 +3,7 @@ import { Search, Sun, Moon, Menu, X, ArrowUpRight } from 'lucide-astro';
 const navItems = [
   { label: '首页', href: '/' }, { label: '文章', href: '/posts' },
   { label: '朋友圈', href: '/moments' }, { label: '相册', href: '/gallery' },
-  { label: '随笔', href: '/diary' }, { label: '论文', href: '/paper' },
-  { label: '中转', href: '/links' }, { label: '关于', href: '/about' },
+  { label: '随笔', href: '/diary' }, { label: '中转', href: '/links' }, { label: '关于', href: '/about' },
 ];
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 const isActive = (href: string) => currentPath === href || (href !== '/' && currentPath.startsWith(href + '/'));
