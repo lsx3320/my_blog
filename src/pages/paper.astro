@@ -1,0 +1,111 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { ArrowUpRight, Languages, Volume2, FileText, Lock } from 'lucide-astro';
+
+const BIN_ID = '6aa92c68ac6210605acfe457';
+const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
+---
+<BaseLayout title="论文阅读" description="把英文论文变成中英对照、可朗读的阅读材料：上传 PDF，逐段翻译并保留术语，支持全文语音播报。">
+  <div class="page-wrap">
+    <header class="page-heading">
+      <span class="eyebrow">PAPER READER</span>
+      <h1>把论文读成自己的语言</h1>
+      <p>上传一篇英文论文，得到中英对照的逐段译文，还能让 AI 把它读给你听。</p>
+    </header>
+
+    <section class="paper-hero" aria-labelledby="paper-enter">
+      <div class="paper-actions">
+        <a id="paper-enter" class="paper-btn" href="#" aria-describedby="paper-status" rel="noopener">
+          <span>进入论文阅读器</span>
+          <ArrowUpRight size={17} />
+        </a>
+        <p id="paper-status" class="paper-status" role="status">正在获取阅读器地址…</p>
+      </div>
+
+      <ul class="paper-features">
+        <li>
+          <FileText size={18} />
+          <div><strong>上传即译</strong><span>PDF 自动切片，逐段流式翻译，公式与引用原样保留</span></div>
+        </li>
+        <li>
+          <Languages size={18} />
+          <div><strong>中英对照</strong><span>左右双语排版，可导出双语 Markdown，术语表统一译名</span></div>
+        </li>
+        <li>
+          <Volume2 size={18} />
+          <div><strong>全文朗读</strong><span>按段落合成语音、边听边读，默认 1.5 倍速，可调进度</span></div>
+        </li>
+      </ul>
+
+      <p class="paper-note">
+        <Lock size={14} />
+        这是一个私人工具，需要访问口令才能使用；论文与译文只存在我自己的机器上。
+      </p>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .paper-hero { border-top: 1px solid var(--color-border); padding-top: 34px; }
+  .paper-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .paper-btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 12px 22px; border-radius: 999px;
+    background: var(--color-primary); color: var(--color-background);
+    font-family: var(--font-sans); font-size: 15px;
+    transition: opacity .2s, transform .15s;
+  }
+  .paper-btn:hover { opacity: .9; transform: translateY(-1px); }
+  .paper-btn[aria-disabled="true"] { opacity: .45; pointer-events: none; }
+  .paper-status { margin: 0; font-family: var(--font-mono); font-size: 12px; color: var(--color-muted-foreground); }
+  .paper-features { list-style: none; margin: 36px 0 0; padding: 0; display: grid; gap: 18px; }
+  .paper-features li { display: flex; gap: 14px; align-items: flex-start; }
+  .paper-features svg { color: var(--color-primary); flex-shrink: 0; margin-top: 3px; }
+  .paper-features strong { display: block; font-size: 15px; font-weight: 600; }
+  .paper-features span { display: block; margin-top: 3px; font-size: 14px; color: var(--color-muted-foreground); }
+  .paper-note {
+    display: flex; align-items: center; gap: 8px;
+    margin: 36px 0 0; padding-top: 20px;
+    border-top: 1px solid var(--color-border);
+    font-size: 13px; color: var(--color-muted-foreground);
+  }
+  @media (min-width: 720px) {
+    .paper-features { grid-template-columns: repeat(3, 1fr); gap: 26px; }
+  }
+</style>
+
+<script is:inline data-astro-rerun>
+  // 快速隧道地址每次重启都会变，因此运行时向 jsonbin 取当前地址。
+  (function () {
+    const BIN = '6aa92c68ac6210605acfe457';
+    // 该 bin 为私有，读取需带 master key（与随笔 / 中转页同一做法）
+    const MASTER_KEY = '$2a$10$Iyqn3eO8f2SOtdwE9A9k1uY7MIXfb5k1Z7pYYkWZW9lYtxc1bJlbi';
+    async function loadPaperUrl() {
+      const btn = document.getElementById('paper-enter');
+      const status = document.getElementById('paper-status');
+      if (!btn || !status) return;
+      btn.setAttribute('aria-disabled', 'true');
+      status.textContent = '正在获取阅读器地址…';
+      try {
+        const res = await fetch('https://api.jsonbin.io/v3/b/' + BIN + '/latest', {
+          cache: 'no-store',
+          headers: { 'X-Master-Key': MASTER_KEY },
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const url = data?.record?.paperUrl;
+        if (!url || !/^https:\/\//.test(url)) throw new Error('地址无效');
+        btn.href = url;
+        btn.removeAttribute('aria-disabled');
+        const when = data?.record?.updatedAt ? new Date(data.record.updatedAt) : null;
+        status.textContent = '在线 · ' + new URL(url).host
+          + (when && !isNaN(when) ? ' · 更新于 ' + when.toLocaleString('zh-CN', { hour12: false }) : '');
+      } catch (e) {
+        btn.setAttribute('aria-disabled', 'true');
+        status.textContent = '阅读器当前离线：家里的服务未启动，启动后刷新本页即可';
+      }
+    }
+    document.addEventListener('astro:page-load', loadPaperUrl);
+    loadPaperUrl();
+  })();
+</script>
