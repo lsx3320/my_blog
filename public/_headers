@@ -1,0 +1,10 @@
+# 插件看板（/dsh-board/）：数据与静态资源给短缓存，页面本身保持实时校验
+# 规则来自 blog 仓库的约定文件；只覆盖 /dsh-board/ 路径，不影响其它页面
+/dsh-board/data/*
+  Cache-Control: public, max-age=300
+
+/dsh-board/*.js
+  Cache-Control: public, max-age=300
+
+/dsh-board/*.css
+  Cache-Control: public, max-age=300
