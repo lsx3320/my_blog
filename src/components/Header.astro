@@ -1,9 +1,11 @@
 ---
 import { Search, Sun, Moon, Menu, X, ArrowUpRight } from 'lucide-astro';
-const navItems = [
+const navItems: { label: string; href: string; reload?: boolean }[] = [
   { label: '首页', href: '/' }, { label: '文章', href: '/posts' },
   { label: '朋友圈', href: '/moments' }, { label: '相册', href: '/gallery' },
-  { label: '随笔', href: '/diary' }, { label: '中转', href: '/links' }, { label: '关于', href: '/about' },
+  { label: '随笔', href: '/diary' }, { label: '中转', href: '/links' },
+  // 插件看板是独立静态页（不是 Astro 路由），必须整页跳转，交给客户端路由会被拼成坏页面
+  { label: '插件', href: '/dsh-board/', reload: true }, { label: '关于', href: '/about' },
 ];
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 const isActive = (href: string) => currentPath === href || (href !== '/' && currentPath.startsWith(href + '/'));
@@ -16,7 +18,7 @@ const isActive = (href: string) => currentPath === href || (href !== '/' && curr
         <span>后生仔<small>卢仕潇的数字手记</small></span>
       </a>
       <ul class="desktop-nav">
-        {navItems.map(item => <li><a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}</a></li>)}
+        {navItems.map(item => <li><a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined} {...(item.reload ? { 'data-astro-reload': true } : {})}>{item.label}</a></li>)}
       </ul>
       <div class="header-actions">
         <a href="/posts#search" class="icon-button" aria-label="搜索文章" title="搜索文章"><Search /></a>
@@ -26,7 +28,7 @@ const isActive = (href: string) => currentPath === href || (href !== '/' && curr
     </nav>
     <nav id="mobile-menu" class="mobile-nav" aria-label="移动端导航" hidden>
       <ul class="page-wrap">
-        {navItems.map(item => <li><a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}<ArrowUpRight size={16} /></a></li>)}
+        {navItems.map(item => <li><a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined} {...(item.reload ? { 'data-astro-reload': true } : {})}>{item.label}<ArrowUpRight size={16} /></a></li>)}
       </ul>
     </nav>
   </site-navigation>
