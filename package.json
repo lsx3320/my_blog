@@ -12,7 +12,8 @@
     "check": "astro check",
     "images:optimize": "node scripts/optimize-images.mjs",
     "astro": "astro",
-    "audio": "node scripts/generate-audio.mjs"
+    "audio": "node scripts/generate-audio.mjs",
+    "audio:check": "node scripts/check-audio.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.4",
