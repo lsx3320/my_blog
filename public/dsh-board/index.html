@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSH 插件看板 · 配线盘</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="band">
+  <div class="band-main">
+    <div class="brand">
+      <span class="brand-mark">DSH</span>
+      <span class="brand-name">插件看板 · 配线盘</span>
+      <span class="brand-ver" id="ver">—</span>
+    </div>
+    <div class="search">
+      <input id="q" type="search" placeholder="说说你想做什么，或直接搜插件名…" autocomplete="off" spellcheck="false" aria-label="搜索">
+      <kbd>/</kbd>
+    </div>
+    <nav class="views" id="views" role="tablist">
+      <button data-view="need" class="on" role="tab">按需求找</button>
+      <button data-view="all" role="tab">全部插件</button>
+      <button data-view="tools" role="tab">能用的工具</button>
+      <button data-view="config" role="tab">装配与配置</button>
+      <button data-view="docs" role="tab">深入文档</button>
+    </nav>
+  </div>
+  <div class="band-readout" id="readout"></div>
+</header>
+
+<div class="shell">
+  <aside class="rail" id="rail">
+    <div class="rail-head">
+      <span class="rail-title">筛选</span>
+      <button id="reset" class="linky">重置</button>
+    </div>
+    <div id="railBody"></div>
+  </aside>
+
+  <main class="main" id="main">
+    <div id="view"></div>
+  </main>
+</div>
+
+<aside class="drawer" id="drawer" hidden aria-label="插件详情">
+  <div class="drawer-head">
+    <button id="close" class="close" aria-label="关闭">✕</button>
+    <div id="drawerTitle"></div>
+  </div>
+  <div class="drawer-tabs" id="drawerTabs"></div>
+  <div class="drawer-body" id="drawerBody"></div>
+</aside>
+<div class="scrim" id="scrim" hidden></div>
+
+<script src="app.js"></script>
+</body>
+</html>
