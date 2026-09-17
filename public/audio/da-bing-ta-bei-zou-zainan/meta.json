@@ -1,0 +1,13 @@
+{
+  "slug": "da-bing-ta-bei-zou-zainan",
+  "title": "他替你们把灾难背走了",
+  "chars": 1973,
+  "hash": "292480b0d7bbd5ae",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3",
+    "2.mp3"
+  ],
+  "generatedAt": "2026-09-17T14:23:34.232Z"
+}
