@@ -5,7 +5,10 @@ const navItems: { label: string; href: string; reload?: boolean }[] = [
   { label: '朋友圈', href: '/moments' }, { label: '相册', href: '/gallery' },
   { label: '随笔', href: '/diary' }, { label: '中转', href: '/links' },
   // 插件看板是独立静态页（不是 Astro 路由），必须整页跳转，交给客户端路由会被拼成坏页面
-  { label: '插件', href: '/dsh-board/', reload: true }, { label: '关于', href: '/about' },
+  { label: '插件', href: '/dsh-board/', reload: true },
+  // 论文翻译是跨域应用（跑在家里的小主机上，经 Cloudflare Tunnel 暴露），同样必须整页跳转
+  { label: '论文翻译', href: 'https://paper.lushixiao.cn', reload: true },
+  { label: '关于', href: '/about' },
 ];
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 const isActive = (href: string) => currentPath === href || (href !== '/' && currentPath.startsWith(href + '/'));
