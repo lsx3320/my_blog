@@ -1,12 +1,12 @@
 {
   "slug": "zou-an-lu-jin-zhai-men",
   "title": "走暗路，进窄门，耕瘦田",
-  "chars": 385,
-  "hash": "2bf862a5056e6e56",
+  "chars": 388,
+  "hash": "05cf5b3d8c9d789f",
   "model": "mimo-v2.5-tts",
   "voice": "mimo_default",
   "segments": [
     "1.mp3"
   ],
-  "generatedAt": "2026-09-19T01:22:49.928Z"
+  "generatedAt": "2026-09-20T09:29:28.186Z"
 }
