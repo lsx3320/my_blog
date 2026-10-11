@@ -1,0 +1,12 @@
+{
+  "slug": "xiu-xing",
+  "title": "修行",
+  "chars": 423,
+  "hash": "72be81264372fdc2",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3"
+  ],
+  "generatedAt": "2026-10-11T09:47:13.868Z"
+}
