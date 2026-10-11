@@ -1,0 +1,12 @@
+{
+  "slug": "tao-hua",
+  "title": "桃花",
+  "chars": 759,
+  "hash": "9af37a7b8402ff77",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3"
+  ],
+  "generatedAt": "2026-10-11T09:38:31.332Z"
+}
