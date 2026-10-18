@@ -1,0 +1,12 @@
+{
+  "slug": "thoughts-to-destiny",
+  "title": "从念头到命运",
+  "chars": 435,
+  "hash": "e1b93d835507c0b5",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3"
+  ],
+  "generatedAt": "2026-10-18T06:18:11.849Z"
+}
