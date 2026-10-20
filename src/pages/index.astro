@@ -53,7 +53,7 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10).replaceAll('-
         ))}
       </div>
       <aside class="journal-sidebar">
-        <div class="about-note"><span class="eyebrow"><span class="status-dot"></span> 保持好奇，持续生长</span><h3>一个做技术的人，<br />也认真过日子。</h3><p>从 Transformer 到 AI 智能体，从武汉的街头到新疆的湖边。这里放着我的尝试、见闻，和慢慢想明白的事。</p><a class="text-link" href="/about">多认识我一点 <ArrowRight /></a></div>
+        <div class="about-note"><span class="eyebrow"><span class="status-dot"></span> 天行健，君子以自强不息</span><h3>一个做技术的人，<br />也认真过日子。</h3><p>从 Transformer 到 AI 智能体，从武汉的街头到新疆的湖边。这里放着我的尝试、见闻，和慢慢想明白的事。</p><a class="text-link" href="/about">多认识我一点 <ArrowRight /></a></div>
         <div class="reading-note"><span class="eyebrow"><Code2 size={16} /> 从这里读起</span><h3>把 AI 讲明白</h3>{technicalPosts.map(post => post && <a href={'/posts/' + post.id}><span>{post.data.title.split('：')[0]}</span><ArrowUpRight size={16} /></a>)}</div>
       </aside>
     </div>
