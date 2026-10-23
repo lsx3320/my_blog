@@ -1,0 +1,14 @@
+{
+  "slug": "rea-nixiang-shiyan-jiaoan",
+  "title": "REA 逆向一切——从「编译一个加法程序」到「AI 逆向还原源码」",
+  "chars": 2658,
+  "hash": "3930649d4dcd2e21",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3",
+    "2.mp3",
+    "3.mp3"
+  ],
+  "generatedAt": "2026-10-23T19:01:30.763Z"
+}
