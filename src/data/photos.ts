@@ -7,6 +7,7 @@ export const photos = [
   { id: 4, title: 'yc', category: '人物', src: '/gallery/yc.webp' },
   { id: 5, title: '拐子', category: '人物', src: '/gallery/拐子.webp' },
   { id: 6, title: '老爹精神', category: '人物', src: '/gallery/老爹精神.webp' },
+  { id: 15, title: '', category: '人物', src: '/gallery/未命名.webp' },
   { id: 7, title: '合照', category: '合影', src: '/gallery/合照.webp' },
   { id: 9, title: '三姊妹', category: '合影', src: '/gallery/三姊妹.webp' },
   { id: 10, title: '来财和妹妹', category: '合影', src: '/gallery/来财和妹妹.webp' },
