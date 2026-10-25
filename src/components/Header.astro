@@ -16,7 +16,7 @@ const isActive = (href: string) => currentPath === href || (href !== '/' && curr
     <nav class="page-wrap header-inner" aria-label="主导航">
       <a href="/" class="wordmark" aria-label="后生仔，首页">
         <span class="wordmark-stamp" aria-hidden="true">潇</span>
-        <span>后生仔<small>卢仕潇的数字手记</small></span>
+        <span>后生仔</span>
       </a>
       <ul class="desktop-nav">
         {navItems.map(item => <li><a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined} {...(item.reload ? { 'data-astro-reload': true } : {})}>{item.label}</a></li>)}
@@ -40,10 +40,10 @@ const isActive = (href: string) => currentPath === href || (href !== '/' && curr
   .header-inner { min-height: 80px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
   .wordmark { display: flex; align-items: center; gap: 12px; flex-shrink: 0; font-size: 20px; font-weight: 650; line-height: 1.3; }
   .wordmark-stamp { width: 35px; height: 39px; display: grid; place-items: center; border: 1px solid var(--color-primary); color: var(--color-primary); font-family: var(--font-serif); font-size: 24px; border-radius: 3px; }
-  .wordmark small { display: block; font-size: 10px; font-weight: 400; color: var(--color-muted-foreground); margin-top: 4px; }
-  .desktop-nav { display: flex; gap: 27px; font-size: 13px; align-self: stretch; align-items: stretch; }
+  .wordmark small { display: block; font-size: 12px; font-weight: 400; color: var(--color-muted-foreground); margin-top: 4px; }
+  .desktop-nav { display: flex; gap: 15px; font-size: 14px; align-self: stretch; align-items: stretch; }
   .desktop-nav li { display: flex; }
-  .desktop-nav a { display: flex; align-items: center; position: relative; color: var(--color-muted-foreground); }
+  .desktop-nav a { display: flex; align-items: center; position: relative; padding-inline: 12px; color: var(--color-muted-foreground); }
   .desktop-nav a:hover, a[aria-current="page"] { color: var(--color-primary); }
   .desktop-nav a[aria-current="page"]::after { content: ''; position: absolute; bottom: 19px; left: 0; right: 0; height: 2px; background: var(--color-primary); }
   .header-actions { display: flex; gap: 2px; }

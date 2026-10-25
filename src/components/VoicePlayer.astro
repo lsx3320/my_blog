@@ -52,21 +52,21 @@ const isSegmented = sources.length > 1;
 </div>
 
 <style>
-  /* 气泡入口在文章里原来的位置（标题下方居中）；播放面板跟随其后、居中排布，不悬浮在内容之上 */
+  /* 入口：带图标的胶囊按钮，放在标题下第一眼（居中）；播放面板跟随其后，不悬浮 */
   .vp-root { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; margin-bottom: 2.5rem; }
-  /* 入口：内联文字标签（无气泡外形） */
   #vp-open {
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    padding: 0;
-    font-family: var(--font-sans); font-size: 0.82rem; letter-spacing: .02em;
-    color: var(--color-muted-foreground);
-    background: none; border: none; cursor: pointer;
-    transition: color .2s;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    min-height: 44px; padding: 9px 18px;
+    font-family: var(--font-sans); font-size: 14px; font-weight: 600;
+    color: var(--color-primary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px; cursor: pointer;
+    transition: background-color .2s, border-color .2s, color .2s;
   }
-  #vp-open:hover, #vp-open[aria-pressed="true"] { color: var(--color-primary); }
-  #vp-open .ico-24 { width: 16px; height: 16px; }
-  #vp-open .vp-label { border-bottom: 1px solid transparent; transition: border-color .2s; }
-  #vp-open:hover .vp-label { border-bottom-color: currentColor; }
+  #vp-open:hover { border-color: var(--color-primary); }
+  #vp-open[aria-pressed="true"] { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+  #vp-open .ico-24 { width: 17px; height: 17px; }
 
   /* 非悬浮：面板在文档流内占位，居中固定在页面中间 */
   .vp-panel {

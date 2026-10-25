@@ -22,11 +22,7 @@ if (!post) {
 
 const { Content, headings } = await render(post);
 
-const formattedDate = post.data.pubDate.toLocaleDateString('zh-CN', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-});
+const formattedDate = post.data.pubDate.toISOString().slice(0, 10);
 
 const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
 
@@ -56,52 +52,34 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
 
 <BaseLayout title={post.data.title} description={post.data.description} image={post.data.image} article>
   <article class="article-shell page-wrap pt-10 pb-16">
-    <!-- 运行页眉 -->
-    <div class="flex items-center justify-between font-sans text-xs text-[var(--color-muted-foreground)] mb-2">
-      <span>后生仔 · {post.data.category}</span>
-      <span>{formattedDate}</span>
-    </div>
-    <div class="h-px bg-[var(--color-border)] mb-10"></div>
-
-    <!-- Back link -->
-    <a href="/posts" class="inline-flex items-center gap-1.5 font-sans text-xs text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-colors mb-10 group">
-      <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-      </svg>
+    <a href="/posts" class="back-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
       返回文章
     </a>
 
-    <!-- Article header -->
-    <header class="article-heading mb-14 text-center">
-      <div class="flex items-center justify-center gap-3 font-sans text-xs text-[var(--color-muted-foreground)] mb-5">
+    <header class="article-heading">
+      <div class="article-meta">
+        <span>{post.data.byline}</span>
+        <span class="dot" aria-hidden="true"></span>
         <time datetime={post.data.pubDate.toISOString()}>{formattedDate}</time>
-        <span class="w-px h-3 bg-[var(--color-border)]" aria-hidden="true"></span>
-        <span>约{readingTime}分钟</span>
-        <span class="w-px h-3 bg-[var(--color-border)]" aria-hidden="true"></span>
-        <span class="text-[var(--color-primary)]">{post.data.category}</span>
+        <span class="dot" aria-hidden="true"></span>
+        <span>约 {readingTime} 分钟</span>
+        <span class="dot" aria-hidden="true"></span>
+        <span class="cat">{post.data.category}</span>
       </div>
-      <h1 class="font-display font-bold text-3xl md:text-4xl lg:text-5xl leading-tight mb-6 tracking-tight">
-        {post.data.title}
-      </h1>
-      <p class="font-sans text-xs text-[var(--color-muted-foreground)] mb-6">{post.data.byline}</p>
-      <p class="text-lg text-[var(--color-muted-foreground)] max-w-2xl mx-auto leading-relaxed">
-        {post.data.description}
-      </p>
-      {post.data.tags.length > 0 && (
-        <div class="flex flex-wrap justify-center gap-2 mt-8">
-          {post.data.tags.map(tag => (
-            <span class="px-3 py-1 text-xs border border-[var(--color-border)] rounded-sm text-[var(--color-muted-foreground)]">
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
-      <div class="mt-10 flex justify-center">
-        <div class="w-12 h-[2px] bg-[var(--color-primary)]" aria-hidden="true"></div>
-      </div>
+      <h1>{post.data.title}</h1>
+      <p class="desc">{post.data.description}</p>
     </header>
 
     {audioSources.length > 0 && <VoicePlayer sources={audioSources} title={post.data.title} />}
+
+    {post.data.tags.length > 0 && (
+      <div class="article-tags">
+        {post.data.tags.map(tag => (
+          <span>{tag}</span>
+        ))}
+      </div>
+    )}
 
     <!-- TOC for mobile -->
     {tocHeadings.length > 0 && (
@@ -135,7 +113,7 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
         <aside class="article-toc hidden lg:block">
           <div class="sticky top-28 toc-scroll">
             <div class="pl-4 border-l border-[var(--color-border)]">
-              <h2 class="text-xs font-semibold text-[var(--color-muted-foreground)] uppercase tracking-widest mb-4">
+              <h2 class="text-[13px] font-semibold text-[var(--color-muted-foreground)] uppercase tracking-widest mb-4">
                 目录
               </h2>
               <nav class="space-y-3">
@@ -217,8 +195,18 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
 
 <style>
   .article-shell { max-width: 1160px; }
-  .article-heading { max-width: 800px; margin-inline: auto; }
-  .article-heading h1 { font-size: 38px; line-height: 1.5; }
+  .article-heading { max-width: 800px; margin-inline: auto; text-align: center; }
+  .article-heading h1 { font-size: 38px; line-height: 1.4; margin-bottom: 18px; }
+  .back-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-bottom: 36px; font-size: 14px; color: var(--color-muted-foreground); }
+  .back-link:hover { color: var(--color-primary); }
+  .back-link svg { width: 18px; height: 18px; transition: transform .2s; }
+  .back-link:hover svg { transform: translateX(-3px); }
+  .article-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; font-size: 13px; color: var(--color-muted-foreground); margin-bottom: 22px; }
+  .article-meta .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--color-border); flex-shrink: 0; }
+  .article-meta .cat { color: var(--color-primary); }
+  .article-heading .desc { font-size: 17px; color: var(--color-muted-foreground); line-height: 1.8; max-width: 720px; margin-inline: auto; margin-bottom: 4px; }
+  .article-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 28px; }
+  .article-tags span { padding: 5px 12px; font-size: 13px; border: 1px solid var(--color-border); border-radius: 999px; color: var(--color-muted-foreground); }
   .reading-layout { max-width: 740px; margin-inline: auto; }
   .article-end { max-width: 800px; margin-inline: auto; }
   .toc-scroll { max-height: calc(100vh - 145px); overflow-y: auto; padding-right: 10px; }
