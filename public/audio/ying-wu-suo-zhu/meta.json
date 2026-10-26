@@ -1,0 +1,12 @@
+{
+  "slug": "ying-wu-suo-zhu",
+  "title": "应无所住而生其心",
+  "chars": 684,
+  "hash": "921955fbc9fd93d7",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3"
+  ],
+  "generatedAt": "2026-10-26T12:34:37.827Z"
+}
