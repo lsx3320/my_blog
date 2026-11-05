@@ -1,0 +1,12 @@
+{
+  "slug": "mao-against-cult",
+  "title": "毛泽东反对个人崇拜",
+  "chars": 520,
+  "hash": "74e48c8484ca50df",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3"
+  ],
+  "generatedAt": "2026-11-05T22:50:37.149Z"
+}
