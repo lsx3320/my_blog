@@ -1,12 +1,12 @@
 {
   "slug": "yongqi-shirenlei-de-zange",
   "title": "勇气是人类的赞歌",
-  "chars": 477,
-  "hash": "e735aad84297b1ff",
+  "chars": 531,
+  "hash": "dede5fc3e32bfbc7",
   "model": "mimo-v2.5-tts",
   "voice": "mimo_default",
   "segments": [
     "1.mp3"
   ],
-  "generatedAt": "2026-11-05T23:08:03.010Z"
+  "generatedAt": "2026-11-05T23:15:02.636Z"
 }
