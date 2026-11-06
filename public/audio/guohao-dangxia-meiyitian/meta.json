@@ -1,0 +1,12 @@
+{
+  "slug": "guohao-dangxia-meiyitian",
+  "title": "过好当下每一天",
+  "chars": 290,
+  "hash": "c12db0796ec4a924",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3"
+  ],
+  "generatedAt": "2026-11-06T10:52:09.175Z"
+}
