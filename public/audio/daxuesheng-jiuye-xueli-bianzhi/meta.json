@@ -1,0 +1,15 @@
+{
+  "slug": "daxuesheng-jiuye-xueli-bianzhi",
+  "title": "大学生就业和学业贬值问题",
+  "chars": 4150,
+  "hash": "8d5b0a7830e91cf8",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3",
+    "2.mp3",
+    "3.mp3",
+    "4.mp3"
+  ],
+  "generatedAt": "2026-11-09T06:26:31.326Z"
+}
