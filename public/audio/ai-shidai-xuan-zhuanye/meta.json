@@ -3,11 +3,20 @@
   "title": "AI时代怎么选专业",
   "chars": 1794,
   "hash": "b48b9a9304fb3344",
-  "model": "mimo-v2.5-tts",
-  "voice": "mimo_default",
+  "model": "eleven_multilingual_v2",
+  "voice": "Xb7hH8MSUJpSbSDYk0k2 (Alice - Clear, Engaging Educator)",
+  "provider": "elevenlabs",
+  "voiceSettings": {
+    "stability": 0.6,
+    "similarity_boost": 0.8,
+    "style": 0,
+    "use_speaker_boost": true,
+    "speed": 1
+  },
   "segments": [
     "1.mp3",
-    "2.mp3"
+    "2.mp3",
+    "3.mp3"
   ],
-  "generatedAt": "2026-10-28T19:13:31.140Z"
+  "generatedAt": "2026-10-28T19:57:36.801Z"
 }
