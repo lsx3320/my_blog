@@ -2,11 +2,11 @@
   "slug": "enshi-paotangyan",
   "title": "恩施刨汤宴",
   "chars": 864,
-  "hash": "f01fce5fce58d429",
+  "hash": "19e91c2e6f225e21",
   "model": "mimo-v2.5-tts",
   "voice": "mimo_default",
   "segments": [
     "1.mp3"
   ],
-  "generatedAt": "2026-11-07T13:58:10.439Z"
+  "generatedAt": "2026-11-12T11:53:04.030Z"
 }
