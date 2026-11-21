@@ -1,0 +1,13 @@
+{
+  "slug": "xiangsi-ersheng",
+  "title": "向死而生的人生态度",
+  "chars": 1675,
+  "hash": "04f6a9a96b552fd2",
+  "model": "mimo-v2.5-tts",
+  "voice": "mimo_default",
+  "segments": [
+    "1.mp3",
+    "2.mp3"
+  ],
+  "generatedAt": "2026-11-21T05:20:40.261Z"
+}
