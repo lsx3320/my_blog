@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import LoginGate from '../memo-card/components/LoginGate.jsx';
 import LinksHub from '../memo-card/components/LinksHub.jsx';
 ---
-<BaseLayout title="网站中转">
+<BaseLayout title="网站中转" robots="noindex">
   <div class="relative">
     <LinksHub client:only="react" />
     <LoginGate client:only="react" title="网站中转" subtitle="我的生日（8 位数字）" storageKey="links_unlocked" />

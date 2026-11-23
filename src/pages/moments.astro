@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection, render } from 'astro:content';
+import { readPublicImage } from '../lib/local-image.mjs';
 
 const allMoments = await getCollection('moments');
 const moments = allMoments.sort((a, b) => {
@@ -32,6 +33,12 @@ const moments = allMoments.sort((a, b) => {
           month: 'long',
           day: 'numeric',
         });
+        const sized = await Promise.all((moment.data.images ?? []).map(async (src, index) => {
+          const size = await readPublicImage(src);
+          const custom = moment.data.imageAlts?.[index]?.trim();
+          const alt = custom || (moment.data.location ? `${moment.data.location}的照片 ${index + 1}` : `动态照片 ${index + 1}`);
+          return { src, alt, width: size?.width, height: size?.height };
+        }));
 
         return (
           <article class="border-b border-[var(--color-border)] pb-14 last:border-0">
@@ -55,21 +62,25 @@ const moments = allMoments.sort((a, b) => {
             </div>
 
             <!-- 图片 -->
-            {moment.data.images && moment.data.images.length > 0 && (
+            {sized.length > 0 && (
               <div class="mb-6">
-                {moment.data.images.length === 1 ? (
-                  <div class="max-w-[320px] overflow-hidden rounded-lg cursor-pointer">
-                    <img src={moment.data.images[0]} alt={moment.data.location || '动态图片'} class="moment-img w-full h-auto hover:opacity-90 transition-opacity" loading="lazy" decoding="async" />
+                {sized.length === 1 ? (
+                  <div class="max-w-[320px] overflow-hidden rounded-lg">
+                    <button type="button" class="moment-zoom" aria-label={'放大照片：' + sized[0].alt}>
+                      <img src={sized[0].src} alt={sized[0].alt} width={sized[0].width} height={sized[0].height} class="moment-img w-full h-auto hover:opacity-90 transition-opacity" loading="lazy" decoding="async" />
+                    </button>
                   </div>
                 ) : (
                   <div class={`grid gap-2 max-w-[400px] ${
-                    moment.data.images.length === 2 ? 'grid-cols-2' :
-                    moment.data.images.length === 4 ? 'grid-cols-2' :
+                    sized.length === 2 ? 'grid-cols-2' :
+                    sized.length === 4 ? 'grid-cols-2' :
                     'grid-cols-3'
                   }`}>
-                    {moment.data.images.map((img: string) => (
-                      <div class="aspect-square overflow-hidden rounded-lg cursor-pointer">
-                        <img src={img} alt={moment.data.location || '动态图片'} class="moment-img w-full h-full object-cover hover:opacity-90 transition-opacity" loading="lazy" decoding="async" />
+                    {sized.map((image) => (
+                      <div class="aspect-square overflow-hidden rounded-lg">
+                        <button type="button" class="moment-zoom" aria-label={'放大照片：' + image.alt}>
+                          <img src={image.src} alt={image.alt} width={image.width} height={image.height} class="moment-img w-full h-full object-cover hover:opacity-90 transition-opacity" loading="lazy" decoding="async" />
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -79,7 +90,7 @@ const moments = allMoments.sort((a, b) => {
 
             <!-- 点赞 -->
             <div class="flex items-center gap-4">
-              <button class="like-btn flex items-center gap-1.5 font-sans text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-colors" data-likes={moment.data.likes}>
+              <button type="button" class="like-btn flex items-center gap-1.5 font-sans text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-colors" data-likes={moment.data.likes} aria-pressed="false" aria-label={`点赞，当前 ${moment.data.likes} 人`}>
                 <svg class="w-4 h-4 heart-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
@@ -99,9 +110,9 @@ const moments = allMoments.sort((a, b) => {
   </section>
 
   <!-- Lightbox -->
-  <div id="lightbox" class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+  <div id="lightbox" role="dialog" aria-modal="true" aria-hidden="true" aria-label="放大的照片" class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
     <img id="lightbox-img" src="" alt="" class="max-w-[90vw] max-h-[90vh] object-contain scale-90 transition-transform duration-300" />
-    <button id="lightbox-close" class="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors">
+    <button id="lightbox-close" type="button" aria-label="关闭照片" class="absolute top-4 right-4 w-11 h-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors">
       <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
       </svg>
@@ -111,33 +122,42 @@ const moments = allMoments.sort((a, b) => {
 
 <script is:inline data-astro-rerun>
   // Lightbox 打开/关闭
-  function openLightbox(src) {
+  function openLightbox(src, alt) {
     const lightboxImg = document.getElementById('lightbox-img');
-    if (!lightboxImg) return;
-    lightboxImg.src = src;
     const lightbox = document.getElementById('lightbox');
-    lightbox?.classList.remove('opacity-0', 'pointer-events-none');
+    if (!lightboxImg || !lightbox) return;
+    lightboxImg.src = src;
+    lightboxImg.alt = alt || '放大后的动态照片';
+    lightbox.classList.remove('opacity-0', 'pointer-events-none');
+    lightbox.setAttribute('aria-hidden', 'false');
     lightboxImg.classList.remove('scale-90');
     lightboxImg.classList.add('scale-100');
     document.body.style.overflow = 'hidden';
+    document.getElementById('lightbox-close')?.focus();
   }
 
   function closeLightbox() {
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     lightbox?.classList.add('opacity-0', 'pointer-events-none');
+    lightbox?.setAttribute('aria-hidden', 'true');
     lightboxImg?.classList.remove('scale-100');
     lightboxImg?.classList.add('scale-90');
+    if (lightboxImg) lightboxImg.alt = '';
     document.body.style.overflow = '';
   }
 
   // 绑定当前页面的图片点击与点赞（astro:page-load 每次导航后都会执行，
   // 保证 SPA 跳转后新页面的图片灯箱 / 点赞依然可用）
   function bindMoments() {
-    document.querySelectorAll('.moment-img').forEach(img => {
-      if (img.__bound) return;
-      img.__bound = true;
-      img.addEventListener('click', () => openLightbox(img.src));
+    document.querySelectorAll('.moment-zoom').forEach(btn => {
+      if (btn.__bound) return;
+      btn.__bound = true;
+      btn.addEventListener('click', () => {
+        const img = btn.querySelector('img');
+        if (!img) return;
+        openLightbox(img.currentSrc || img.src, img.alt);
+      });
     });
 
     document.querySelectorAll('.like-btn').forEach(btn => {
@@ -159,6 +179,9 @@ const moments = allMoments.sort((a, b) => {
         }
 
         countEl.textContent = String(count);
+        const liked = btn.classList.contains('liked');
+        btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
+        btn.setAttribute('aria-label', (liked ? '取消点赞，当前 ' : '点赞，当前 ') + count + ' 人');
       });
     });
   }
@@ -181,8 +204,11 @@ const moments = allMoments.sort((a, b) => {
 </script>
 
 <style>
+  .moment-zoom { display: block; width: 100%; padding: 0; border: 0; background: transparent; cursor: pointer; }
   .like-btn {
     -webkit-tap-highlight-color: transparent;
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .heart-icon {

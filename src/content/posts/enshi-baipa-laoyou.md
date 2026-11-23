@@ -18,6 +18,6 @@ tags: ['恩施', '白帕', '武陵山区', '民俗', '方言']
 
 还有一个最主要的功效，我告诉你们，现在进山徒步探险的人会戴头盔，这个帕子真正起的作用就是这个。它缠起来有一定的厚度，原来在山林里面穿，有树丫枝倒下来的，有岩壳支起的，人在过路的时候很容易就把头碰破了，它实际上就是个安全帽。
 
-<img src="/posts/enshi-baipa/1794060441497.jpg" alt="恩施老一辈头上包的白帕（资料图）" style="display:block;width:100%;max-width:min(88vw,480px);height:auto;margin:2rem auto;border-radius:var(--radius-md)" />
+<img src="/posts/enshi-baipa/1794060441497.jpg" alt="恩施老一辈头上包的白帕（资料图）" width="800" height="1043" loading="lazy" decoding="async" style="display:block;width:100%;max-width:min(88vw,480px);height:auto;margin:2rem auto;border-radius:var(--radius-md)" />
 
 山区尽是黄泥巴路，搞得不好一仰八叉翻到地下去了。凡是老年人摔跤，只要是后脑壳着地的，多半都是稀皮了的。但他们即便是后脑壳着地，依然能用这个毛巾把它缓冲了，这才是它最大的功效。

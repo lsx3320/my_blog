@@ -3,17 +3,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { ArrowUpRight, ArrowRight, Code2, Camera, BookOpen, MoveDown } from 'lucide-astro';
 import { timelineEvents } from '../data/timeline';
+import { readPublicImage } from '../lib/local-image.mjs';
 const posts = (await getCollection('posts')).filter(post => !post.data.draft).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 const recentPosts = posts.slice(0, 4);
 const technicalPosts = ['transformer-guide', 'resnet-guide', 'agent-guide'].map(id => posts.find(post => post.id === id)).filter(Boolean);
 const selectedMemories = [timelineEvents[1], timelineEvents[2], timelineEvents[5]];
-const lake = '/gallery/ppyq/slmh/f709402f3861a10eb4749ede2e8127dd.webp';
 const cover = '/gallery/mountain-blessing.webp';
-const photos = [
-  { src: lake, title: '赛里木湖', note: '新疆 · 路上的风景', href: '/gallery#travel' },
-  { src: '/gallery/故宫.webp', title: '故宫', note: '北京 · 一眼千年', href: '/gallery#memories' },
-  { src: '/gallery/合照.webp', title: '合照', note: '一些人，一些记得住的日子', href: '/gallery#together' },
+const strip = [
+  { src: '/gallery/thumbs/sayram.webp', title: '赛里木湖', note: '新疆 · 路上的风景', href: '/gallery#travel' },
+  { src: '/gallery/thumbs/gugong.webp', title: '故宫', note: '北京 · 一眼千年', href: '/gallery#memories' },
+  { src: '/gallery/thumbs/group.webp', title: '合照', note: '一些人，一些记得住的日子', href: '/gallery#together' },
 ];
+const photos = await Promise.all(strip.map(async (photo) => ({ ...photo, ...(await readPublicImage(photo.src) ?? {}) })));
 const formatDate = (date: Date) => date.toISOString().slice(0, 10).replaceAll('-', '.');
 ---
 <BaseLayout title="首页" image={cover}>
@@ -62,7 +63,7 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10).replaceAll('-
   <section class="photo-band">
     <div class="page-wrap section-space">
       <div class="section-heading"><div><span class="eyebrow uppercase">AWAY FROM THE SCREEN</span><h2>屏幕之外</h2><p>总有一些瞬间，值得按下快门。</p></div><a href="/gallery" class="text-link">走进相册 <ArrowUpRight /></a></div>
-      <div class="photo-strip">{photos.map(photo => <a href={photo.href} class="photo-memory"><figure><img src={photo.src} alt={photo.title} loading="lazy" decoding="async" width="800" height="600" /><figcaption><div><h3>{photo.title}</h3><p>{photo.note}</p></div><ArrowUpRight size={18} /></figcaption></figure></a>)}</div>
+      <div class="photo-strip">{photos.map(photo => <a href={photo.href} class="photo-memory"><figure><img src={photo.src} alt={photo.title} width={photo.width} height={photo.height} loading="lazy" decoding="async" /><figcaption><div><h3>{photo.title}</h3><p>{photo.note}</p></div><ArrowUpRight size={18} /></figcaption></figure></a>)}</div>
     </div>
   </section>
 
@@ -145,7 +146,7 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10).replaceAll('-
     .intro-inner > p { font-size: 13px; }
     .intro-links { gap: 22px; font-size: 11px; }
     .journal-grid { grid-template-columns: minmax(0,1fr); gap: 30px; }
-    .journal-sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; border-left: 0; padding-left: 0; }
+    .journal-sidebar { display: grid; grid-template-columns: 1fr; gap: 24px; border-left: 0; padding-left: 0; }
     .about-note { border-bottom: 0; padding-block: 0; }
     .about-note h3 { font-size: 19px; margin-top: 14px; }
     .reading-note { padding-top: 0; }

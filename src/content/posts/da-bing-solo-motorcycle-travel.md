@@ -11,7 +11,7 @@ image: '/posts/da-bing-solo-motorcycle-travel/can-am-spyder-ride.webp'
 本文根据大冰直播连线的文字转写整理，保留原意与口语表达，调整标点、分段并合并明显重复。以下为直播摘录。
 
 <figure>
-  <img src="/posts/da-bing-solo-motorcycle-travel/can-am-spyder-ride.webp" alt="骑手驾驶红色庞巴迪 Can-Am Spyder F3 倒三轮载着乘客行驶在乡间公路上" width="1280" height="720" decoding="async" />
+  <img src="/posts/da-bing-solo-motorcycle-travel/can-am-spyder-ride.webp" alt="骑手驾驶红色庞巴迪 Can-Am Spyder F3 倒三轮载着乘客行驶在乡间公路上" width="1280" height="720" loading="lazy" decoding="async" />
   <figcaption class="text-sm text-[var(--color-muted-foreground)]">庞巴迪 Can-Am Spyder F3 公路骑行。图源：<a href="https://can-am.brp.com/on-road/us/en/models/3-wheel-vehicles.html">BRP / Can-Am 官方</a>，图片版权归原权利方所有。主题配图，非大冰本人或直播现场。</figcaption>
 </figure>
 

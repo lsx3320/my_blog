@@ -1,6 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { photos, photoChapters } from '../data/photos';
+import { photos as photoList, photoChapters } from '../data/photos';
+import { readPublicImage } from '../lib/local-image.mjs';
+const photos = await Promise.all(photoList.map(async (photo) => ({
+  ...photo,
+  title: photo.title || '未命名照片',
+  ...(await readPublicImage(photo.src) ?? {}),
+})));
 import { ArrowUpRight, ArrowLeft, ArrowRight, X } from 'lucide-astro';
 ---
 <BaseLayout title="相册" description="卢仕潇的个人相册：路上的风景，熟悉的面孔，记得住的日子。">
@@ -12,7 +18,7 @@ import { ArrowUpRight, ArrowLeft, ArrowRight, X } from 'lucide-astro';
         <div class="section-heading"><h2>{chapter.name}</h2><span class="eyebrow">{photos.filter(photo => photo.category === chapter.name).length} 张照片</span></div>
         <div class="photo-grid">{photos.filter(photo => photo.category === chapter.name).map(photo => <figure>
           <a class="photo-item" href={photo.src} data-src={photo.src} data-title={photo.title} aria-label={'查看照片：' + photo.title}>
-            <img src={photo.src} alt={photo.title} loading="lazy" decoding="async" />
+            <img src={photo.src} alt={photo.title} width={photo.width} height={photo.height} loading="lazy" decoding="async" />
             <figcaption><span>{photo.title}</span><ArrowUpRight size={16} /></figcaption>
           </a>
         </figure>)}</div>
@@ -98,7 +104,7 @@ import { ArrowUpRight, ArrowLeft, ArrowRight, X } from 'lucide-astro';
     .photo-grid { columns: 2; column-gap: 16px; }
     #travel .photo-grid { columns: 1; }
     .chapter-nav { gap: 24px; font-size: 13px; }
-    .lightbox-button { width: 40px; height: 40px; }
+    .lightbox-button { width: 44px; height: 44px; }
     #lightbox-title { font-size: 14px; }
   }
   @media (max-width: 380px) { .chapter-nav { gap: 18px; } }
