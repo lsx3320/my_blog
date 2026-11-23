@@ -58,10 +58,18 @@ test('moments controls and plugin board return link are named in source', () => 
   assert.match(board, /class="back-blog" href="\/">返回博客/);
 });
 
-test('phone reading column leaves room for the music control', () => {
+test('phone pages keep symmetric margins and the original corner music button', () => {
   const css = read('src/styles/global.css');
-  assert.match(css, /margin-right: 68px/);
-  assert.match(css, /\.site-header \.page-wrap/);
+  assert.match(css, /@media \(max-width: 700px\) \{\s*\.page-wrap \{ width: calc\(100% - 40px\); \}/);
+  assert.doesNotMatch(css, /margin-right:\s*68px/);
+  assert.doesNotMatch(css, /padding-right:\s*68px/);
+  const header = read('src/components/Header.astro');
+  assert.doesNotMatch(header, /header-actions \{ margin-right: 48px/);
+  const music = read('src/components/MusicPlayer.astro');
+  assert.match(music, /\.music-player \{ position: fixed; bottom: 22px; right: 22px; z-index: 40; \}/);
+  assert.doesNotMatch(music, /bottom: auto/);
+  const footer = read('src/components/Footer.astro');
+  assert.doesNotMatch(footer, /padding-bottom: calc\(88px/);
   const home = read('src/pages/index.astro');
   assert.match(home, /grid-template-columns: 1fr; gap: 24px/);
   assert.match(home, /\/gallery\/thumbs\/gugong\.webp/);

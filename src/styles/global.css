@@ -101,14 +101,7 @@ pre code { padding: 0; background: none; color: var(--color-foreground); font-si
 .reveal { opacity: 1; }
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .15s; }
 @media (max-width: 700px) {
-  /* 右下角音乐按钮约占 56px。正文让开，页眉和封面保持原来的左右边距。 */
-  .page-wrap { width: calc(100% - 88px); margin-left: 20px; margin-right: 68px; }
-  .site-header .page-wrap,
-  .journal-cover .page-wrap { width: calc(100% - 40px); margin-left: auto; margin-right: auto; }
-  #main-content > section.px-6,
-  #main-content > section.max-w-3xl,
-  #main-content > section.max-w-4xl,
-  #main-content > .relative { padding-right: 68px; }
+  .page-wrap { width: calc(100% - 40px); }
   .section-space { padding-block: 44px; }
   .section-heading { gap: 16px; margin-bottom: 24px; align-items: center; }
   .section-heading h2 { font-size: 24px; }
