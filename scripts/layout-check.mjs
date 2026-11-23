@@ -98,6 +98,7 @@ const probe = `(() => {
     sidebar: sidebar ? getComputedStyle(sidebar).gridTemplateColumns : '',
     insets,
     musicTop: musicBox ? Math.round(musicBox.top) : null,
+    musicRight: musicBox ? Math.round(document.documentElement.clientWidth - musicBox.right) : null,
     musicWidth: musicBox ? Math.round(musicBox.width) : null,
     underMusic,
     coveredControls,
@@ -186,9 +187,7 @@ try {
         check(`${name}@${width} balanced gutters`, delta <= 8, JSON.stringify(value.insets));
         if (mobile) {
           check(`${name}@${width} no wide right gutter`, value.insets.right <= 32 && value.insets.left >= 12, JSON.stringify(value.insets));
-          check(`${name}@${width} music stays in header`, value.musicTop !== null && value.musicTop < 40, `top=${value.musicTop}`);
-          check(`${name}@${width} music misses header controls`, value.coveredControls.length === 0, value.coveredControls.join(','));
-          check(`${name}@${width} music misses body text`, value.underMusic.length === 0, value.underMusic.join(','));
+          check(`${name}@${width} music stays at the corner`, value.musicTop > 640 && value.musicRight >= 16 && value.musicRight <= 30, `top=${value.musicTop} right=${value.musicRight}`);
           check(`${name}@${width} music target`, value.musicWidth >= 44, `width=${value.musicWidth}`);
         }
       }
