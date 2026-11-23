@@ -4,7 +4,7 @@ import DiaryGate from '../components/DiaryGate.astro';
 import DiaryList from '../memo-card/components/DiaryList.jsx';
 ---
 
-<BaseLayout title="随笔">
+<BaseLayout title="随笔" robots="noindex">
   <DiaryGate title="随笔">
     <DiaryList client:only="react" />
   </DiaryGate>

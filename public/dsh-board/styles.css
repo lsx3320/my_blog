@@ -32,7 +32,8 @@
 /* hidden 属性必须压过组件自己的 display（抽屉 .drawer 是 flex，否则关不掉） */
 [hidden] { display: none !important; }
 
-html, body { margin: 0; padding: 0; }
+html, body { margin: 0; padding: 0; max-width: 100%; }
+html { overflow-x: hidden; }
 
 body {
   background: var(--shell);
@@ -81,6 +82,16 @@ a { color: inherit; }
   letter-spacing: 0.02em;
   white-space: nowrap;
 }
+
+.back-blog {
+  margin-left: 4px;
+  color: #eaf3f1;
+  font: 500 12px/1 var(--sans);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+.back-blog:hover { color: #fff; }
 
 .brand-ver {
   font: 400 11px/1 var(--mono);
@@ -700,9 +711,21 @@ pre code { background: none; border: none; padding: 0; }
   .group { margin-bottom: 0; flex: 0 0 auto; }
   .chip { width: auto; }
   .brand-ver, .search kbd { display: none; }
+  .band, .band-main, .band-readout { max-width: 100%; }
   .band-main { flex-wrap: wrap; gap: 10px; }
-  .search { order: 3; flex-basis: 100%; max-width: none; }
-  .views { margin-left: 0; }
+  .brand { max-width: 100%; min-width: 0; }
+  .search { order: 3; flex: 1 1 100%; max-width: none; min-width: 0; }
+  .views {
+    order: 4;
+    flex: 1 1 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin-left: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+  .views button { min-height: 44px; white-space: nowrap; }
+  .back-blog { min-height: 44px; display: inline-flex; align-items: center; }
   .main { padding: 14px; }
   .card-headline {
   margin: 0;

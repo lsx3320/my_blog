@@ -8,3 +8,26 @@
 
 /dsh-board/*.css
   Cache-Control: public, max-age=300
+
+# 文件名带内容哈希，可以长期缓存。不要给 HTML 加同样的长缓存。
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# 错误页和私人工具页不进入索引。不改 public/robots.txt，也不改全站爬虫策略。
+/404
+  X-Robots-Tag: noindex
+
+/404/
+  X-Robots-Tag: noindex
+
+/diary
+  X-Robots-Tag: noindex
+
+/diary/*
+  X-Robots-Tag: noindex
+
+/links
+  X-Robots-Tag: noindex
+
+/links/
+  X-Robots-Tag: noindex

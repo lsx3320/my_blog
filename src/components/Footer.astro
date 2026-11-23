@@ -26,5 +26,5 @@ const currentYear = new Date().getFullYear();
   .footer-contact a { display: flex; align-items: center; gap: 8px; }
   a:hover { color: var(--color-primary); }
   .footer-bottom { border-top: 1px solid var(--color-border); padding-top: 22px; display: flex; justify-content: space-between; gap: 16px; font-size: 11px; color: var(--color-muted-foreground); }
-  @media (max-width: 700px) { .footer-main { flex-wrap: wrap; gap: 28px; } .footer-main > div:first-child { width: 100%; } .footer-contact { margin-right: 15px; } .footer-bottom { flex-direction: column; padding-bottom: 35px; } }
+  @media (max-width: 700px) { .footer-main { flex-wrap: wrap; gap: 28px; } .footer-main > div:first-child { width: 100%; } .footer-contact { margin-right: 15px; } .footer-bottom { flex-direction: column; padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); } }
 </style>
