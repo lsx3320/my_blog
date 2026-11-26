@@ -100,19 +100,21 @@ test('phone pages keep symmetric margins and the original corner music button', 
   assert.doesNotMatch(home, /width="800" height="600"/);
 });
 
-test('header seal and favicon are vectors, and icons stay on the site origin', () => {
+test('header logo and favicon are the crystal vector, and icons stay on the site origin', () => {
   const header = read('src/components/Header.astro');
-  assert.match(header, /<svg class="wordmark-stamp" viewBox="0 0 70 78" width="35" height="39"/);
-  assert.match(header, /fill="currentColor"/);
+  assert.match(header, /<svg class="wordmark-logo" viewBox="0 0 214 304" width="27.43" height="39"/);
+  assert.match(header, /fill="#87cbb5"/);
   assert.match(header, /<span>后生仔<\/span>/);
-  assert.doesNotMatch(header, /wordmark-stamp[^>]*>潇</);
+  assert.doesNotMatch(header, /潇/);
+  assert.doesNotMatch(header, /currentColor/);
   assert.doesNotMatch(header, /\.png/);
   const svg = read('public/favicon.svg');
   assert.match(svg, /<path /);
-  assert.match(svg, /#27614f/);
-  assert.match(svg, /prefers-color-scheme: dark/);
+  assert.match(svg, /#87cbb5/);
+  assert.match(svg, /#0e3125/);
   assert.doesNotMatch(svg, /<image/);
   assert.doesNotMatch(svg, /data:image/);
+  assert.doesNotMatch(svg, /currentColor/);
   const ico = readFileSync('public/favicon.ico');
   assert.equal(ico.readUInt16LE(0), 0);
   assert.equal(ico.readUInt16LE(2), 1);
