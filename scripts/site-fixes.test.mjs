@@ -58,6 +58,30 @@ test('moments controls and plugin board return link are named in source', () => 
   assert.match(board, /class="back-blog" href="\/">返回博客/);
 });
 
+test('article taps keep a pressed state and show a top progress bar while the next page loads', () => {
+  const css = read('src/styles/global.css');
+  const layout = read('src/layouts/BaseLayout.astro');
+  const script = read('src/scripts/nav-feedback.ts');
+  const home = read('src/pages/index.astro');
+  assert.match(layout, /id="nav-progress"/);
+  assert.match(layout, /transition:persist="nav-progress"/);
+  assert.match(layout, /nav-feedback/);
+  assert.match(css, /\.nav-progress\.is-active \{ background: var\(--color-primary-light\); \}/);
+  assert.match(css, /\.post-item > a\.is-pressed/);
+  assert.match(css, /\.recent-post > a\.is-pressed/);
+  assert.match(css, /\.reading-note > a\.is-pressed/);
+  assert.match(css, /\.memory\.is-pressed/);
+  assert.match(css, /\.pager-card\.is-pressed/);
+  assert.match(css, /\.mobile-nav a\.is-pressed/);
+  assert.match(css, /button, a, input \{ -webkit-tap-highlight-color: transparent; \}/);
+  assert.match(script, /astro:before-preparation/);
+  assert.match(script, /astro:after-swap/);
+  assert.match(script, /pointerdown/);
+  assert.match(script, /is-pressed/);
+  assert.match(home, /\.photo-memory:is\(:active, \.is-pressed\) img/);
+  assert.match(read('src/pages/posts/[slug].astro'), /class="pager-card /);
+});
+
 test('phone pages keep symmetric margins and the original corner music button', () => {
   const css = read('src/styles/global.css');
   assert.match(css, /@media \(max-width: 700px\) \{\s*\.page-wrap \{ width: calc\(100% - 40px\); \}/);
