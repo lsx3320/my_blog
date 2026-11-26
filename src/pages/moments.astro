@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection, render } from 'astro:content';
 import { readPublicImage } from '../lib/local-image.mjs';
+import { contentImageUrl } from '../lib/image-cdn.mjs';
 
 const allMoments = await getCollection('moments');
 const moments = allMoments.sort((a, b) => {
@@ -37,7 +38,7 @@ const moments = allMoments.sort((a, b) => {
           const size = await readPublicImage(src);
           const custom = moment.data.imageAlts?.[index]?.trim();
           const alt = custom || (moment.data.location ? `${moment.data.location}的照片 ${index + 1}` : `动态照片 ${index + 1}`);
-          return { src, alt, width: size?.width, height: size?.height };
+          return { src: contentImageUrl(src), alt, width: size?.width, height: size?.height };
         }));
 
         return (

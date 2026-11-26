@@ -4,6 +4,7 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
 import { includeInSitemap } from './src/lib/sitemap-filter.mjs';
+import { rehypeContentImages, remarkContentImages } from './src/lib/image-cdn.mjs';
 
 export default defineConfig({
   site: 'https://lushixiao.cn',
@@ -13,6 +14,8 @@ export default defineConfig({
     customPages: ['https://lushixiao.cn/dsh-board/'],
   })],
   markdown: {
+    remarkPlugins: [remarkContentImages],
+    rehypePlugins: [rehypeContentImages],
     syntaxHighlight: {
       type: 'shiki',
       excludeLangs: ['mermaid'],

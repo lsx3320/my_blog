@@ -2,10 +2,12 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { photos as photoList, photoChapters } from '../data/photos';
 import { readPublicImage } from '../lib/local-image.mjs';
+import { contentImageUrl } from '../lib/image-cdn.mjs';
 const photos = await Promise.all(photoList.map(async (photo) => ({
   ...photo,
   title: photo.title || '未命名照片',
   ...(await readPublicImage(photo.src) ?? {}),
+  src: contentImageUrl(photo.src),
 })));
 import { ArrowUpRight, ArrowLeft, ArrowRight, X } from 'lucide-astro';
 ---

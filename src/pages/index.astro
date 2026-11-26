@@ -4,17 +4,22 @@ import { getCollection } from 'astro:content';
 import { ArrowUpRight, ArrowRight, Code2, Camera, BookOpen, MoveDown } from 'lucide-astro';
 import { timelineEvents } from '../data/timeline';
 import { readPublicImage } from '../lib/local-image.mjs';
+import { contentImageUrl } from '../lib/image-cdn.mjs';
 const posts = (await getCollection('posts')).filter(post => !post.data.draft).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 const recentPosts = posts.slice(0, 4);
 const technicalPosts = ['transformer-guide', 'resnet-guide', 'agent-guide'].map(id => posts.find(post => post.id === id)).filter(Boolean);
 const selectedMemories = [timelineEvents[1], timelineEvents[2], timelineEvents[5]];
-const cover = '/gallery/mountain-blessing.webp';
+const cover = contentImageUrl('/gallery/mountain-blessing.webp');
 const strip = [
   { src: '/gallery/thumbs/sayram.webp', title: '赛里木湖', note: '新疆 · 路上的风景', href: '/gallery#travel' },
   { src: '/gallery/thumbs/gugong.webp', title: '故宫', note: '北京 · 一眼千年', href: '/gallery#memories' },
   { src: '/gallery/thumbs/group.webp', title: '合照', note: '一些人，一些记得住的日子', href: '/gallery#together' },
 ];
-const photos = await Promise.all(strip.map(async (photo) => ({ ...photo, ...(await readPublicImage(photo.src) ?? {}) })));
+const photos = await Promise.all(strip.map(async (photo) => ({
+  ...photo,
+  ...(await readPublicImage(photo.src) ?? {}),
+  src: contentImageUrl(photo.src),
+})));
 const formatDate = (date: Date) => date.toISOString().slice(0, 10).replaceAll('-', '.');
 ---
 <BaseLayout title="首页" image={cover}>

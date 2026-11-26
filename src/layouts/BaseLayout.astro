@@ -4,10 +4,11 @@ import Footer from '../components/Footer.astro';
 import MusicPlayer from '../components/MusicPlayer.astro';
 import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
+import { contentImageUrl } from '../lib/image-cdn.mjs';
 interface Props { title: string; description?: string; image?: string; article?: boolean; robots?: string; canonical?: string | false; }
 const { title, description = '我是卢仕潇，也叫后生仔。在这里记录 AI 技术探索、旅行见闻和生活中的点滴思考。', image = '/og-default.png', article = false, robots, canonical } = Astro.props;
 const canonicalURL = canonical === false ? null : new URL(canonical ?? Astro.url.pathname, Astro.site);
-const socialImage = new URL(image, Astro.site);
+const socialImage = new URL(contentImageUrl(image), Astro.site);
 ---
 <!doctype html>
 <html lang="zh-CN">
