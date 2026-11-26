@@ -100,6 +100,33 @@ test('phone pages keep symmetric margins and the original corner music button', 
   assert.doesNotMatch(home, /width="800" height="600"/);
 });
 
+test('header seal and favicon are vectors, and icons stay on the site origin', () => {
+  const header = read('src/components/Header.astro');
+  assert.match(header, /<svg class="wordmark-stamp" viewBox="0 0 70 78" width="35" height="39"/);
+  assert.match(header, /fill="currentColor"/);
+  assert.match(header, /<span>后生仔<\/span>/);
+  assert.doesNotMatch(header, /wordmark-stamp[^>]*>潇</);
+  assert.doesNotMatch(header, /\.png/);
+  const svg = read('public/favicon.svg');
+  assert.match(svg, /<path /);
+  assert.match(svg, /#27614f/);
+  assert.match(svg, /prefers-color-scheme: dark/);
+  assert.doesNotMatch(svg, /<image/);
+  assert.doesNotMatch(svg, /data:image/);
+  const ico = readFileSync('public/favicon.ico');
+  assert.equal(ico.readUInt16LE(0), 0);
+  assert.equal(ico.readUInt16LE(2), 1);
+  assert.ok(ico.readUInt16LE(4) >= 3);
+  const touch = readFileSync('public/apple-touch-icon.png');
+  assert.equal(touch.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
+  assert.equal(touch.readUInt32BE(16), 180);
+  assert.equal(touch.readUInt32BE(20), 180);
+  const layout = read('src/layouts/BaseLayout.astro');
+  assert.match(layout, /href="\/favicon\.svg"/);
+  assert.match(layout, /href="\/apple-touch-icon\.png"/);
+  assert.doesNotMatch(layout, /img\.lushixiao\.cn\/favicon/);
+});
+
 test('built sitemap omits gated tools when dist exists', () => {
   const file = 'dist/sitemap-0.xml';
   if (!existsSync(file)) return;

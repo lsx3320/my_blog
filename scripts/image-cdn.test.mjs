@@ -29,6 +29,7 @@ test('page, audio, and favicon URLs are not sent to the image host', () => {
   assert.equal(contentImageUrl('/gallery#travel'), '/gallery#travel');
   assert.equal(contentImageUrl('/favicon.svg'), '/favicon.svg');
   assert.equal(contentImageUrl('/favicon.ico'), '/favicon.ico');
+  assert.equal(contentImageUrl('/apple-touch-icon.png'), '/apple-touch-icon.png');
   assert.equal(contentImageUrl('/audio/xiangsi-ersheng/1.mp3'), '/audio/xiangsi-ersheng/1.mp3');
   assert.equal(contentImageUrl('/bgm.mp3'), '/bgm.mp3');
   assert.equal(contentImageUrl('https://example.com/a.png'), 'https://example.com/a.png');
