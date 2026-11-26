@@ -39,6 +39,7 @@ const socialImage = new URL(image, Astro.site);
   </head>
   <body class="min-h-screen flex flex-col">
     <a class="skip-link" href="#main-content">跳到正文</a>
+    <div id="nav-progress" class="nav-progress" transition:persist="nav-progress" aria-hidden="true"><span></span></div>
     {article && <div class="reading-progress" id="reading-progress" aria-hidden="true"></div>}
     <Header />
     <main id="main-content" class="flex-1" tabindex="-1"><slot /></main>
@@ -72,4 +73,7 @@ const socialImage = new URL(image, Astro.site);
     button?.setAttribute('aria-label', label);
     button?.setAttribute('title', label);
   });
+</script>
+<script>
+  import '../scripts/nav-feedback.ts';
 </script>

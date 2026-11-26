@@ -98,6 +98,35 @@ pre code { padding: 0; background: none; color: var(--color-foreground); font-si
 .page-heading p { color: var(--color-muted-foreground); }
 .skip-link { position: fixed; top: 10px; left: 12px; z-index: 200; padding: 10px 18px; background: var(--color-background); transform: translateY(-160%); }
 .skip-link:focus { transform: translateY(0); }
+/* Covers the reading bar while a new page is loading, then the fill grows left to right. */
+.nav-progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 140; pointer-events: none; background: transparent; transition: background-color .18s ease; }
+.nav-progress.is-active { background: var(--color-primary-light); }
+.nav-progress > span { display: block; height: 100%; background: var(--color-primary); transform: scaleX(0); transform-origin: left center; opacity: 0; transition: transform .2s ease-out; }
+.nav-progress.is-active > span { opacity: 1; }
+.recent-post > a,
+.post-item > a,
+.reading-note > a,
+.memory,
+.photo-memory,
+.pager-card,
+.mobile-nav a { touch-action: manipulation; transition: background-color .16s ease, color .16s ease, border-color .16s ease; }
+.text-link:is(:active, .is-pressed) { opacity: .55; }
+.recent-post > a.is-pressed,
+.recent-post > a:active,
+.post-item > a.is-pressed,
+.post-item > a:active,
+.reading-note > a.is-pressed,
+.reading-note > a:active,
+.memory.is-pressed,
+.memory:active,
+.pager-card.is-pressed,
+.pager-card:active,
+.mobile-nav a.is-pressed,
+.mobile-nav a:active { background-color: var(--color-primary-light); color: var(--color-primary); transition: none; }
+.memory.is-pressed,
+.memory:active,
+.pager-card.is-pressed,
+.pager-card:active { border-color: var(--color-primary); }
 .reveal { opacity: 1; }
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .15s; }
 @media (max-width: 700px) {

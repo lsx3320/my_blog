@@ -59,7 +59,9 @@ const categories = [...new Set(posts.map(post => post.data.category))];
   .post-summary p { font-size: 13px; color: var(--color-muted-foreground); line-height: 1.9; }
   .post-tags { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; color: var(--color-muted-foreground); font-size: 11px; }
   .post-arrow { color: var(--color-primary); margin-top: 31px; }
-  .post-item a:hover h2 { color: var(--color-primary); }
+  .post-item a:hover h2,
+  .post-item a:is(:active, .is-pressed) h2 { color: var(--color-primary); }
+  .post-item > a:is(:active, .is-pressed) { background-color: var(--color-primary-light); transition: none; }
   .empty-results { text-align: center; padding-block: 72px; }
   .empty-results svg { margin: 0 auto 18px; color: var(--color-muted-foreground); }
   .empty-results h2 { font-size: 20px; }

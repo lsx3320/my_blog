@@ -170,7 +170,7 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
     {(prevPost || nextPost) && (
       <div class="article-end mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
         {prevPost && (
-          <a href={`/posts/${prevPost.id}`} class="group p-5 bg-[var(--color-card)] border border-[var(--color-border)] rounded-md hover:border-[var(--color-primary)] transition-colors">
+          <a href={`/posts/${prevPost.id}`} class="pager-card group p-5 bg-[var(--color-card)] border border-[var(--color-border)] rounded-md hover:border-[var(--color-primary)] transition-colors">
             <div class="text-xs text-[var(--color-muted-foreground)] mb-2">上一篇</div>
             <div class="font-display font-semibold text-sm group-hover:text-[var(--color-primary)] transition-colors line-clamp-2">
               {prevPost.data.title}
@@ -178,7 +178,7 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
           </a>
         )}
         {nextPost && (
-          <a href={`/posts/${nextPost.id}`} class={`group p-5 bg-[var(--color-card)] border border-[var(--color-border)] rounded-md hover:border-[var(--color-primary)] transition-colors ${!prevPost ? 'md:col-start-2' : ''}`}>
+          <a href={`/posts/${nextPost.id}`} class={`pager-card group p-5 bg-[var(--color-card)] border border-[var(--color-border)] rounded-md hover:border-[var(--color-primary)] transition-colors ${!prevPost ? 'md:col-start-2' : ''}`}>
             <div class="text-xs text-[var(--color-muted-foreground)] mb-2 text-right">下一篇</div>
             <div class="font-display font-semibold text-sm group-hover:text-[var(--color-primary)] transition-colors line-clamp-2 text-right">
               {nextPost.data.title}
