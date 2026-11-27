@@ -6,10 +6,13 @@ const navItems: { label: string; href: string; reload?: boolean }[] = [
   { label: '随笔', href: '/diary' }, { label: '中转', href: '/links' },
   // 插件看板是独立静态页（不是 Astro 路由），必须整页跳转，交给客户端路由会被拼成坏页面
   { label: '插件', href: '/dsh-board/', reload: true },
+  // 论文站在另一个子域，整页离开本站，不能被客户端路由截走
+  { label: '论文阅读', href: 'https://paper.lushixiao.cn/#', reload: true },
   { label: '关于', href: '/about' },
 ];
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
-const isActive = (href: string) => currentPath === href || (href !== '/' && currentPath.startsWith(href + '/'));
+const isExternal = (href: string) => /^https?:\/\//i.test(href);
+const isActive = (href: string) => !isExternal(href) && (currentPath === href || (href !== '/' && currentPath.startsWith(href + '/')));
 ---
 <header class="site-header">
   <site-navigation>
@@ -54,7 +57,7 @@ const isActive = (href: string) => currentPath === href || (href !== '/' && curr
   .wordmark small { display: block; font-size: 12px; font-weight: 400; color: var(--color-muted-foreground); margin-top: 4px; }
   .desktop-nav { display: flex; gap: 15px; font-size: 14px; align-self: stretch; align-items: stretch; }
   .desktop-nav li { display: flex; }
-  .desktop-nav a { display: flex; align-items: center; position: relative; padding-inline: 12px; color: var(--color-muted-foreground); }
+  .desktop-nav a { display: flex; align-items: center; position: relative; padding-inline: 12px; color: var(--color-muted-foreground); white-space: nowrap; }
   .desktop-nav a:hover, a[aria-current="page"] { color: var(--color-primary); }
   .desktop-nav a[aria-current="page"]::after { content: ''; position: absolute; bottom: 19px; left: 0; right: 0; height: 2px; background: var(--color-primary); }
   .header-actions { display: flex; gap: 2px; }
